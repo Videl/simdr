@@ -14,7 +14,7 @@
 	ok |
 	undefined.
 
--callback work_time(Time :: non_neg_integer()) ->
+-callback work_time() ->
 	non_neg_integer() |
 	undefined.
 
