@@ -4,7 +4,8 @@
 	Name :: string().
 
 -callback get_opt() -> 
-	list(tuple(Name :: string(), Parameters :: list(atom()))).
+	list(tuple(Name :: string(), Parameters :: list(atom()))) |
+	undefined.
 
 -callback start() -> 
 	ok |
