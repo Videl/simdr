@@ -81,6 +81,26 @@ get_previous_data_helper([_Head|Tail], N) ->
 %% Tests
 %% ===================================================================
 
+get_data_1_test() ->
+	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
+	1 = get_data(Actor).
+
+get_data_2_test() ->
+	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [sdfg, 1,2,3]),
+	sdfg = get_data(Actor).
+
+get_previous_data_1_test() ->
+	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
+	2 = get_previous_data(Actor, 2).
+
+get_previous_data_2_test() ->
+	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
+	1 = get_previous_data(Actor, 1).
+
+get_previous_data_3_test() ->
+	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
+	3 = get_previous_data(Actor, 3).
+
 get_head_1_test() ->
 	3 = get_head_data([3,2,1]).
 
@@ -90,20 +110,20 @@ get_head_2_test() ->
 get_head_3_test() ->
 	1 = get_head_data([1]).
 
-get_previous_data_1_test() ->
+get_previous_data_helper_1_test() ->
 	2 = get_previous_data_helper([1,2,3], 2).
 
-get_previous_data_2_test() ->
+get_previous_data_helper_2_test() ->
 	1 = get_previous_data_helper([1,2,3], 1).
 
-get_previous_data_3_test() ->
+get_previous_data_helper_3_test() ->
 	3 = get_previous_data_helper([1,2,3], 3).
 
-get_previous_data_4_test() ->
+get_previous_data_helper_4_test() ->
 	out_of_range = get_previous_data_helper([1,2,3], 4).
 
-get_previous_data_5_test() ->
+get_previous_data_helper_5_test() ->
 	out_of_range = get_previous_data_helper([1,2,3], -3).
 
-get_previous_data_6_test() ->
+get_previous_data_helper_6_test() ->
 	4 = get_previous_data_helper([1,2,3, 4], 4).
