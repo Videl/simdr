@@ -16,7 +16,7 @@
 %% ===================================================================
 
 create(Module, Id, Work_time) ->
-	Actor = #config{module=Module, id=Id, opt=undefined, state=off, work_time=Work_time, list_data=[]},
+	Actor = #config{module=Module, id=Id opt=undefined, state=off, work_time=Work_time, list_data=[]},
 	{ok, Actor}.
 
 create(Module, Id, Opt, State, Work_time, List_data ) ->
