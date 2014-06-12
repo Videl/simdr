@@ -81,24 +81,24 @@ get_previous_data_helper([_Head|Tail], N) ->
 %% Tests
 %% ===================================================================
 
-get_data_1_test() ->
+mock_actor() ->
 	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
+	Actor.
+
+	get_data_1_test() ->
+	Actor = mock_actor(),
 	1 = get_data(Actor).
 
-get_data_2_test() ->
-	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [sdfg, 1,2,3]),
-	sdfg = get_data(Actor).
-
 get_previous_data_1_test() ->
-	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
+	Actor = mock_actor(),
 	2 = get_previous_data(Actor, 2).
 
 get_previous_data_2_test() ->
-	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
+	Actor = mock_actor(),
 	1 = get_previous_data(Actor, 1).
 
 get_previous_data_3_test() ->
-	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
+	Actor = mock_actor(),
 	3 = get_previous_data(Actor, 3).
 
 get_head_1_test() ->
