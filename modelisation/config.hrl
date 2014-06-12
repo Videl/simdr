@@ -1,10 +1,8 @@
--record(config, 
-	{
-		module,
-		name,
-		id,
-		opt, 
-		state, 
-		work_time, 
-		list_data
+-record(config, {
+	module,
+	id,
+	opt, 
+	state, 
+	work_time, 
+	list_data
 	}).
