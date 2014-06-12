@@ -1,9 +1,11 @@
 -module(actor_contract).
--include(config.hlr).
+-include("config.hrl").
+
+-export([create/6]).
 
 -callback get_name(Config :: term()) -> 
 	Name :: string() |
-	Name :: atom().
+	atom().
 
 -callback get_opt(Config :: term()) -> 
 	list(tuple(Name :: string(), Parameters :: list(atom()))) |
@@ -30,9 +32,7 @@
 -callback get_state(Config :: term()) ->
 	term().
 
--callback loop(Config :: term(), ListData :: list(term())).
-
 create(Module, Name, Opt, State, Work_time, List_data ) ->
-	Actor = #Config { module=Module, name=Name, opt=Opt, state=State, work_time=Work_time, list_data=List_data  },
+	Actor = #config { module=Module, name=Name, opt=Opt, state=State, work_time=Work_time, list_data=List_data },
 	{ok,Actor}.
 	
