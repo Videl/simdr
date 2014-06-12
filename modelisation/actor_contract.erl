@@ -32,8 +32,9 @@ get_data(Actor) ->
 get_previous_data(Config, N) ->
 	get_previous_data_helper(Config#config.list_data, N).
 
-add_data(Actor, new_data) -> 
-	[new_data] ++ Actor#config.list_data.
+add_data(Actor, X) -> 
+	Actor#config{list_data = [X] ++ Actor#config.list_data}.
+
 
 get_id(Actor) ->
 	Actor#config.id.
@@ -48,16 +49,14 @@ get_state(Actor) ->
 	Actor#config.state.
 
 set_work_time(Actor, Work_time)->
-	Actor = #config { work_time =Work_time},
- 	{ok, time}.
+	 Actor#config{work_time =Work_time}.
 
 start(Actor) -> 
-	Actor = #config {state = on},
-	on.
+	Actor#config {state = on}.
 
 stop(Actor) -> 
-	Actor = #config {state = off},
-	off. 
+	Actor#config {state = off}.
+	
 	
 %% ===================================================================
 %% Internal API
@@ -127,3 +126,52 @@ get_previous_data_helper_5_test() ->
 
 get_previous_data_helper_6_test() ->
 	4 = get_previous_data_helper([1,2,3, 4], 4).
+
+add_data_test() ->
+	{ok,Actor} = create(mod, test, undefined, on, 0, [1,2]),
+	NewActor = add_data(Actor, 3),
+	[3,1,2] = NewActor#config.list_data.
+
+
+get_id_test() ->
+{ok,Actor} = create(mod, test, 0),
+	test = get_id(Actor).
+
+get_opt_1_test() ->
+	{ok,Actor} = create(mod, test, opt1, on, 0, [1,2]),
+	opt1= get_opt(Actor).
+
+get_opt_2_test() ->
+	{ok,Actor} = create(mod, test, 0),
+	undefined= get_opt(Actor).
+
+get_opt_3_test() ->
+	{ok,Actor} = create(mod, test, [opt1, opt2], on, 0, [1,2]),
+	[opt1, opt2] = get_opt(Actor).
+
+get_work_time_test() ->
+	{ok,Actor} = create(mod, test, [opt1, opt2], on, 42, [1,2]),
+	42 = get_work_time(Actor).
+
+get_state_1_test() ->
+	{ok,Actor} = create(mod, test, [opt1, opt2], on, 42, [1,2]),
+	on = get_state(Actor).
+
+get_state_2_test() ->
+	{ok,Actor} =create(mod, test, 0),
+	off = get_state(Actor).
+
+set_work_time_test()->
+	{ok,Actor} = create(mod, test, [opt1, opt2], on, 42, [1,2]),
+	NewActor = set_work_time(Actor, 12),
+	12 = NewActor#config.work_time.
+
+get_start_test() ->
+	{ok,Actor} = create(mod, test, [opt1, opt2], off, 42, [1,2]),
+	NewActor = start(Actor),
+	on = NewActor#config.state.
+
+get_stop_test() ->
+	{ok,Actor} = create(mod, test, [opt1, opt2], on, 42, [1,2]),
+	NewActor = stop(Actor),
+	off = NewActor#config.state.
