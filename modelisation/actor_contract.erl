@@ -1,4 +1,5 @@
 -module(actor_contract).
+-include(config.hlr).
 
 -callback get_name(Config :: term()) -> 
 	Name :: string() |
@@ -31,6 +32,7 @@
 
 -callback loop(Config :: term(), ListData :: list(term())).
 
-create(Module) ->
-	Pid = spawn(Module, loop, []).
+create(Module, Name, Opt, State, Work_time, List_data ) ->
+	Actor = #Config { module=Module, name=Name, opt=Opt, state=State, work_time=Work_time, list_data=List_data  },
+	{ok,Actor}.
 	
