@@ -1,6 +1,7 @@
 -record(config, {
 	module,
-	name, 
+	name,
+	id,
 	opt, 
 	state, 
 	work_time, 

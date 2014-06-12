@@ -7,8 +7,8 @@
 %% Contract for Actors
 %% ===================================================================
 
--callback answer(term()) ->
-	term().
+-callback answer(Config :: term(), Entering :: term()) ->
+	Exiting :: term().
 
 %% ===================================================================
 %% Helper functions
