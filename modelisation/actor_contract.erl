@@ -16,11 +16,11 @@
 %% ===================================================================
 
 create(Module, Id, Work_time) ->
-	Actor = #config{module=Module, id=Id opt=undefined, state=off, work_time=Work_time, list_data=[]},
+	Actor = #config{module=Module, id=Id, opt=undefined, state=off, work_time=Work_time, list_data=[]},
 	{ok, Actor}.
 
 create(Module, Id, Opt, State, Work_time, List_data ) ->
-	Actor = #config { module=Module,, id=Id, opt=Opt, state=State, work_time=Work_time, list_data=List_data },
+	Actor = #config { module=Module, id=Id, opt=Opt, state=State, work_time=Work_time, list_data=List_data },
 	{ok,Actor}.
 	
 get_data(Actor) ->
@@ -45,15 +45,15 @@ get_state(Actor) ->
 	Actor#config.state.
 
 set_work_time(Actor, Work_time)->
-	Actor#config { work_time =Work_time},
+	Actor = #config { work_time =Work_time},
  	{ok, time}.
 
 start(Actor) -> 
-	Actor#config {state = on},
+	Actor = #config {state = on},
 	on.
 
 stop(Actor) -> 
-	Actor#config {state = off},
+	Actor = #config {state = off},
 	off. 
 	
 %% ===================================================================
@@ -62,6 +62,5 @@ stop(Actor) ->
 
 get_head_data([]) ->
 	undefined;
-
 get_head_data([Head|_Tail]) ->
 	Head.
