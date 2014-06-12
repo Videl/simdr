@@ -18,7 +18,7 @@ answer(RFIDConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
 	{RFIDConfig, answer, actor_contract:get_id(ProductConfig)};
 
-answer(RFIDConfig, ping) ->
+answer(RFIDConfig, {supervisor, ping}) ->
 	{RFIDConfig, answer, pong};
 
 answer(_RFIDConfig, _) ->
