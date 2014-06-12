@@ -29,6 +29,9 @@ get_data(Actor) ->
 get_previous_data(Actor, N) ->
 	not_implemented.
 
+add_data(Actor, new_data) -> 
+	[new_data] ++ Actor#config.list_data.
+
 get_id(Actor) ->
 	Actor#config.id.
 
