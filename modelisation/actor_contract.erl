@@ -13,7 +13,8 @@
 		 get_opt/1, 
 		 get_work_time/1, 
 		 get_state/1, 
-		 set_work_time/2, 
+		 set_work_time/2,
+		 set_state/2, 
 		 start/1, 
 		 stop/1,
 		 work/1]).
@@ -64,10 +65,14 @@ set_work_time(Actor, Work_time)->
 	 Actor#config{work_time =Work_time}.
 
 start(Actor) -> 
-	Actor#config {state = on}.
+	set_state(Actor, on).
 
-stop(Actor) -> 
-	Actor#config {state = off}.
+stop(Actor) ->
+	set_state(Actor, off).
+
+set_state(Actor, State) ->
+	Actor#config {state = State}.
+
 
 work(N) ->
 	timer:sleep(N*1000).
