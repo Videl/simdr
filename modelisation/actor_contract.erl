@@ -4,7 +4,19 @@
 % config record
 -include("config.hrl").
 
--export([create/6, create/3, get_data/1, get_previous_data/2, add_data/2, get_id/1, get_opt/1, get_work_time/1, get_state/1, set_work_time/2, start/1, stop/1]).
+-export([create/6, 
+		 create/3, 
+		 get_data/1, 
+		 get_previous_data/2, 
+		 add_data/2, 
+		 get_id/1, 
+		 get_opt/1, 
+		 get_work_time/1, 
+		 get_state/1, 
+		 set_work_time/2, 
+		 start/1, 
+		 stop/1,
+		 work/1]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -22,7 +34,7 @@ create(Module, Id, Work_time) ->
 	Actor = #config{module=Module, id=Id, opt=undefined, state=off, work_time=Work_time, list_data=[]},
 	{ok, Actor}.
 
-create(Module, Id, Opt, State, Work_time, List_data ) ->
+create(Module, Id, Opt, State, Work_time, List_data) ->
 	Actor = #config { module=Module, id=Id, opt=Opt, state=State, work_time=Work_time, list_data=List_data },
 	{ok,Actor}.
 	
@@ -56,7 +68,9 @@ start(Actor) ->
 
 stop(Actor) -> 
 	Actor#config {state = off}.
-	
+
+work(N) ->
+	timer:sleep(N*1000).
 	
 %% ===================================================================
 %% Internal API
@@ -84,7 +98,7 @@ mock_actor() ->
 	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
 	Actor.
 
-	get_data_1_test() ->
+get_data_1_test() ->
 	Actor = mock_actor(),
 	1 = get_data(Actor).
 
