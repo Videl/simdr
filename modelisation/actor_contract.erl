@@ -1,7 +1,7 @@
 -module(actor_contract).
 -include("config.hrl").
 
--export([create/6, create/3, get_data/1, get_previous_data/2, get_id/1, get_opt/1, get_work_time/1, get_state/1, set_work_time/1, start/1, stop/1]).
+-export([create/6, create/3, get_data/1, get_previous_data/2, add_data/2, get_id/1, get_opt/1, get_work_time/1, get_state/1, set_work_time/2, start/1, stop/1]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -44,8 +44,8 @@ get_work_time(Actor) ->
 get_state(Actor) ->
 	Actor#config.state.
 
-set_work_time(Actor, Wtime:: non_neg_integer())->
-	Actor#config { wtime =Wtime},
+set_work_time(Actor, Work_time)->
+	Actor#config { work_time =Work_time},
  	{ok, time}.
 
 start(Actor) -> 
@@ -53,7 +53,7 @@ start(Actor) ->
 	on.
 
 stop(Actor) -> 
-	Actor#config { state = off},
+	Actor#config {state = off},
 	off. 
 	
 %% ===================================================================
