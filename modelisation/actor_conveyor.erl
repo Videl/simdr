@@ -1,17 +1,16 @@
 -module(actor_conveyor).
 -behaviour(actor_contract).
--include(config.hlr).
+-include("config.hrl").
+
+%% Actor Contract Behaviors Callbacks
 
 -export([
-	get_name/1, 
-	get_opt/1, 
-	start/1, 
-	stop/1, 
-	work_time/1, 
-	get_data/1, 
-	get_previous_data/2, 
-	get_state/1
+	answer/2
 	]).
+
+%% External API
+
+-export([create/0]).
 
 create() ->
    actor_contract:create(?MODULE, actor_conveyor, off, undefined, 42, []).
