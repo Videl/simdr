@@ -6,6 +6,7 @@
 
 -export([create/6, 
 		 create/3, 
+		 get_list_data/1,
 		 get_data/1, 
 		 get_previous_data/2, 
 		 add_data/2, 
@@ -38,6 +39,9 @@ create(Module, Id, Work_time) ->
 create(Module, Id, Opt, State, Work_time, List_data) ->
 	Actor = #config { module=Module, id=Id, opt=Opt, state=State, work_time=Work_time, list_data=List_data },
 	{ok,Actor}.
+
+get_list_data(Actor) ->
+	Actor#config.list_data.
 	
 get_data(Actor) ->
 	get_head_data(Actor#config.list_data).
@@ -102,6 +106,10 @@ get_previous_data_helper([_Head|Tail], N) ->
 mock_actor() ->
 	{ok, Actor} = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
 	Actor.
+
+get_list_data_test() ->
+{ok,Actor} = create(mod, test, 0),
+	[]= get_list_data(Actor).
 
 get_data_1_test() ->
 	Actor = mock_actor(),
