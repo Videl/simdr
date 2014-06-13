@@ -19,7 +19,9 @@ create() ->
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
-	{actor_contract:get_id(ConveyorConfig), finish, actor_contract:get_id(ProductConfig)}.
+	{ProductConfig, actor_contract:get_option(ConveyorConfig,out)}.
+
+
 
 %% ===================================================================
 %% Tests
@@ -28,4 +30,4 @@ answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 answer_test() ->
 	{ok, Conv} = create(),
 	{ok, Prod} = actor_product:create(),
-	{ actor_conveyor, finish, 450} = answer(Conv, {actor_product, Prod}).
+	{ Conv, finish, Prod} = answer(Conv, {actor_product, Prod}).

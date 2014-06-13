@@ -16,12 +16,31 @@
 create() ->
    actor_contract:create(?MODULE, actor_railway, undefined, off, 2, []).
 
-answer(RailwayConfig, {actor_product, ProductConfig}) ->
-	actor_contract:work(actor_contract:get_work_time(RailwayConfig)),
-	{answer, actor_contract:get_state(RailwayConfig), actor_contract:get_id(ProductConfig)};
+answer(ProductConfig, RailwayConfig) ->
+case taille(get_option(RailwayConfig, in)) of 
+	1 ->{ok};
+	_ ->{ProductConfig, {supervisor, RailwayConfig}}
+end,
+
+case taille(get_option(RailwayConfig, out)) of 
+	1 ->{ProductConfig, actor_contract:get_option(RailwayConfig,out)}; 
+	_ ->{ProductConfig, {supervisor, RailwayConfig}}
+end.
+
 
 answer(RailwayConfig, {supervisor, state}) ->
-	{ answer, state, actor_contract:get_state(RailwayConfig)}.
+	{answer, state, actor_contract:get_state(RailwayConfig)};
+
+answer(ProductConfig, {supervisor, RailwayConfig, Decision}) ->
+	actor_contract: set_state(RailwayConfig, Decision),
+	{_In, Out}= Decision,
+	actor_contract:work(actor_contract:get_work_time(RailwayConfig)),
+	{ProductConfig, Out}.
+
+%Internal API
+
+taille([_ | Queue]) -> 1 + taille(Queue).
+
 %% ===================================================================
 %% Tests
 %% ===================================================================
