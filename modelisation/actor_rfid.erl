@@ -26,7 +26,7 @@ answer(_RFIDConfig, _) ->
 create() ->
 	actor_contract:create(?MODULE, rfid, 0).
 
-%% Internal API
+%% Tests
 
 answer_test_() ->
 	ActorRFID = actor_rfid:create(),
@@ -36,6 +36,6 @@ answer_test_() ->
 		answer(ActorRFID, {actor_product, ActorProduct})),
 	?_assertEqual(
 		{ActorRFID, answer, pong}, 
-		{ActorRFID, answer, pong} = answer(ActorRFID, {supervisor, ping})),
+		answer(ActorRFID, {supervisor, ping})),
 	?_assert(answer(weird_message, hioho) =:= undefined)
 	].
