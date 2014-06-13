@@ -80,9 +80,9 @@ stop(Actor) ->
 set_state(Actor, State) ->
 	Actor#config {state = State}.
 
-get_option(Actor, Option) ->
+get_option(Actor, Key) ->
 	Opts = Actor#config.opt,
-	get_option_helper(lists:keyfind(Option, 1, Opts)).
+	get_option_helper(Opts, Key).
 
 add_option(Actor, Key, Value) ->
 	Actor#config{opt = [{Key, Value}] ++ Actor#config.opt}.
@@ -108,10 +108,17 @@ get_previous_data_helper([], 1) ->
 get_previous_data_helper([_Head|Tail], N) ->
 	get_previous_data_helper(Tail, N-1).
 
-get_option_helper(false) ->
+get_option_helper(AllOptions, Key) ->
+	get_option_helper_two(AllOptions, [], Key).
+
+get_option_helper_two([], [], _Key) ->
 	unknown_option;
-get_option_helper({_Key, Value}) ->
-	Value.
+get_option_helper_two([], Result, _Key) ->
+	Result;
+get_option_helper_two([{Key, Value}|RestOfOptions], Result, Key) ->
+	get_option_helper_two(RestOfOptions, Result ++ [Value], Key);
+get_option_helper_two([_BadHead|RestOfOptions], Result, Key) ->
+	get_option_helper_two(RestOfOptions, Result, Key).
 
 %% ===================================================================
 %% Tests
@@ -123,7 +130,7 @@ mock_actor() ->
 
 get_list_data_test() ->
 	Actor = create(mod, test, 0),
-	[]= get_list_data(Actor).
+	[] = get_list_data(Actor).
 
 get_data_1_test() ->
 	Actor = mock_actor(),
@@ -216,15 +223,17 @@ get_stop_test() ->
 	NewActor = stop(Actor),
 	off = NewActor#config.state.
 
+
+
 get_option_test_() ->
-	Actor = create(mod, test, [{friend, yes}, {friendo, no}], on, 42, [1,2]),
+	Actor = create(mod, test, [{friend, yes}, {friendo, no}, {friend, haha}], on, 42, [1,2]),
 	[
 	?_assertEqual(
-			yes,
+			[yes, haha],
 			get_option(Actor, friend)
 		),
 	?_assertEqual(
-			no,
+			[no],
 			get_option(Actor, friendo)
 		),
 	?_assertEqual(
@@ -239,11 +248,11 @@ add_option_test_() ->
 	ActorA = add_option(ActorB, friendo, yes),
 	[
 	?_assertEqual(
-			no,
+			[no],
 			get_option(ActorA, friend)
 		),
 	?_assertEqual(
-			yes,
+			[yes],
 			get_option(ActorA, friendo)
 		),
 	?_assertEqual(

@@ -1,7 +1,8 @@
 -module(actor_product).
+-include_lib("eunit/include/eunit.hrl").
+
 -behaviour(actor_contract).
 -include("config.hrl").
--include_lib("eunit/include/eunit.hrl").
 
 %% Actor Contract Behaviors Callbacks
 

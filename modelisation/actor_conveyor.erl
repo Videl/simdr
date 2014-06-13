@@ -1,6 +1,7 @@
 -module(actor_conveyor).
--behaviour(actor_contract).
 -include_lib("eunit/include/eunit.hrl").
+
+-behaviour(actor_contract).
 -include("config.hrl").
 
 %% Actor Contract Behaviors Callbacks
