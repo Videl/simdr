@@ -18,7 +18,9 @@
 		 set_state/2, 
 		 start/1, 
 		 stop/1,
-		 work/1]).
+		 work/1,
+		 get_option/2,
+		 add_option/3]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -54,7 +56,6 @@ get_previous_data(Config, N) ->
 add_data(Actor, X) -> 
 	Actor#config{list_data = [X] ++ Actor#config.list_data}.
 
-
 get_id(Actor) ->
 	Actor#config.id.
 
@@ -79,6 +80,12 @@ stop(Actor) ->
 set_state(Actor, State) ->
 	Actor#config {state = State}.
 
+get_option(Actor, Option) ->
+	Opts = Actor#config.opt,
+	get_option_helper(lists:keyfind(Option, 1, Opts)).
+
+add_option(Actor, Key, Value) ->
+	Actor#config{opt = [{Key, Value}] ++ Actor#config.opt}.
 
 work(N) ->
 	timer:sleep(N*1000).
@@ -101,6 +108,11 @@ get_previous_data_helper([], 1) ->
 get_previous_data_helper([_Head|Tail], N) ->
 	get_previous_data_helper(Tail, N-1).
 
+get_option_helper(false) ->
+	unknown_option;
+get_option_helper({_Key, Value}) ->
+	Value.
+
 %% ===================================================================
 %% Tests
 %% ===================================================================
@@ -110,7 +122,7 @@ mock_actor() ->
 	Actor.
 
 get_list_data_test() ->
-Actor = create(mod, test, 0),
+	Actor = create(mod, test, 0),
 	[]= get_list_data(Actor).
 
 get_data_1_test() ->
@@ -161,9 +173,8 @@ add_data_test() ->
 	NewActor = add_data(Actor, 3),
 	[3,1,2] = NewActor#config.list_data.
 
-
 get_id_test() ->
-Actor = create(mod, test, 0),
+	Actor = create(mod, test, 0),
 	test = get_id(Actor).
 
 get_opt_1_test() ->
@@ -204,3 +215,39 @@ get_stop_test() ->
 	Actor = create(mod, test, [opt1, opt2], on, 42, [1,2]),
 	NewActor = stop(Actor),
 	off = NewActor#config.state.
+
+get_option_test_() ->
+	Actor = create(mod, test, [{friend, yes}, {friendo, no}], on, 42, [1,2]),
+	[
+	?_assertEqual(
+			yes,
+			get_option(Actor, friend)
+		),
+	?_assertEqual(
+			no,
+			get_option(Actor, friendo)
+		),
+	?_assertEqual(
+			unknown_option,
+			get_option(Actor, truc)
+		)
+	].
+
+add_option_test_() ->
+	Actor = create(mod, test, [], on, 42, [1,2]),
+	ActorB = add_option(Actor, friend, no),
+	ActorA = add_option(ActorB, friendo, yes),
+	[
+	?_assertEqual(
+			no,
+			get_option(ActorA, friend)
+		),
+	?_assertEqual(
+			yes,
+			get_option(ActorA, friendo)
+		),
+	?_assertEqual(
+			unknown_option,
+			get_option(ActorA, truc)
+		)
+	].
