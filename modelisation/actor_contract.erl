@@ -20,7 +20,8 @@
 		 stop/1,
 		 work/1,
 		 get_option/2,
-		 add_option/3]).
+		 add_option/3,
+		 list_size/1]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -37,7 +38,7 @@
 %% ===================================================================
 
 create(Module, Id, Work_time) ->
-	Actor = #config{module=Module, id=Id, opt=undefined, state=off, work_time=Work_time, list_data=[]},
+	Actor = #config{module=Module, id=Id, opt=[], state=off, work_time=Work_time, list_data=[]},
 	Actor.
 
 create(Module, Id, Opt, State, Work_time, List_data) ->
@@ -89,6 +90,9 @@ add_option(Actor, Key, Value) ->
 
 work(N) ->
 	timer:sleep(N*1000).
+
+list_size(List) ->
+	list_size_helper(List, 0).
 	
 %% ===================================================================
 %% Internal API
@@ -111,6 +115,8 @@ get_previous_data_helper([_Head|Tail], N) ->
 get_option_helper(AllOptions, Key) ->
 	get_option_helper_two(AllOptions, [], Key).
 
+get_option_helper_two(undefined, _, _) ->
+	unknown_option;
 get_option_helper_two([], [], _Key) ->
 	unknown_option;
 get_option_helper_two([], Result, _Key) ->
@@ -119,6 +125,13 @@ get_option_helper_two([{Key, Value}|RestOfOptions], Result, Key) ->
 	get_option_helper_two(RestOfOptions, Result ++ [Value], Key);
 get_option_helper_two([_BadHead|RestOfOptions], Result, Key) ->
 	get_option_helper_two(RestOfOptions, Result, Key).
+
+list_size_helper([], Acc) ->
+	Acc;
+list_size_helper(unknown_option, 0) ->
+	0;
+list_size_helper([_H|T], Acc) ->
+	list_size_helper(T, Acc+1).
 
 %% ===================================================================
 %% Tests
@@ -190,7 +203,7 @@ get_opt_1_test() ->
 
 get_opt_2_test() ->
 	Actor = create(mod, test, 0),
-	undefined= get_opt(Actor).
+	[] = get_opt(Actor).
 
 get_opt_3_test() ->
 	Actor = create(mod, test, [opt1, opt2], on, 0, [1,2]),
@@ -259,4 +272,25 @@ add_option_test_() ->
 			unknown_option,
 			get_option(ActorA, truc)
 		)
+	].
+
+list_size_test_() ->
+	A = [1,2,3],
+	B = [],
+	C = [1,2],
+	D = unknown_option,
+	[
+	?_assertEqual(3, list_size(A)),
+	?_assertEqual(0, list_size(B)),
+	?_assertEqual(2, list_size(C)),
+	?_assertEqual(0, list_size(D))
+	].
+
+add_option_list_size_test_() ->
+	Actor = create(mod, test, [], on, 42, [1,2]),
+	ActorB = add_option(Actor, friend, no),
+	ActorA = add_option(ActorB, friend, yes),
+	[
+	?_assertEqual(2, actor_contract:list_size(actor_contract:get_opt(ActorA))),
+	?_assertEqual(2, list_size(actor_contract:get_option(ActorA, friend)))
 	].
