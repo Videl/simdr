@@ -24,6 +24,8 @@
 %% Contract for Actors
 %% ===================================================================
 
+-callback create() -> Actor :: tuple(atom(), term()).
+
 -callback answer(Config :: term(), Entering :: term()) ->
 	Exiting :: term().
 
