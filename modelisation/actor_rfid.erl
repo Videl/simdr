@@ -7,11 +7,13 @@
 %% Actor Contract Behaviors Callbacks
 
 -export([
-	answer/2,
-	create/0
+	create/0,
+	answer/2
 	]).
 
 %% Behavior implementation
+create() ->
+	actor_contract:create(?MODULE, rfid, 0).
 
 answer(RFIDConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
@@ -23,8 +25,7 @@ answer(RFIDConfig, {supervisor, ping}) ->
 answer(_RFIDConfig, _) ->
 	undefined.
 
-create() ->
-	actor_contract:create(?MODULE, rfid, 0).
+
 
 %% Internal API
 

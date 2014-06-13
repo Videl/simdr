@@ -19,13 +19,16 @@
 %% Behavior implementation
 
 create() ->
-   actor_contract:create(?MODULE, random_id(), undefined, raw, 0, []).
+	actor_contract:create(?MODULE, random_id(), undefined, raw, 0, []).
 
 create(Id) ->
 	actor_contract:create(?MODULE, Id, undefined, raw, 0, []).
 
-answer(ProductConfig, _ ) ->
-		{answer, actor_contract:get_state(ProductConfig), actor_contract:get_list_data(ProductConfig)}.
+answer(ProductConfig, state) ->
+	{answer, actor_contract:get_id(ProductConfig), state, actor_contract:get_state(ProductConfig)};
+
+answer(ProductConfig, list_data) ->
+	{answer,  actor_contract:get_id(ProductConfig),	list_data, actor_contract:get_list_data(ProductConfig)}.
 
 
 %% Internal API
@@ -37,8 +40,14 @@ random_id() ->
 %% Tests
 %% ===================================================================
 
-answer_test() ->	
-	{ok, Prod} = create(),
+answer_test_() ->	
+	Prod = create(),
 	NewProd = actor_contract:add_data(Prod,{21,05,02, q2}),
-	{ answer, raw, [{21,05,02, q2}]} = answer(NewProd, undefined).
-
+	Id = actor_contract:get_id(NewProd),
+	[?_assertEqual(
+		{answer, Id, list_data, [{21,05,02, q2}]},
+		 answer(NewProd, list_data)),
+	?_assertEqual(
+		{answer, Id, state, raw},
+		answer(NewProd, state))	
+	].
