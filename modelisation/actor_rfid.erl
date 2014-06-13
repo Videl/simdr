@@ -29,8 +29,8 @@ create() ->
 %% Internal API
 
 answer_test_() ->
-	{ok, ActorRFID} = actor_rfid:create(),
-	{ok, ActorProduct} = actor_product:create(product_one),
+	ActorRFID = actor_rfid:create(),
+	ActorProduct = actor_product:create(product_one),
 	[?_assertEqual(
 		{ActorRFID, answer, product_one}, 
 		answer(ActorRFID, {actor_product, ActorProduct})),
