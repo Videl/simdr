@@ -1,7 +1,6 @@
 -module(actor_railway).
--include_lib("eunit/include/eunit.hrl").
-
 -behaviour(actor_contract).
+-include_lib("eunit/include/eunit.hrl").
 -include("config.hrl").
 
 %% Actor Contract Behaviors Callbacks
@@ -13,20 +12,29 @@
 %% External API
 
 -export([create/0]).
-create() ->
-   actor_contract:create(?MODULE, actor_railway, undefined, off, 2, []).
+-export([
+	create/1
+	]).
 
-answer(ProductConfig, RailwayConfig) ->
-case taille(get_option(RailwayConfig, in)) of 
-	1 ->{ok};
+%% Behavior implementation
+
+create() ->
+	actor_contract:create(?MODULE, random_id(), undefined, undefined, 0, []).
+
+create(Id) ->
+	actor_contract:create(?MODULE, Id, undefined, undefined, 0, []).
+
+answer(ProductConfig,{next, RailwayConfig}) ->
+MesA = case taille(actor_contract:get_option(RailwayConfig, in)) of 
+	1 ->{no_change};
 	_ ->{ProductConfig, {supervisor, RailwayConfig}}
 end,
 
-case taille(get_option(RailwayConfig, out)) of 
+MesB = case taille(actor_contract:get_option(RailwayConfig, out)) of 
 	1 ->{ProductConfig, actor_contract:get_option(RailwayConfig,out)}; 
 	_ ->{ProductConfig, {supervisor, RailwayConfig}}
-end.
-
+end,
+{MesA,MesB};
 
 answer(RailwayConfig, {supervisor, state}) ->
 	{answer, state, actor_contract:get_state(RailwayConfig)};
@@ -40,7 +48,8 @@ answer(ProductConfig, {supervisor, RailwayConfig, Decision}) ->
 %Internal API
 
 taille([_ | Queue]) -> 1 + taille(Queue).
-
+random_id() ->
+	random:uniform(1000).
 %% ===================================================================
 %% Tests
 %% ===================================================================
@@ -48,11 +57,13 @@ taille([_ | Queue]) -> 1 + taille(Queue).
 answer_test_() ->
 	Rail = create(),
 	Prod = actor_product:create(),
-		Id = actor_contract:get_id(Prod),
+	NewRail = actor_contract:add_option(Rail, in, 1),
+	NewRail1 = actor_contract:add_option(NewRail, in, 2),
+	NewRail2 = actor_contract:add_option(NewRail1, out, 2),
 	[?_assertEqual(
-		{ answer, off, Id},
-		answer(Rail, {actor_product, Prod})),
+		{{ Prod, {supervisor, Rail}},{Prod,2}},
+		answer(NewRail2, {next, Prod})),
 	?_assertEqual(
-		{answer, state, off},
-		answer(Rail, {supervisor,state}))	
+		{answer, state, undefined},
+		answer(NewRail2, {supervisor,state}))	
 	].
