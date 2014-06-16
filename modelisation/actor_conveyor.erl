@@ -20,7 +20,7 @@ create() ->
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
 	Destination = actor_contract:get_option(ConveyorConfig, out),
-	{ConveyorConfig, {actor_conveyor, ProductConfig, Destination}, Destination};
+	{ConveyorConfig, {actor_product, ProductConfig, Destination}, Destination};
 answer(ConveyorConfig, Request) ->
 	actor_contract:answer(ConveyorConfig, Request).
 
@@ -33,8 +33,8 @@ answer_test_() ->
 	Prod = actor_product:create(),
 	NewConv = actor_contract:add_option(Conv, out, 2),
 	[?_assertEqual(
-		{Prod, unknown_option},
-		 answer(Conv, {actor_product, Prod})),
+		{Conv, {actor_product, Prod, unknown_option}, unknown_option},
+		answer(Conv, {actor_product, Prod})),
 	?_assertEqual(
-		{Prod, [2]},
-		 answer(NewConv, {actor_product, Prod}))].
+		{NewConv, {actor_product, Prod, [2]}, [2]},
+		answer(NewConv, {actor_product, Prod}))].
