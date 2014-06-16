@@ -22,8 +22,7 @@ answer(RFIDConfig, {actor_product, ProductConfig, id}) ->
 	{actor_product, ProductConfig, actor_contract:get_id(ProductConfig)}, 
 	anyone};
 answer(RFIDConfig, Request) ->
-	actor_contract(RFIDConfig, Request).
-
+	actor_contract:answer(RFIDConfig, Request).
 
 
 %% Tests
@@ -32,10 +31,10 @@ answer_test_() ->
 	ActorRFID = actor_rfid:create(),
 	ActorProduct = actor_product:create(product_one),
 	[?_assertEqual(
-		{ActorRFID, answer, product_one}, 
-		answer(ActorRFID, {actor_product, ActorProduct})),
+		{ActorRFID, {actor_product, ActorProduct, product_one}, anyone}, 
+		answer(ActorRFID, {actor_product, ActorProduct, id})),
 	?_assertEqual(
-		{ActorRFID, answer, pong}, 
+		{ActorRFID, {supervisor, pong}}, 
 		answer(ActorRFID, {supervisor, ping})),
 	?_assert(answer(weird_message, hioho) =:= undefined)
 	].
