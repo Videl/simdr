@@ -28,8 +28,8 @@ answer(WSConfig, {supervisor, work_time, N}) ->
 	NewWsConfig = actor_contract:set_work_time(WSConfig, N),
 	{WSConfig, answer, NewWsConfig};
 
-answer(_WSConfig, _) ->
-	undefined.
+answer(_WSConfig, A) ->
+	actor_contract:answer(WSConfig, A).
 
 %% Internal API
 

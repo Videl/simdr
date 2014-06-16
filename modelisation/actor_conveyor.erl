@@ -15,7 +15,7 @@
 -export([create/0]).
 
 create() ->
-   actor_contract:create(?MODULE, actor_conveyor,  undefined, off, 4, []).
+   actor_contract:create(?MODULE, actor_conveyor,  [], off, 4, []).
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
@@ -27,7 +27,13 @@ answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 %% Tests
 %% ===================================================================
 
-answer_test() ->
-	{ok, Conv} = create(),
-	{ok, Prod} = actor_product:create(),
-	{ Conv, finish, Prod} = answer(Conv, {actor_product, Prod}).
+answer_test_() ->
+	Conv = create(),
+	Prod = actor_product:create(),
+	NewConv = actor_contract:add_option(Conv, out, 2),
+	[?_assertEqual(
+		{Prod, unknown_option},
+		 answer(Conv, {actor_product, Prod})),
+	?_assertEqual(
+		{Prod, [2]},
+		 answer(NewConv, {actor_product, Prod}))].
