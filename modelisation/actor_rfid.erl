@@ -15,15 +15,14 @@
 create() ->
 	actor_contract:create(?MODULE, rfid, 0).
 
-answer(RFIDConfig, {actor_product, ProductConfig}) ->
+answer(RFIDConfig, {actor_product, ProductConfig, id}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
-	{RFIDConfig, answer, actor_contract:get_id(ProductConfig)};
-
-answer(RFIDConfig, {supervisor, ping}) ->
-	{RFIDConfig, answer, pong};
-
-answer(_RFIDConfig, _) ->
-	undefined.
+	% Answer
+	{RFIDConfig, 
+	{actor_product, ProductConfig, actor_contract:get_id(ProductConfig)}, 
+	anyone};
+answer(RFIDConfig, Request) ->
+	actor_contract(RFIDConfig, Request).
 
 
 

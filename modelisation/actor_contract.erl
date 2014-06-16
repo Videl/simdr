@@ -21,7 +21,8 @@
 		 work/1,
 		 get_option/2,
 		 add_option/3,
-		 list_size/1]).
+		 list_size/1,
+		 answer/2]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -93,6 +94,15 @@ work(N) ->
 
 list_size(List) ->
 	list_size_helper(List, 0).
+
+answer(ActorConfig, {supervisor, ping}) ->
+	{ActorConfig, {supervisor, pong}};
+
+answer(ActorConfig, {supervisor, work_time, N}) ->
+	NewConfig = actor_contract:set_work_time(ActorConfig, N),
+	{ActorConfig, answer, NewConfig};
+answer(_, _) ->
+	undefined.
 	
 %% ===================================================================
 %% Internal API

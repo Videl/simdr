@@ -16,31 +16,26 @@
 create() ->
 	actor_contract:create(?MODULE, work_one, 5).
 
-answer(WSConfig, {actor_product, ProductConfig}) ->
+answer(WSConfig, {actor_product, ProductConfig, transformation}) ->
 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
-	NewProductConfig = change_product(ProductConfig),
-	{WSConfig, answer, NewProductConfig, get_destination(WSConfig)};
-
-answer(WSConfig, {supervisor, ping}) ->
-	{WSConfig, answer, pong};
-
-answer(WSConfig, {supervisor, work_time, N}) ->
-	NewWsConfig = actor_contract:set_work_time(WSConfig, N),
-	{WSConfig, answer, NewWsConfig};
-
-answer(_WSConfig, A) ->
-	actor_contract:answer(WSConfig, A).
+	{NewProductConfig, Quality} = change_product(ProductConfig),
+	% Answer
+	{WSConfig, 
+	{actor_product, NewProductConfig, Quality}, 
+	get_destination(WSConfig)};
+answer(WSConfig, Request) ->
+	actor_contract:answer(WSConfig, Request).
 
 %% Internal API
 
 change_product(ProductConfig) ->
 	case random:uniform(3) of
 		1 -> % Good quality
-			NewP = actor_contract:set_state(ProductConfig, "Q1");
+			{NewP, "Q1"} = actor_contract:set_state(ProductConfig, "Q1");
 		2 -> % Medium quality
-			NewP = actor_contract:set_state(ProductConfig, "Q2");
+			{NewP, "Q2"} = actor_contract:set_state(ProductConfig, "Q2");
 		3 -> % Bad quality
-			NewP = actor_contract:set_state(ProductConfig, "Q3")
+			{NewP, "Q3"} = actor_contract:set_state(ProductConfig, "Q3")
 	end,
 	NewP.
 
@@ -60,7 +55,7 @@ workstation_answer_test_() ->
 	ActorWS = actor_workstation:create(),
 	ActorProductOne = actor_product:create(product_one),
 	{_, _, NewActor} = answer(ActorWS, {supervisor, work_time, 20}),
-	{_, _, ActorProductTwo, Destination} = answer(ActorWS, {actor_product, ActorProductOne}),
+	{_, _, ActorProductTwo, _Destination} = answer(ActorWS, {actor_product, ActorProductOne}),
 	[
 	?_assertEqual(
 		{ActorWS, answer, pong}, 

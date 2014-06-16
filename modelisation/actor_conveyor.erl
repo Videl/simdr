@@ -19,9 +19,10 @@ create() ->
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
-	{ProductConfig, actor_contract:get_option(ConveyorConfig,out)}.
-
-
+	Destination = actor_contract:get_option(ConveyorConfig, out),
+	{ConveyorConfig, {actor_conveyor, ProductConfig, Destination}, Destination};
+answer(ConveyorConfig, Request) ->
+	actor_contract:answer(ConveyorConfig, Request).
 
 %% ===================================================================
 %% Tests
