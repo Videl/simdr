@@ -101,8 +101,8 @@ answer(ActorConfig, {supervisor, ping}) ->
 answer(ActorConfig, {supervisor, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
 	{ActorConfig, answer, NewConfig};
-answer(_, _) ->
-	undefined.
+answer(_, Request) ->
+	{unknown_type_of_request, Request}.
 	
 %% ===================================================================
 %% Internal API

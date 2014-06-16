@@ -29,15 +29,15 @@ answer(WSConfig, Request) ->
 %% Internal API
 
 change_product(ProductConfig) ->
-	case random:uniform(3) of
+	Result = case random:uniform(3) of
 		1 -> % Good quality
-			{NewP, "Q1"} = actor_contract:set_state(ProductConfig, "Q1");
+			{actor_contract:set_state(ProductConfig, "Q1"), "Q1"};
 		2 -> % Medium quality
-			{NewP, "Q2"} = actor_contract:set_state(ProductConfig, "Q2");
+			{actor_contract:set_state(ProductConfig, "Q2"), "Q2"};
 		3 -> % Bad quality
-			{NewP, "Q3"} = actor_contract:set_state(ProductConfig, "Q3")
+			{actor_contract:set_state(ProductConfig, "Q3"), "Q3"}
 	end,
-	NewP.
+	Result.
 
 get_destination(Config) ->
 	ListOfOuts = actor_contract:get_option(Config, out),
@@ -50,15 +50,15 @@ get_destination(Config) ->
 	Out.
 
 %% Tests
-
 workstation_answer_test_() ->
 	ActorWS = actor_workstation:create(),
 	ActorProductOne = actor_product:create(product_one),
 	{_, _, NewActor} = answer(ActorWS, {supervisor, work_time, 20}),
-	{_, _, ActorProductTwo, _Destination} = answer(ActorWS, {actor_product, ActorProductOne}),
+	{_, {actor_product, ActorProductTwo, _Quality}, _Destination} = 
+		answer(ActorWS, {actor_product, ActorProductOne, transformation}),
 	[
 	?_assertEqual(
-		{ActorWS, answer, pong}, 
+		{ActorWS, {supervisor, pong}}, 
 		answer(ActorWS, {supervisor, ping})),
 	?_assertEqual(
 		20, 
