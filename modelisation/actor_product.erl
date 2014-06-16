@@ -20,10 +20,10 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, random_id(), undefined, raw, 0, []).
+	actor_contract:create(?MODULE, random_id(), [], raw, 0, []).
 
 create(Id) ->
-	actor_contract:create(?MODULE, Id, undefined, raw, 0, []).
+	actor_contract:create(?MODULE, Id, [], raw, 0, []).
 
 answer(ProductConfig, state) ->
 	{answer, actor_contract:get_id(ProductConfig), state, actor_contract:get_state(ProductConfig)};
