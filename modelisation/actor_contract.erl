@@ -6,12 +6,15 @@
 
 -export([create/6, 
 		 create/3, 
+		 add_data/2, 
+		 add_option/3,
+		 add_to_list_data/2,
 		 get_list_data/1,
 		 get_data/1, 
 		 get_previous_data/2, 
-		 add_data/2, 
 		 get_id/1, 
 		 get_opt/1, 
+		 get_option/2,
 		 get_work_time/1, 
 		 get_state/1, 
 		 set_work_time/2,
@@ -19,8 +22,6 @@
 		 start/1, 
 		 stop/1,
 		 work/1,
-		 get_option/2,
-		 add_option/3,
 		 list_size/1,
 		 answer/2]).
 
@@ -94,6 +95,9 @@ work(N) ->
 
 list_size(List) ->
 	list_size_helper(List, 0).
+
+add_to_list_data({FirstActor, FirstData}, {SecondActor, SecondData}) ->
+	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
 
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
