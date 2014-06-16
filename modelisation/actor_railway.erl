@@ -24,26 +24,34 @@ create() ->
 create(Id) ->
 	actor_contract:create(?MODULE, Id, [], undefined, 0, []).
 
-answer(RailwayConfig,{next, ProductConfig}) ->
-MesA = case actor_contract:list_size(actor_contract:get_option(RailwayConfig, in)) of 
-	1 ->{no_change};
-	_ ->{ProductConfig, {supervisor, RailwayConfig}}
+answer(RailwayConfig,{actor_product, ProductConfig, switch}) ->
+MesOut = case actor_contract:list_size(actor_contract:get_option(RailwayConfig, out)) of 
+			1 ->{[no_prob_out], actor_contract:get_option(RailwayConfig,out)}; 
+			_ ->{[prob_out], supervisor}
+
+		end,
+MesIn = case actor_contract:list_size(actor_contract:get_option(RailwayConfig, in)) of 
+	1 -> { Info, Rec} =MesOut,
+		{[no_prob_in]++Info, Rec};
+	_ -> { Info, _Rec} =MesOut,
+		{[prob_in]++Info, supervisor}
 end,
+{InfoProb, Dest} = MesIn,
 
-MesB = case actor_contract:list_size(actor_contract:get_option(RailwayConfig, out)) of 
-	1 ->{ProductConfig, actor_contract:get_option(RailwayConfig,out)}; 
-	_ ->{ProductConfig, {supervisor, RailwayConfig}}
-end,
-{MesA,MesB};
+case Dest =/= supervisor of
+		true -> {RailwayConfig, {actor_product, ProductConfig, InfoProb}, Dest};
+		false -> actor_contract:work(actor_contract:get_work_time(RailwayConfig)),
+				{RailwayConfig, {actor_product, ProductConfig, InfoProb}, Dest}
+end;
 
-answer(RailwayConfig, {supervisor, state}) ->
-	{answer, state, actor_contract:get_state(RailwayConfig)};
-
-answer(ProductConfig, {supervisor, RailwayConfig, Decision}) ->
-	actor_contract: set_state(RailwayConfig, Decision),
+answer(RailwayConfig, {supervisor, ProductConfig, Decision}) ->
+	RailwayConf=actor_contract: set_state(RailwayConfig, Decision),
 	{_In, Out}= Decision,
-	actor_contract:work(actor_contract:get_work_time(RailwayConfig)),
-	{ProductConfig, Out}.
+	actor_contract:work(actor_contract:get_work_time(RailwayConf)),
+	{RailwayConf,{actor_product, ProductConfig,switched}, Out};
+
+answer(RailwayConfig, Request) ->
+	actor_contract:answer(RailwayConfig, Request).
 
 %Internal API
 
@@ -60,10 +68,14 @@ answer_test_() ->
 	NewRail = actor_contract:add_option(Rail, in, 1),
 	NewRail1 = actor_contract:add_option(NewRail, in, 2),
 	NewRail2 = actor_contract:add_option(NewRail1, out, 2),
-		[?_assertEqual(
-		{{ Prod, {supervisor, NewRail2}},{Prod,[2]}},
-		answer(NewRail2, {next, Prod})),
-		?_assertEqual(
-		{answer, state, undefined},
-		answer(NewRail2, {supervisor,state}))	
+	RailwayConfig=actor_contract: set_state(NewRail2, {2,3}),
+	[?_assertEqual(
+		{ NewRail2, {actor_product, Prod, [prob_in,no_prob_out]}, supervisor},
+		answer(NewRail2, {actor_product, Prod, switch})),
+	?_assertEqual(
+		{RailwayConfig, {actor_product, Prod, switched}, 3},
+		answer(NewRail2, {supervisor, Prod, {2,3}})),
+	?_assertEqual(
+		{Rail, {supervisor, pong}}, 
+		answer(Rail, {supervisor, ping}))
 	].
