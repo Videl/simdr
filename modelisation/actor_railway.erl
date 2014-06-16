@@ -66,12 +66,23 @@ answer_test_() ->
 	Rail = create(),
 	Prod = actor_product:create(),
 	NewRail = actor_contract:add_option(Rail, in, 1),
-	NewRail1 = actor_contract:add_option(NewRail, in, 2),
-	NewRail2 = actor_contract:add_option(NewRail1, out, 2),
+	NewRail1 = actor_contract:add_option(NewRail, out, 2),
+	NewRail2 = actor_contract:add_option(NewRail1, in, 2),
+	NewRail3 = actor_contract:add_option(NewRail2, out, 2),
+	NewRail4 = actor_contract:add_option(NewRail1, out, 2),
 	RailwayConfig=actor_contract: set_state(NewRail2, {2,3}),
 	[?_assertEqual(
 		{ NewRail2, {actor_product, Prod, [prob_in,no_prob_out]}, supervisor},
 		answer(NewRail2, {actor_product, Prod, switch})),
+	?_assertEqual(
+		{ NewRail1, {actor_product, Prod, [no_prob_in,no_prob_out]}, actor_contract:get_option(RailwayConfig,out)},
+		answer(NewRail1, {actor_product, Prod, switch})),
+	?_assertEqual(
+		{ NewRail3, {actor_product, Prod, [prob_in,prob_out]}, supervisor},
+		answer(NewRail3, {actor_product, Prod, switch})),
+	?_assertEqual(
+		{ NewRail4, {actor_product, Prod, [no_prob_in,prob_out]}, supervisor},
+		answer(NewRail4, {actor_product, Prod, switch})),
 	?_assertEqual(
 		{RailwayConfig, {actor_product, Prod, switched}, 3},
 		answer(NewRail2, {supervisor, Prod, {2,3}})),

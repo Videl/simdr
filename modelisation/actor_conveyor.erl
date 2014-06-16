@@ -21,6 +21,7 @@ answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
 	Destination = actor_contract:get_option(ConveyorConfig, out),
 	{ConveyorConfig, {actor_product, ProductConfig, Destination}, Destination};
+	
 answer(ConveyorConfig, Request) ->
 	actor_contract:answer(ConveyorConfig, Request).
 
