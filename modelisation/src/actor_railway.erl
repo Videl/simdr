@@ -6,12 +6,12 @@
 %% Actor Contract Behaviors Callbacks
 
 -export([
+	create/0,
 	answer/2
 	]).
 
 %% External API
 
--export([create/0]).
 -export([
 	create/1
 	]).
