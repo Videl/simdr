@@ -1,0 +1,87 @@
+\input{preamble.tex}
+
+\newcommand\sectio[1]{%
+  \section*{#1}%
+  \addcontentsline{toc}{section}{#1}}
+
+\renewcommand\contentsname{Sommaire}
+
+\renewcommand{\thesection}{\arabic{section}}
+%\renewcommand{\thesubsection}{\arabic{section}}
+\newcommand\familyname{\textsc}
+\addto\captionsfrench{\renewcommand{\figurename}{Image}}
+
+\newtoggle{annexes}
+\toggletrue{annexes}
+
+\input{first_page.tex}
+
+\title{\textbf{Rapport de stage}}
+\author{Marion \familyname{Ly} \\ Thibaut \familyname{Smith}}
+\date{2013 - 2014}
+
+\begin{document}
+	\section{configuration des acteurs}
+	
+	Chaque acteur possède une même configuration :
+	
+	\begin{tabular}{|c|c|c|c|}
+	\hline 
+	Configuration/ Acteur & convoyeur & aiguilleurs & rfid  \\ 
+	\hline 
+	module & actorconveyor & actorrailway & actorrfid \\
+	\hline 
+	id & random & random & random \\
+	\hline 
+	opt & entrée/sortie & entrée/sortie/regle de propriorité & •  \\ 
+	\hline 
+	state & on/off & {[in],[out]} (son état physique) & • \\
+	\hline 
+	worktime & ? & ? & 0\\ 
+	\hline 
+	listdata & produit transféré & {produit tranféré, état aiguilleur} & produit détecté  \\ 
+	\hline 
+	\end{tabular} 
+	
+	
+	\begin{tabular}{|c|c|c|}
+	\hline
+	Configuration/ Acteur & workstation & produits \\
+	\hline
+	module & actorworkstation & actorproduct \\ 
+	\hline
+	id & random & random \\ 
+	\hline
+	opt & entrée/sortie & •\\
+	\hline
+	state & on/off/default & etat pysique (raw,Q1,Q2,Q3) \\ 
+	\hline
+	worktime & ? & ?  \\
+	\hline
+	list\_data & {produit tranformé, qualité} & emplacement traversé\\
+	\hline
+	\end{tabular}
+	
+	\section{Interface : actor_contract}
+
+	 une fonction create qui permet de créer l'acteur avec un id aléatoire pour l'instant et des configurations par défaut différentes pour chaque acteur
+	
+	 une fonction answer qui prend 2 arguments, le protocole utilisé dans les différents acteurs est 
+	\begin{itemize}
+	
+	 \item pour l'appel à la fonction les arguments : {Config,{actor\_product, Config\_prod, type de 				question}}
+	\item pour la réponse : {Config,{actor\_product, NewConfig\_prod, info}, destination}
+
+	\end{itemize}
+	 Le produit étant le seul acteur qui est un flux physique, il ne répond pas au protocole. 
+	 L'interface comprend également différentes fonctions implémentées pour accéder, modifier les données des configurations.
+	 
+	 
+	 \section{Lecteur RFID}
+	 Lorsque le lecteur reçoit une demande du type 
+	 
+	 \section{Le produit}
+	 
+	 Comme dit précédemment, le produit est un flux physique donc il ne répond pas à un protocole pour ce qui est de ses réponses au superviseur. 
+	 
+\end{document}
