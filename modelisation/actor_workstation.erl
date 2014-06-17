@@ -23,6 +23,7 @@ answer(WSConfig, {actor_product, ProductConfig, transformation}) ->
 	{WSConfig, 
 	{actor_product, NewProductConfig, Quality}, 
 	get_destination(WSConfig)};
+	
 answer(WSConfig, Request) ->
 	actor_contract:answer(WSConfig, Request).
 
