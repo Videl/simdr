@@ -46,8 +46,8 @@ answer(RailwayConfig,{actor_product, ProductConfig, switch}) ->
 	end;
 
 answer(RailwayConfig, {supervisor, ProductConfig, Decision}) ->
-	{_In, Out}= Decision,
-	{Conf, Prod} = actor_contract:add_to_list_data({RailwayConfig, {ProductConfig, Decision}}, 
+	{In, Out}= Decision,
+	{Conf, Prod} = actor_contract:add_to_list_data({RailwayConfig, {ProductConfig, {[In],[Out]}}}, 
 		{ProductConfig, RailwayConfig}),
 	case Decision =/= actor_contract:get_state(Conf) of
 		true ->	RailwayConf=actor_contract:set_state(Conf, Decision),
@@ -77,11 +77,13 @@ answer_test_() ->
 	NewRail3 = actor_contract:add_option(NewRail2, out, 2),
 	NewRail4 = actor_contract:add_option(NewRail1, out, 2),
 	{NewRail1bis, Prodbis}= actor_contract:add_to_list_data({NewRail1, 
-					{Prod,{1,2}}},{Prod,NewRail1}),
-	RailwayConfig=actor_contract: set_state(NewRail2, {2,3}),
-	{RailwayConf, Product}= actor_contract:add_to_list_data({RailwayConfig, 
-					{Prod,{2,3}}},{Prod,RailwayConfig}),
-	[?_assertEqual(
+					{Prod,{[1],[2]}}},{Prod,NewRail1}),
+	
+	{RailwayConf, Product}= actor_contract:add_to_list_data({NewRail2, 
+					{Prod,{[2],[3]}}},{Prod,NewRail2}),
+	RailwayConfig=actor_contract: set_state(RailwayConf, {2,3}),
+	[
+	?_assertEqual(
 		{ NewRail2, {actor_product, Prod, [prob_in,no_prob_out]}, supervisor},
 		answer(NewRail2, {actor_product, Prod, switch})),
 	?_assertEqual(
@@ -94,7 +96,7 @@ answer_test_() ->
 		{ NewRail4, {actor_product, Prod, [no_prob_in,prob_out]}, supervisor},
 		answer(NewRail4, {actor_product, Prod, switch})),
 	?_assertEqual(
-		{RailwayConf, {actor_product, Product, switched}, 3},
+		{RailwayConfig, {actor_product, Product, switched}, 3},
 		answer(NewRail2, {supervisor, Prod, {2,3}})),
 	?_assertEqual(
 		{Rail, {supervisor, pong}}, 
