@@ -41,11 +41,11 @@ change_product(ProductConfig) ->
 
 get_destination(Config) ->
 	ListOfOuts = actor_contract:get_option(Config, out),
-	case actor_contract:list_size(ListOfOuts) of
+	Out = case actor_contract:list_size(ListOfOuts) of
 		1 ->
-			[Out] = ListOfOuts;
+			[ListOfOuts];
 		_ ->
-			Out = supervisor
+			supervisor
 	end,
 	Out.
 
