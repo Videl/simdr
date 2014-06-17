@@ -38,10 +38,10 @@ answer_test_() ->
 	NewConv = actor_contract:add_option(Conv, out, 2),
 	{_, _, Destination} = answer(Conv, {actor_product, Prod}),
 	{_, _, DestinationTwo} = answer(NewConv, {actor_product, Prod}),
-	[?_assertEqual(
+	{timeout, 20, [?_assertEqual(
 		%{Conv, {actor_product, Prod, unknown_option}, unknown_option}
 		unknown_option,
 		Destination),
 	?_assertEqual(
 		[2],
-		DestinationTwo)].
+		DestinationTwo)]}.

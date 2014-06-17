@@ -36,5 +36,7 @@ answer_test_() ->
 	?_assertEqual(
 		{ActorRFID, {supervisor, pong}}, 
 		answer(ActorRFID, {supervisor, ping})),
-	?_assert(answer(weird_message, hioho) =:= undefined)
+	?_assertEqual(
+		{unknown_type_of_request, hioho},
+		answer(weird_message, hioho))
 	].

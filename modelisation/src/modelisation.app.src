@@ -1,0 +1,8 @@
+{application, modelisation,
+  [{description,  "Erlang program to run simulations of 
+                   production scenarios in discrete/real time."},
+   {vsn, "0.0.1"},
+   {modules, [actor_contract, actor_conveyor, actor_product, actor_railway, 
+              actor_rfid, actor_workstation, actor_conveyor]}
+  ]
+}.
