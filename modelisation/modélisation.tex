@@ -74,11 +74,17 @@
 
 	\end{itemize}
 	 Le produit étant le seul acteur qui est un flux physique, il ne répond pas au protocole. 
-	 L'interface comprend également différentes fonctions implémentées pour accéder, modifier les données des configurations.
 	 
+	 L'interface comprend également différentes fonctions implémentées pour accéder, modifier les données des configurations ainsi que des réponses types utilisées par chaque acteur
 	 
 	 \section{Lecteur RFID}
-	 Lorsque le lecteur reçoit une demande du type 
+	 Lorsque le lecteur reçoit un produit, nous avons alors un temps de travail, puis le lecteur enregistre alors les données du produit dans sa base et ses données à lui dans la base du produit. Le lecteur envoie alors l'Id du produit qu'il a lu en réponse
+	 
+	 \section{Convoyeur}
+	Lorsqu'un produit arrive au convoyeur, un temps de travail se passe, le temps de transport du produit. Les données du produit sont enregistrées dans la base du convoyeur, celles du convoyeur dans la base du produit.Le produit est alors envoyé à l'acteur suivant.
+
+	\section{Aiguilleur}
+	Lorsque re
 	 
 	 \section{Le produit}
 	 
