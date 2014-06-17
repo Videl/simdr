@@ -25,11 +25,9 @@ create() ->
 create(Id) ->
 	actor_contract:create(?MODULE, Id, [], raw, 0, []).
 
-answer(ProductConfig, state) ->
-	{answer, actor_contract:get_id(ProductConfig), state, actor_contract:get_state(ProductConfig)};
 
-answer(ProductConfig, list_data) ->
-	{answer,  actor_contract:get_id(ProductConfig),	list_data, actor_contract:get_list_data(ProductConfig)}.
+answer(ProdConfig, Request) ->
+	actor_contract:answer(ProdConfig, Request).
 
 
 %% Internal API

@@ -104,7 +104,12 @@ answer(ActorConfig, {supervisor, ping}) ->
 
 answer(ActorConfig, {supervisor, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
-	{ActorConfig, answer, NewConfig};
+	{NewConfig, work_time, N};
+
+answer(ActorConfig, {supervisor, state, State}) ->
+	NewConfig = actor_contract:set_state(ActorConfig, State),
+	{NewConfig, state, State};
+
 answer(_, Request) ->
 	{unknown_type_of_request, Request}.
 	
