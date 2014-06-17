@@ -1,4 +1,4 @@
-{application, sim,
+{application, modelisation,
   [{description,  "Erlang program to run simulations of 
                    production scenarios in discrete/real time."},
    {vsn, "0.0.1"},
