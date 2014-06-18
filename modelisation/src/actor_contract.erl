@@ -98,17 +98,18 @@ add_to_list_data({FirstActor, FirstData}, {SecondActor, SecondData}) ->
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
-answer(ActorConfig, {changed, work_time, N}) ->
+answer(ActorConfig, {change, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
 	{NewConfig, changed_work_time, N};
 
-answer(ActorConfig, {changed, state, State}) ->
+answer(ActorConfig, {change, state, State}) ->
 	NewConfig = actor_contract:set_state(ActorConfig, State),
 	{NewConfig, changed_state, State};
 
-answer(ActorConfig, {changed, option, Opt}) ->
-	NewConfig = actor_contract:set_state(ActorConfig, Opt),
-	{NewConfig, changed_option, Opt};
+answer(ActorConfig, {change, option, Opt}) ->
+	{Key, Desc}=Opt,
+	NewConfig = actor_contract:add_option(ActorConfig, Key, Desc),
+	{NewConfig, added_option, Opt};
 
 answer(ActorConfig, {status, work_time}) ->
 	{ActorConfig, work_time, actor_contract:get_work_time(ActorConfig)};
@@ -325,23 +326,36 @@ add_option_list_size_test_() ->
 	].
 
 answer_test_() ->
- Actor = create(mod, test, [], on, 42, [1,2]),
+ Actor = create(mod, test, [{out,1},{in,2},{out,3}], on, 42, [5,6]),
  NewState = set_state(Actor,off),
  NewWTime = set_work_time(Actor,10),
+ NewOpt = add_option(Actor,in,4),
  [
 ?_assertEqual(
 	{Actor, state,on},
 	answer(Actor, {status, state})),
 ?_assertEqual(
 	{NewState, changed_state, off},
-	answer(Actor, {changed, state, off})),
+	answer(Actor, {change, state, off})),
 ?_assertEqual(
 	{Actor, module, mod},
 	answer(Actor,{status, module})),
+?_assertEqual(
+	{Actor, id, test},
+	answer(Actor,{status, id})),
 ?_assertEqual(
 	{Actor, work_time, 42},
 	answer(Actor, {status, work_time})),
 ?_assertEqual(
 	{NewWTime, changed_work_time, 10},
-	answer(Actor, {changed, work_time, 10}))
+	answer(Actor, {change, work_time, 10})),
+?_assertEqual(
+	{Actor, option, [1,3]},
+	answer(Actor, {status, option, out})),
+?_assertEqual(
+	{NewOpt, added_option,{in,4}},
+	answer(Actor, {change, option,{in,4}})),
+?_assertEqual(
+	{Actor, list_data, [5,6]},
+	answer(Actor, {status, list_data}))
  ].
