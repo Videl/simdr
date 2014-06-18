@@ -6,6 +6,7 @@
 
 -export([create/6, 
 		 create/3, 
+		 get_module/1,
 		 add_data/2, 
 		 add_option/3,
 		 add_to_list_data/2,
@@ -19,8 +20,6 @@
 		 get_state/1, 
 		 set_work_time/2,
 		 set_state/2, 
-		 start/1, 
-		 stop/1,
 		 work/1,
 		 list_size/1,
 		 answer/2]).
@@ -46,6 +45,9 @@ create(Module, Id, Work_time) ->
 create(Module, Id, Opt, State, Work_time, List_data) ->
 	Actor = #config { module=Module, id=Id, opt=Opt, state=State, work_time=Work_time, list_data=List_data },
 	Actor.
+
+get_module(Actor) ->
+	Actor#config.module.
 
 get_list_data(Actor) ->
 	Actor#config.list_data.
@@ -74,12 +76,6 @@ get_state(Actor) ->
 set_work_time(Actor, Work_time)->
 	 Actor#config{work_time =Work_time}.
 
-start(Actor) -> 
-	set_state(Actor, on).
-
-stop(Actor) ->
-	set_state(Actor, off).
-
 set_state(Actor, State) ->
 	Actor#config {state = State}.
 
@@ -102,13 +98,35 @@ add_to_list_data({FirstActor, FirstData}, {SecondActor, SecondData}) ->
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
-answer(ActorConfig, {supervisor, work_time, N}) ->
+answer(ActorConfig, {changed, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
-	{NewConfig, work_time, N};
+	{NewConfig, changed_work_time, N};
 
-answer(ActorConfig, {supervisor, state, State}) ->
+answer(ActorConfig, {changed, state, State}) ->
 	NewConfig = actor_contract:set_state(ActorConfig, State),
-	{NewConfig, state, State};
+	{NewConfig, changed_state, State};
+
+answer(ActorConfig, {changed, option, Opt}) ->
+	NewConfig = actor_contract:set_state(ActorConfig, Opt),
+	{NewConfig, changed_option, Opt};
+
+answer(ActorConfig, {status, work_time}) ->
+	{ActorConfig, work_time, actor_contract:get_work_time(ActorConfig)};
+
+answer(ActorConfig, {status, state}) ->
+	{ActorConfig, state, actor_contract:get_state(ActorConfig)};
+
+answer(ActorConfig, {status, list_data}) ->
+	{ActorConfig, list_data, actor_contract:get_list_data(ActorConfig)};
+
+answer(ActorConfig, {status, option, Key}) ->
+	{ActorConfig, option, actor_contract:get_option(ActorConfig, Key)};
+
+answer(ActorConfig, {status, module}) ->
+	{ActorConfig, module, actor_contract:get_module(ActorConfig)};
+
+answer(ActorConfig, {status, id}) ->
+	{ActorConfig, id, actor_contract:get_id(ActorConfig)};
 
 answer(_, Request) ->
 	{unknown_type_of_request, Request}.
@@ -159,7 +177,10 @@ list_size_helper([_H|T], Acc) ->
 mock_actor() ->
 	Actor = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
 	Actor.
-
+get_module_test() ->
+	Actor = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
+	 mod = get_module(Actor).
+	 
 get_list_data_test() ->
 	Actor = create(mod, test, 0),
 	[] = get_list_data(Actor).
@@ -244,18 +265,6 @@ set_work_time_test()->
 	Actor = create(mod, test, [opt1, opt2], on, 42, [1,2]),
 	NewActor = set_work_time(Actor, 12),
 	12 = NewActor#config.work_time.
-
-get_start_test() ->
-	Actor = create(mod, test, [opt1, opt2], off, 42, [1,2]),
-	NewActor = start(Actor),
-	on = NewActor#config.state.
-
-get_stop_test() ->
-	Actor = create(mod, test, [opt1, opt2], on, 42, [1,2]),
-	NewActor = stop(Actor),
-	off = NewActor#config.state.
-
-
 
 get_option_test_() ->
 	Actor = create(mod, test, [{friend, yes}, {friendo, no}, {friend, haha}], on, 42, [1,2]),
