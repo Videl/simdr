@@ -177,10 +177,11 @@ list_size_helper([_H|T], Acc) ->
 mock_actor() ->
 	Actor = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
 	Actor.
+
 get_module_test() ->
 	Actor = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
 	 mod = get_module(Actor).
-	 
+
 get_list_data_test() ->
 	Actor = create(mod, test, 0),
 	[] = get_list_data(Actor).
@@ -322,3 +323,25 @@ add_option_list_size_test_() ->
 	?_assertEqual(2, actor_contract:list_size(actor_contract:get_opt(ActorA))),
 	?_assertEqual(2, list_size(actor_contract:get_option(ActorA, friend)))
 	].
+
+answer_test_() ->
+ Actor = create(mod, test, [], on, 42, [1,2]),
+ NewState = set_state(Actor,off),
+ NewWTime = set_work_time(Actor,10),
+ [
+?_assertEqual(
+	{Actor, state,on},
+	answer(Actor, {status, state})),
+?_assertEqual(
+	{NewState, changed_state, off},
+	answer(Actor, {changed, state, off})),
+?_assertEqual(
+	{Actor, module, mod},
+	answer(Actor,{status, module})),
+?_assertEqual(
+	{Actor, work_time, 42},
+	answer(Actor, {status, work_time})),
+?_assertEqual(
+	{NewWTime, changed_work_time, 10},
+	answer(Actor, {changed, work_time, 10}))
+ ].
