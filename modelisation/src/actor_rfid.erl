@@ -16,7 +16,7 @@
 -export([
 	idling/1,
 	powered/1,
-	processing/2,
+	processing/3,
 	worker_loop/3]).
 
 %% Behavior implementation
@@ -54,19 +54,20 @@ powered(Config) ->
 			?MODULE:idling(actor_contract:set_state(Config, off));
 		{Sender, Request} -> 
 			Pid = spawn(?MODULE, worker_loop, [self(), Config, Request]),
-			?MODULE:processing(actor_contract:set_state(Config, processing), Pid);
+			?MODULE:processing(actor_contract:set_state(Config, processing), Pid, Sender);
 		_ ->
 			?MODULE:powered(Config)
 	end.
 
-processing(Config, MainWorker) ->
+processing(Config, MainWorker, Sender) ->
 	receive
 		{Sender, _Request} ->
-			Sender ! {state, busy};
+			Sender ! {state, busy},
 			?MODULE:processing(Config, MainWorker);
 		{MainWorker, end_of_work, {NewConfig, LittleAnswer, Destination}} ->
 			% Find destination in 'out' pool
 			% Send LittleAnswer
+			Sender ! {LittleAnswer, Destination},
 			?MODULE:powered(actor_contract:set_state(NewConfig, on));
 		_ ->
 			?MODULE:processing(Config, MainWorker)
