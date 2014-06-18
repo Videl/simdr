@@ -58,7 +58,7 @@ get_destination(Config) ->
 workstation_answer_test_() ->
 	ActorWS = actor_contract:set_work_time(actor_workstation:create(),1),
 	ActorProductOne = actor_product:create(product_one),
-	{_, _, NewActor} = answer(ActorWS, {supervisor, work_time, 20}),
+	{NewActor, _, 20} = answer(ActorWS, {changed, work_time, 20}),
 	{_, {actor_product, ActorProductTwo, _Quality}, _Destination} = 
 		answer(ActorWS, {actor_product, ActorProductOne, transformation}),
 	[
