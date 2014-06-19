@@ -3,6 +3,7 @@
 
 -behaviour(actor_contract).
 -include("config.hrl").
+-include("debug.hrl").
 
 %% Actor Contract Behaviors Callbacks
 
@@ -14,6 +15,7 @@
 %%
 
 -export([
+	init/0,
 	idling/1,
 	powered/1,
 	processing/2,
@@ -37,6 +39,12 @@ answer(RFIDConfig, Request) ->
 	actor_contract:answer(RFIDConfig, Request).
 
 %% Main loop
+init() ->
+	?CREATE_DEBUG_TABLE,
+	?DLOG("RFID Actor initialisation."),
+	Conf = ?MODULE:create(),
+	spawn(?MODULE, idling, [Conf]).
+
 idling(Config) ->
 	receive
 		{start} ->
@@ -62,7 +70,7 @@ powered(Config) ->
 processing(Config, MainWorker) ->
 	receive
 		{Sender, _Request} ->
-			Sender ! {state, busy};
+			Sender ! {state, busy},
 			?MODULE:processing(Config, MainWorker);
 		{MainWorker, end_of_work, {NewConfig, LittleAnswer, Destination}} ->
 			% Find destination in 'out' pool
