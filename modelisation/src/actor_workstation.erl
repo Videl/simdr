@@ -54,6 +54,62 @@ get_destination(Config) ->
 	end,
 	Out.
 
+
+idling(Config) ->
+ 	actor_contract : idling(Config).
+
+processing(Config, NbWorker) ->
+	receive
+		{Sender, {actor_product,ProdConf, _}} ->
+			Request= {actor_product,ProdConf, id},
+			[N] = actor_contract:get_option(Config, capacity),
+			case NbWorker> N-1 of
+				false -> spawn(?MODULE, worker_loop, [self(), Config, Request]),
+						?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
+
+				_-> Sender ! { self(), {control, full,{actor_contract : get_work_time(Config), Request}}},
+						?MODULE:processing(Config, NbWorker)
+				
+			end;
+		{Sender, {control, full, {Wait_time, Request}}} ->
+			spawn(?MODULE, wait, [self(), Wait_time,{Request, Sender}]),
+			?MODULE:processing(Config, NbWorker);
+
+		{Sender, Request} ->
+			A =	?MODULE:answer(Config, Request),
+			send_message({A,Sender}),
+			?MODULE:processing(Config, NbWorker);
+
+		{_Worker, end_of_work, {NewConfig, LittleAnswer, Destination}} ->
+			% Find destination in 'out' pool
+			% Send LittleAnswer
+		
+			send_message({LittleAnswer, Destination}),
+			?MODULE:processing(actor_contract:set_state(NewConfig, work), NbWorker-1);
+		_ ->
+			?MODULE:processing(Config, NbWorker)
+	end.
+
+
+send_message( {Ans, Dest}) when is_pid(Dest) -> 
+	Dest ! {self(), {Ans}};
+send_message({Ans, Dest}) ->
+	%% @TODO: decider de la destination
+	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
+
+wait(Pid ,Wait_time, {Ans, Dest}) when is_pid(Dest)->
+	actor_contract:work(Wait_time),
+	Dest ! {Pid, {Ans}};
+
+wait(_Pid ,Wait_time, {Ans, Dest}) when is_pid(Dest)->
+	actor_contract:work(Wait_time),
+	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
+
+worker_loop(Master, MasterConfig, Request) ->
+	FullAnswer = ?MODULE:answer(MasterConfig, Request),
+	Master ! {self(), end_of_work, FullAnswer}.
+
+
 %% Tests
 workstation_answer_test_() ->
 	ActorWS = actor_contract:set_work_time(actor_workstation:create(),1),

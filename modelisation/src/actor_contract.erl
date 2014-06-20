@@ -23,7 +23,8 @@
 		 work/1,
 		 list_size/1,
 		 first/1,
-		 answer/2]).
+		 answer/2,
+		 idling/1]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -133,7 +134,7 @@ answer(ActorConfig, {status, module}) ->
 answer(ActorConfig, {status, id}) ->
 	{ActorConfig, id, actor_contract:get_id(ActorConfig)};
 
-answer(_, Request) ->
+answer(_, _Request) ->
 	exit(unknown_request).
 
 first(List) ->
