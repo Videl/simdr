@@ -13,6 +13,7 @@
 	]).
 
 -export([
+	create/1,
 	init/0,
 	idling/1,
 	powered/1,
@@ -21,10 +22,16 @@
 
 %% Behavior implementation
 create() ->
+	create(void).
+
+create(Out) ->
 	TablePid = ets:new(test2, [duplicate_bag, public]),
-	actor_contract:add_option(actor_contract:create(?MODULE, 'BasicQueue', 1),
-							  ets,
-							  TablePid).
+	Ac1 = actor_contract:add_option(
+			  actor_contract:create(?MODULE, 'BasicQueue', 10),
+			  ets,
+			  TablePid),
+	Ac2 = actor_contract:add_option(Ac1, out, Out),
+	Ac2.
 
 %% Possible answer: a new product arriving
 answer(BasicQueueConfig, {actor_product, ProductConfig, register}) ->
@@ -63,7 +70,7 @@ powered(Config) ->
 	receive
 		{stop} ->
 			?MODULE:idling(actor_contract:set_state(Config, off));
-		{Sender, Request} -> 
+		{_Sender, Request} -> 
 			io:format("received request~n"),
 			spawn(?MODULE, worker_loop, [self(), Config, Request]),
 			?MODULE:processing(
@@ -80,18 +87,53 @@ processing(Config) ->
 			%io:format("received request~n"),
 			spawn(?MODULE, worker_loop, [self(), Config, Request]),
 			?MODULE:processing(Config);
-		{end_of_work, {NewConfig, LittleAnswer, Destination}} ->
+		{_Pid, end_of_work, {NewConfig, LittleAnswer, Destination}} ->
 			% Being here means: a new product has arrived to my attention and 
 			% 					has been set up in ETS.
 			% So there is quite nothing to do here.
 			%io:format("request done~n"),
-			MODULE:processing(actor_contract:set_state(NewConfig, processing));
+			?MODULE:processing(actor_contract:set_state(NewConfig, processing));
 		_ ->
-			?MODULE:processing(Config, MainWorker)
+			?MODULE:processing(Config)
 		after make_up_wait_time(Config) ->
-			%% Try to send the first product arrived
-			%% to the workstation to out.
-			ok
+			%% Try to send the first product arrived in the queue to
+			%% the workstation, that should be in out.
+			[WS] = actor_contract:get_option(Config, out),
+			%% Send message to know if it's available
+			WS ! {self(), free_space, {product}},
+			receive
+				{WS, yes, {}} ->
+					%% yes -> send an item
+					%%        1) fetch the first item from ets
+					%%        2) send it
+		            %%		  3) if product is acknowledged,
+					%%        	4) remove it from ets, add a new entry
+					%% 
+					%%		  	4')else nothing (this step should not happen,
+					%%							 but who knows)
+					%% 1)
+					[TablePid] = actor_contract:get_option(Config, ets),
+					ListEntry = ets:match_object(
+									test, {product, awaiting_processing, '$1'}
+								),
+					FirstEntry = actor_contract:first(ListEntry),
+					{product, awaiting_processing, Prod} = FirstEntry,
+					%% 2)
+					WS ! {self(), {actor_product, Prod, transformation}},
+					%% 3)
+					receive
+							{WS, {control, acknowledged, actor_product}} ->
+								%% 4)
+								ets:delete_object(TablePid, FirstEntry),
+								ets:insert(TablePid, {product, sent, Prod});
+							{WS, _} ->
+								ets:insert(TablePid, {product, error, d})
+					end;
+				{WS, no, {}} ->
+					%% no -> do nothing, let's wait a bit before asking again
+					ok
+			end,
+			?MODULE:processing(Config)
 	end.
 
 
@@ -105,15 +147,3 @@ make_up_wait_time(Config) ->
 	actor_contract:get_work_time(Config)*1000.
 
 %% Tests
-
-answer_test_() ->
-	ActorBasicQueue = actor_rfid:create(),
-	ActorProduct = actor_product:create(product_one),
-	{BQResult, ProdResult}= actor_contract:add_to_list_data({ActorBasicQueue, ActorProduct}, 
-		{ActorProduct, ActorBasicQueue}),	[
-	?_assertEqual(
-		{ActorBasicQueue, {supervisor, pong}}, 
-		answer(ActorBasicQueue, {supervisor, ping})),
-	?_assertEqual(
-		{BQResult,{actor_product, ProdResult, product_one}, anyone},
-	answer(ActorBasicQueue, {actor_product, ActorProduct, id}))	].
