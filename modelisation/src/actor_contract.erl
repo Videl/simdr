@@ -22,8 +22,8 @@
 		 set_state/2, 
 		 work/1,
 		 list_size/1,
-		 answer/2,
-		 first/1]).
+		 first/1,
+		 answer/2]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -131,7 +131,7 @@ answer(ActorConfig, {status, id}) ->
 	{ActorConfig, id, actor_contract:get_id(ActorConfig)};
 
 answer(_, Request) ->
-	{unknown_type_of_request, Request}.
+	exit(unknown_request).
 
 first(List) ->
 	get_head_data(List).
