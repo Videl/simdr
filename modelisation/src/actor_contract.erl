@@ -143,12 +143,12 @@ first(List) ->
 idling(Config) ->
 	receive
 		{start} ->
-			?MODULE:processing(actor_contract:set_state(Config, on), 0);
+			(actor_contract:get_module(Config)):processing(actor_contract:set_state(Config, on), 0);
 		{Sender, actor_product, _, _} ->
 			Sender ! {state, actor_contract:get_state(Config)},
-			?MODULE:idling(Config);
+			(actor_contract:get_module(Config)):idling(Config);
 		_ ->
-			?MODULE:idling(Config)
+			(actor_contract:get_module(Config)):idling(Config)
 	end.
 
 	
