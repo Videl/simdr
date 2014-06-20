@@ -56,11 +56,14 @@ processing(Config, NbWorker) ->
 					false -> spawn(?MODULE, worker_loop, [self(), Config, Request]),
 							?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
 
-					_-> Sender ! { self(), {control, actor_contract : get_work_time(Config)}},
+					_-> Sender ! { self(), {control, full,{actor_contract : get_work_time(Config), Request}}},
 							?MODULE:processing(Config, NbWorker)
 					
 					end;
-					
+		{Sender, {control, full, {Wait_time, Request}}} ->
+			spawn(?MODULE, wait, [self(), Wait_time,{Request, Sender}]),
+			?MODULE:processing(Config, NbWorker);
+
 		{Sender, Request} ->
 				A =	?MODULE:answer(Config, Request),
 				send_message({A,Sender}),
@@ -77,10 +80,18 @@ processing(Config, NbWorker) ->
 	end.
 
 
-send_message({Ans, Dest}) when is_pid(Dest) -> 
+send_message( {Ans, Dest}) when is_pid(Dest) -> 
 	Dest ! {self(), {Ans}};
 send_message({Ans, Dest}) ->
 	%% @TODO: decider de la destination
+	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
+
+wait(Pid ,Wait_time, {Ans, Dest}) when is_pid(Dest)->
+	actor_contract:work(Wait_time),
+	Dest ! {Pid, {Ans}};
+
+wait(_Pid ,Wait_time, {Ans, Dest}) when is_pid(Dest)->
+	actor_contract:work(Wait_time),
 	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
 
 worker_loop(Master, MasterConfig, Request) ->
