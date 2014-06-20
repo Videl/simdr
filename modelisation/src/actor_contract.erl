@@ -22,7 +22,8 @@
 		 set_state/2, 
 		 work/1,
 		 list_size/1,
-		 answer/2]).
+		 answer/2,
+		 first/1]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -131,6 +132,9 @@ answer(ActorConfig, {status, id}) ->
 
 answer(_, Request) ->
 	{unknown_type_of_request, Request}.
+
+first(List) ->
+	get_head_data(List).
 	
 %% ===================================================================
 %% Internal API
