@@ -8,13 +8,19 @@
 
 -export([
 	create/0,
-	answer/2
+	answer/2,
+	idling/1,
+	processing/2
 	]).
 
+-export([
+	wait/3,
+	worker_loop/3	
+	]).
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, work_one, 5).
+	actor_contract:create(?MODULE, work_one, [{capacity, 1}], off, 20, []).
 
 answer(WSConfig, {actor_product, ProductConfig, transformation}) ->
 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
@@ -56,20 +62,22 @@ get_destination(Config) ->
 
 
 idling(Config) ->
- 	actor_contract : idling(Config).
+ 	actor_contract:idling(Config).
 
 processing(Config, NbWorker) ->
 	receive
-		{Sender, {actor_product,ProdConf, _}} ->
-			Request= {actor_product,ProdConf, id},
+		{Sender, {actor_product, ProdConf, Act}} ->
+			Request = {actor_product,ProdConf, Act},
 			[N] = actor_contract:get_option(Config, capacity),
-			case NbWorker> N-1 of
-				false -> spawn(?MODULE, worker_loop, [self(), Config, Request]),
-						?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
+			case NbWorker > N-1 of
+				false ->
+					io:format("STARTING TO WOOOOOORK WITH ~w~n", [ProdConf]),
+					spawn(?MODULE, worker_loop, [self(), Config, Request]),
+					?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
 
-				_-> Sender ! { self(), {control, full,{actor_contract : get_work_time(Config), Request}}},
-						?MODULE:processing(Config, NbWorker)
-				
+				_ -> 
+					Sender ! { self(), {control, full, {actor_contract : get_work_time(Config), Request}}},
+					?MODULE:processing(Config, NbWorker)
 			end;
 		{Sender, {control, full, {Wait_time, Request}}} ->
 			spawn(?MODULE, wait, [self(), Wait_time,{Request, Sender}]),
@@ -91,7 +99,7 @@ processing(Config, NbWorker) ->
 	end.
 
 
-send_message( {Ans, Dest}) when is_pid(Dest) -> 
+send_message({Ans, Dest}) when is_pid(Dest) -> 
 	Dest ! {self(), {Ans}};
 send_message({Ans, Dest}) ->
 	%% @TODO: decider de la destination

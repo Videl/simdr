@@ -9,14 +9,14 @@
 
 -export([
 	create/0,
-	answer/2
+	answer/2,
+	idling/1,
+	processing/2
 	]).
 
 -export([
 	create/1,
 	init/0,
-	idling/1,
-	processing/1,
 	worker_loop/3,
 	make_up_wait_time/1]).
 
@@ -55,34 +55,26 @@ init() ->
 
 %% Awaiting a new product
 idling(Config) ->
-	receive
-		{start} ->
-			?MODULE:processing(actor_contract:set_state(Config, on));
-		{Sender, actor_product, _, _} when is_pid(Sender) ->
-			Sender ! {state, actor_contract:get_state(Config)},
-			?MODULE:idling(Config);
-		_ ->
-			?MODULE:idling(Config)
-	end.
+	actor_contract:idling(Config).
 	
 
 %% Awaiting new products
 %% Trying to send them over to a work station
-processing(Config) ->
+processing(Config, O) ->
 	receive
 		{_Sender, Request} ->
 			%io:format("received request~n"),
 			% no capacity analyse here, we are infinite
 			spawn(?MODULE, worker_loop, [self(), Config, Request]),
-			?MODULE:processing(Config);
+			?MODULE:processing(Config, O);
 		{_Pid, end_of_work, {NewConfig, _LittleAnswer, _Destination}} ->
 			% Being here means: a new product has arrived to my attention and 
 			% 					has been set up in ETS.
 			% So there is quite nothing to do here.
 			%io:format("request done~n"),
-			?MODULE:processing(actor_contract:set_state(NewConfig, processing));
+			?MODULE:processing(actor_contract:set_state(NewConfig, processing), O);
 		_ ->
-			?MODULE:processing(Config)
+			?MODULE:processing(Config, O)
 		after make_up_wait_time(Config) ->
 			%% Test if there are any item in the list waiting to be sent
 			[TablePid] = actor_contract:get_option(Config, ets),
@@ -123,7 +115,7 @@ processing(Config) ->
 					io:format("Nothing to send!!!~n"),
 					ok
 			end,
-			?MODULE:processing(Config)
+			?MODULE:processing(Config, O)
 	end.
 
 
