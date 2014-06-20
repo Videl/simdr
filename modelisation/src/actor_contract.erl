@@ -144,7 +144,7 @@ idling(Config) ->
 	receive
 		{start} ->
 			(actor_contract:get_module(Config)):processing(actor_contract:set_state(Config, on), 0);
-		{Sender, actor_product, _, _} ->
+		{Sender, actor_product, _, _} when is_pid(Sender) ->
 			Sender ! {state, actor_contract:get_state(Config)},
 			(actor_contract:get_module(Config)):idling(Config);
 		_ ->
