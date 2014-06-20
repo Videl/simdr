@@ -16,9 +16,9 @@
 	create/1,
 	init/0,
 	idling/1,
-	powered/1,
 	processing/1,
-	worker_loop/3]).
+	worker_loop/3,
+	make_up_wait_time/1]).
 
 %% Behavior implementation
 create() ->
@@ -53,41 +53,29 @@ init() ->
 	spawn(?MODULE, idling, [Conf]).
 
 
-%% Awaiting the start command
+%% Awaiting a new product
 idling(Config) ->
 	receive
 		{start} ->
-			?MODULE:powered(actor_contract:set_state(Config, on));
+			?MODULE:processing(actor_contract:set_state(Config, on));
 		{Sender, actor_product, _, _} when is_pid(Sender) ->
 			Sender ! {state, actor_contract:get_state(Config)},
 			?MODULE:idling(Config);
 		_ ->
 			?MODULE:idling(Config)
 	end.
-
-%% Awaiting a new product
-powered(Config) ->
-	receive
-		{stop} ->
-			?MODULE:idling(actor_contract:set_state(Config, off));
-		{_Sender, Request} -> 
-			io:format("received request~n"),
-			spawn(?MODULE, worker_loop, [self(), Config, Request]),
-			?MODULE:processing(
-				actor_contract:set_state(Config, processing));
-		_ ->
-			?MODULE:powered(Config)
-	end.
+	
 
 %% Awaiting new products
 %% Trying to send them over to a work station
 processing(Config) ->
 	receive
-		{Sender, Request} ->
+		{_Sender, Request} ->
 			%io:format("received request~n"),
+			% no capacity analyse here, we are infinite
 			spawn(?MODULE, worker_loop, [self(), Config, Request]),
 			?MODULE:processing(Config);
-		{_Pid, end_of_work, {NewConfig, LittleAnswer, Destination}} ->
+		{_Pid, end_of_work, {NewConfig, _LittleAnswer, _Destination}} ->
 			% Being here means: a new product has arrived to my attention and 
 			% 					has been set up in ETS.
 			% So there is quite nothing to do here.
@@ -96,13 +84,18 @@ processing(Config) ->
 		_ ->
 			?MODULE:processing(Config)
 		after make_up_wait_time(Config) ->
-			%% Try to send the first product arrived in the queue to
-			%% the workstation, that should be in out.
-			[WS] = actor_contract:get_option(Config, out),
-			%% Send message to know if it's available
-			WS ! {self(), free_space, {product}},
-			receive
-				{WS, yes, {}} ->
+			%% Test if there are any item in the list waiting to be sent
+			[TablePid] = actor_contract:get_option(Config, ets),
+			ListEntry = ets:match_object(
+							TablePid, {product, awaiting_processing, '$1'}
+						),
+			io:format("Testing... ~w~n", [ListEntry]),
+			case actor_contract:list_size(ListEntry) > 0 of
+				true ->
+					%% Try to send the first product arrived in the queue to
+					%% the workstation, that should be in out.
+					[WS] = actor_contract:get_option(Config, out),
+					WS ! {something,to,send},
 					%% yes -> send an item
 					%%        1) fetch the first item from ets
 					%%        2) send it
@@ -112,25 +105,22 @@ processing(Config) ->
 					%%		  	4')else nothing (this step should not happen,
 					%%							 but who knows)
 					%% 1)
-					[TablePid] = actor_contract:get_option(Config, ets),
-					ListEntry = ets:match_object(
-									test, {product, awaiting_processing, '$1'}
-								),
 					FirstEntry = actor_contract:first(ListEntry),
 					{product, awaiting_processing, Prod} = FirstEntry,
 					%% 2)
 					WS ! {self(), {actor_product, Prod, transformation}},
+					io:format("Pauuuuuuse time!!~n"),
 					%% 3)
 					receive
 							{WS, {control, acknowledged, actor_product}} ->
 								%% 4)
 								ets:delete_object(TablePid, FirstEntry),
 								ets:insert(TablePid, {product, sent, Prod});
-							{WS, _} ->
-								ets:insert(TablePid, {product, error, d})
+							_ ->
+								ets:insert(TablePid, {product, error_putting_product, Prod})
 					end;
-				{WS, no, {}} ->
-					%% no -> do nothing, let's wait a bit before asking again
+				false ->
+					io:format("Nothing to send!!!~n"),
 					ok
 			end,
 			?MODULE:processing(Config)
@@ -139,7 +129,7 @@ processing(Config) ->
 
 worker_loop(Master, MasterConfig, Request) ->
 	FullAnswer = ?MODULE:answer(MasterConfig, Request),
-	Master ! {end_of_work, FullAnswer}.
+	Master ! {self(), end_of_work, FullAnswer}.
 
 %% Internal API
 
