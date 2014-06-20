@@ -3,7 +3,6 @@
 
 -behaviour(actor_contract).
 -include("config.hrl").
--include("debug.hrl").
 
 %% Actor Contract Behaviors Callbacks
 
@@ -15,15 +14,13 @@
 
 
 -export([
-	init/0,
 	idling/1,
-	powered/1,
-	processing/3,
+	processing/2,
 	worker_loop/3]).
 
 %% Behavior implementation
 create() ->
-	actor_contract:create(?MODULE,rfid,[{capacity, 2}], undefined, 10, []).
+	actor_contract:create(?MODULE,rfid,[{capacity, 4}], undefined, 20, []).
 
 answer(RFIDConfig, {actor_product, ProductConfig, id}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
@@ -39,16 +36,10 @@ answer(RFIDConfig, Request) ->
 	actor_contract:answer(RFIDConfig, Request).
 
 %% Main loop
-init() ->
-	?CREATE_DEBUG_TABLE,
-	?DLOG("RFID Actor initialisation."),
-	Conf = ?MODULE:create(),
-	spawn(?MODULE, idling, [Conf]).
-
 idling(Config) ->
 	receive
 		{start} ->
-			?MODULE:powered(actor_contract:set_state(Config, on));
+			?MODULE:processing(actor_contract:set_state(Config, on), 0);
 		{Sender, actor_product, _, _} ->
 			Sender ! {state, actor_contract:get_state(Config)},
 			?MODULE:idling(Config);
@@ -56,44 +47,37 @@ idling(Config) ->
 			?MODULE:idling(Config)
 	end.
 
-powered(Config) ->
-	receive
-		{stop} ->
-			?MODULE:idling(actor_contract:set_state(Config, off));
-
-		{_Sender, Request} ->
-					Pid = spawn(?MODULE, worker_loop, [self(), Config, Request]),
-					?MODULE:processing(actor_contract:set_state(Config, processing), Pid, 1);
-		_ ->
-			?MODULE:powered(Config)
-	end.
-
-processing(Config, Worker, NbWorker) ->
+processing(Config, NbWorker) ->
 	receive
 		{Sender, {actor_product,ProdConf, _}} ->
 					Request= {actor_product,ProdConf, id},
-					case NbWorker> actor_contract:get_option(Config, capacity) of
-					true -> Sender ! { state, full, NbWorker},
-							?MODULE:processing(Config, Worker, NbWorker);
-					false -> Pid = spawn(?MODULE, worker_loop, [self(), Config, Request]),
-								?MODULE:processing(actor_contract:set_state(Config, processing), Pid, NbWorker+1)
+					[N] = actor_contract:get_option(Config, capacity),
+					case NbWorker> N-1 of
+					false -> spawn(?MODULE, worker_loop, [self(), Config, Request]),
+							?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
+					_-> Sender ! { state, full, NbWorker},
+							
+							?MODULE:processing(Config, NbWorker)
+					
+
 					end;
+					
 
 		{_Worker, end_of_work, {NewConfig, LittleAnswer, Destination}} ->
 			% Find destination in 'out' pool
 			% Send LittleAnswer
 		
 			send_message({LittleAnswer,NbWorker, Destination}),
-			?MODULE:processing(actor_contract:set_state(NewConfig, work),2, NbWorker-1);
+			?MODULE:processing(actor_contract:set_state(NewConfig, work), NbWorker-1);
 		_ ->
-			?MODULE:processing(Config, Worker, NbWorker)
+			?MODULE:processing(Config, NbWorker)
 	end.
 
-send_message({Ans, Nb, Dest}) when is_pid(Dest) -> 
+send_message({Ans, _Nb, Dest}) when is_pid(Dest) -> 
 	Dest ! Ans;
-send_message({Ans, Nb, Dest}) ->
+send_message({Ans, _Nb, Dest}) ->
 	%% @TODO: decider de la destination
-	io:format("Sending: ~w and ~w to ~w.~n", [Ans, Nb, Dest]).
+	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
 
 worker_loop(Master, MasterConfig, Request) ->
 	FullAnswer = ?MODULE:answer(MasterConfig, Request),
