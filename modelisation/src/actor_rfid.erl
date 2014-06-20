@@ -8,14 +8,15 @@
 
 -export([
 	create/0,
-	answer/2
+	answer/2,
+	idling/1,
+	processing/2
 	]).
 
 
 
 -export([
-	idling/1,
-	processing/2,
+	wait/3,
 	worker_loop/3]).
 
 %% Behavior implementation
