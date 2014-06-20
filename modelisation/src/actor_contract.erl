@@ -34,6 +34,9 @@
 -callback answer(Config :: term(), Entering :: term()) ->
 	Exiting :: term().
 
+-callback processing(Config :: term(), NbWorker :: term()) ->
+	Processing :: term().
+
 
 %% ===================================================================
 %% Helper functions
@@ -135,6 +138,18 @@ answer(_, Request) ->
 
 first(List) ->
 	get_head_data(List).
+
+idling(Config) ->
+	receive
+		{start} ->
+			?MODULE:processing(actor_contract:set_state(Config, on), 0);
+		{Sender, actor_product, _, _} ->
+			Sender ! {state, actor_contract:get_state(Config)},
+			?MODULE:idling(Config);
+		_ ->
+			?MODULE:idling(Config)
+	end.
+
 	
 %% ===================================================================
 %% Internal API
