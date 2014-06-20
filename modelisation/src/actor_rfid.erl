@@ -20,7 +20,7 @@
 
 %% Behavior implementation
 create() ->
-	actor_contract:create(?MODULE,rfid,[{capacity, 4}], undefined, 20, [joyeux, anniversaire, marion]).
+	actor_contract:create(?MODULE,rfid,[{capacity, 4}], undefined, 20, []).
 
 answer(RFIDConfig, {actor_product, ProductConfig, id}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
@@ -37,37 +37,31 @@ answer(RFIDConfig, Request) ->
 
 %% Main loop
 idling(Config) ->
-	receive
-		{start} ->
-			?MODULE:processing(actor_contract:set_state(Config, on), 0);
-		{Sender, actor_product, _, _} ->
-			Sender ! {state, actor_contract:get_state(Config)},
-			?MODULE:idling(Config);
-		_ ->
-			?MODULE:idling(Config)
-	end.
+ 	actor_contract : idling(Config).
 
 processing(Config, NbWorker) ->
 	receive
 		{Sender, {actor_product,ProdConf, _}} ->
-					Request= {actor_product,ProdConf, id},
-					[N] = actor_contract:get_option(Config, capacity),
-					case NbWorker> N-1 of
-					false -> spawn(?MODULE, worker_loop, [self(), Config, Request]),
-							?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
+			Request= {actor_product,ProdConf, id},
+			[N] = actor_contract:get_option(Config, capacity),
+			case NbWorker> N-1 of
+				false -> 
+					spawn(?MODULE, worker_loop, [self(), Config, Request]),
+					?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
 
-					_-> Sender ! { self(), {control, full,{actor_contract : get_work_time(Config), Request}}},
-							?MODULE:processing(Config, NbWorker)
-					
-					end;
+				_-> 
+					Sender ! { self(), {control, full,{actor_contract : get_work_time(Config), Request}}},
+					?MODULE:processing(Config, NbWorker)
+				
+			end;
 		{Sender, {control, full, {Wait_time, Request}}} ->
 			spawn(?MODULE, wait, [self(), Wait_time,{Request, Sender}]),
 			?MODULE:processing(Config, NbWorker);
 
 		{Sender, Request} ->
-				A =	?MODULE:answer(Config, Request),
-				send_message({A,Sender}),
-				?MODULE:processing(Config, NbWorker);
+			A =	?MODULE:answer(Config, Request),
+			send_message({A,Sender}),
+			?MODULE:processing(Config, NbWorker);
 
 		{_Worker, end_of_work, {NewConfig, LittleAnswer, Destination}} ->
 			% Find destination in 'out' pool
