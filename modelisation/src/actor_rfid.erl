@@ -20,7 +20,7 @@
 
 %% Behavior implementation
 create() ->
-	actor_contract:create(?MODULE,rfid,[{capacity, 4}], undefined, 20, []).
+	actor_contract:create(?MODULE,rfid,[{capacity, 4}], undefined, 20, [joyeux, anniversaire, marion]).
 
 answer(RFIDConfig, {actor_product, ProductConfig, id}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
@@ -55,27 +55,31 @@ processing(Config, NbWorker) ->
 					case NbWorker> N-1 of
 					false -> spawn(?MODULE, worker_loop, [self(), Config, Request]),
 							?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
-					_-> Sender ! { state, full, NbWorker},
-							
+
+					_-> Sender ! { self(), {control, actor_contract : get_work_time(Config)}},
 							?MODULE:processing(Config, NbWorker)
 					
-
 					end;
 					
+		{Sender, Request} ->
+				A =	?MODULE:answer(Config, Request),
+				send_message({A,Sender}),
+				?MODULE:processing(Config, NbWorker);
 
 		{_Worker, end_of_work, {NewConfig, LittleAnswer, Destination}} ->
 			% Find destination in 'out' pool
 			% Send LittleAnswer
 		
-			send_message({LittleAnswer,NbWorker, Destination}),
+			send_message({LittleAnswer, Destination}),
 			?MODULE:processing(actor_contract:set_state(NewConfig, work), NbWorker-1);
 		_ ->
 			?MODULE:processing(Config, NbWorker)
 	end.
 
-send_message({Ans, _Nb, Dest}) when is_pid(Dest) -> 
-	Dest ! Ans;
-send_message({Ans, _Nb, Dest}) ->
+
+send_message({Ans, Dest}) when is_pid(Dest) -> 
+	Dest ! {self(), {Ans}};
+send_message({Ans, Dest}) ->
 	%% @TODO: decider de la destination
 	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
 

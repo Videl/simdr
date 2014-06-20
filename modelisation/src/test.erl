@@ -19,6 +19,7 @@ lancer() ->
  Ok ! {self(), {actor_product,ProdConf, id}},
  Ok ! {self(), {actor_product,ProdConf, id}},
  Ok ! {self(), {actor_product,ProdConf, id}},
+  Ok ! {self(), {status, list_data}},
  rec().
 
  rec()->
