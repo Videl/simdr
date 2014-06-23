@@ -24,14 +24,14 @@
 create() ->	
 TablePid = ets:new(test2, [duplicate_bag, public]),
 	actor_contract:add_option(
-			  actor_contract:create(?MODULE, 'BasicQueue', 10),
+			  actor_contract:create(?MODULE, 'BasicQueue', 0),
 			  ets,
 			  TablePid).
 
 create(Out) ->
 	TablePid = ets:new(test2, [duplicate_bag, public]),
 	Ac1 = actor_contract:add_option(
-			  actor_contract:create(?MODULE, 'BasicQueue', 10),
+			  actor_contract:create(?MODULE, 'BasicQueue', 0),
 			  ets,
 			  TablePid),
 	Ac2 = actor_contract:add_option(Ac1, out, Out),
@@ -40,6 +40,9 @@ create(Out) ->
 %% Possible answer: a new product arriving
 answer(BasicQueueConfig, {actor_product, ProductConfig}) ->
 	%% Add it to ETS
+	%% Work time here means 'deplacement time' of the product, when the queue
+	%% is used as a conveyor
+	actor_contract:work(actor_contract:get_work_time(BasicQueueConfig)),
 	%% @TODO: time ?!
 	[TablePid] = actor_contract:get_option(BasicQueueConfig, ets),
 	ets:insert(TablePid, {product, awaiting_processing, ProductConfig}),
@@ -119,7 +122,7 @@ processing(Config, O) ->
 									{product, error_putting_product, Prod})
 					end;
 				false ->
-					io:format("BasicQueue > Nothing to send~n"),
+					%io:format("BasicQueue > Nothing to send~n"),
 					ok
 			end,
 			?MODULE:processing(Config, O)
@@ -133,6 +136,6 @@ worker_loop(Master, MasterConfig, Request) ->
 %% Internal API
 
 make_up_wait_time(Config) ->
-	actor_contract:get_work_time(Config)*1000.
+	actor_contract:get_work_time(Config)*1000+5000.
 
 %% Tests
