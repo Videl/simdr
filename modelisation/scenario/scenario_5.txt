@@ -1,0 +1,38 @@
+%%%
+%%% Scenario:
+%%% One conveyor (N1) (with RFID (N_RFID) attached) 
+%%% is linked to a railway (N2).
+%%% 
+%%% The railway (N2) has two outputs: 
+%%% 	Output one: A conveyor (N3a), then 
+%%%					Queue (N3b) and its 
+%%%					Workstation (N3c).
+%%% 	Output two: A simple conveyor (N4).
+
+N1 = spawn(actor_conveyor, idling, [actor_conveyor:create()]).
+N_RFID = spawn(actor_rfid, idling, [actor_rfid:create()]).
+
+N2 = spawn(actor_railway, idling, [actor_railway:create()]).
+
+N3a = spawn(actor_conveyor, idling, [actor_conveyor:create()]).
+
+N4 = spawn(actor_conveyor, idling, [actor_conveyor:create()]).
+
+N3b = spawn(actor_basic_queue, idling, [actor_basic_queue:create()]).
+N3c = spawn(actor_workstation, idling, [actor_workstation:create()]).
+
+N1 ! N2 ! N3a ! N3b ! N3c ! N4 ! N_RFID ! {start}.
+
+N1 ! {self(), {add, option, {rfid, N_RFID}}}.
+N2 ! {self(), {add, option, {in, N1}}}.
+N1 ! {self(), {add, option, {out, N2}}}.
+N2 ! {self(), {add, option, {out, N3a}}}.
+N2 ! {self(), {add, option, {out, N4}}}.
+N4 ! {self(), {add, option, {out, N3b}}}.
+N3a ! {self(), {add, option, {out, N3b}}}.
+N3b ! {self(), {add, option, {out, N3c}}}.
+
+
+
+
+N1 ! {self(), {actor_product, actor_product:create()}}.
