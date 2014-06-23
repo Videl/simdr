@@ -22,7 +22,7 @@
 -export([create/0]).
 
 create() ->
-   actor_contract:create(?MODULE, actor_conveyor,  [{capacity,1}], off, 5, []).
+   actor_contract:create(?MODULE, actor_conveyor,  [{capacity,1}], off, 10, []).
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
@@ -122,7 +122,10 @@ answer_test_() ->
 		{Prod, NewConv}),
 	{_, _, Destination} = answer(Conv, {actor_product, Prod}),
 	{_, _, DestinationTwo} = answer(NewConv, {actor_product, Prod}),
-	[?_assertEqual(
+	Result = answer(NewConv, {actor_product, Prod}),
+	[
+
+	?_assertEqual(
 		%{Conv, {actor_product, Prod, unknown_option}, unknown_option}
 		unknown_option,
 		Destination),
@@ -131,4 +134,5 @@ answer_test_() ->
 		DestinationTwo),
 	?_assertEqual(
 		{ConvResult, {actor_product, ProdResult, [2]}, [2]},
-		answer(NewConv, {actor_product, Prod}))].
+		Result)
+	].
