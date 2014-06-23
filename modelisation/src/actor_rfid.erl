@@ -10,7 +10,8 @@
 	create/0,
 	answer/2,
 	idling/1,
-	processing/2
+	processing/2, 
+	get_information/3
 	]).
 
 
@@ -21,9 +22,9 @@
 
 %% Behavior implementation
 create() ->
-	actor_contract:create(?MODULE,rfid,[{capacity, 4}], undefined, 20, []).
+	actor_contract:create(?MODULE,rfid,[{capacity, 4}], undefined, 1, []).
 
-answer(RFIDConfig, {actor_product, ProductConfig, id}) ->
+answer(RFIDConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
 	{NewRFIDConfig, NewProductConfig} = actor_contract:add_to_list_data(
 		{RFIDConfig, ProductConfig}, 
@@ -39,59 +40,74 @@ answer(RFIDConfig, Request) ->
 %% Main loop
 idling(Config) ->
  	actor_contract : idling(Config).
-
 processing(Config, NbWorker) ->
 	receive
-		{Sender, {actor_product,ProdConf, _}} ->
-			Request= {actor_product,ProdConf, id},
+		{Sender, {actor_product,ProdConf}} ->
+			Request= {actor_product,ProdConf},
 			[N] = actor_contract:get_option(Config, capacity),
 			case NbWorker> N-1 of
-				false -> 
-					spawn(?MODULE, worker_loop, [self(), Config, Request]),
-					?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
+				false -> Sender ! { self(), {control, ok, Request}},
+						spawn(?MODULE, worker_loop, [self(), Config, Request]),
+						?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
 
-				_-> 
-					Sender ! { self(), {control, full,{actor_contract : get_work_time(Config), Request}}},
-					?MODULE:processing(Config, NbWorker)
+				_-> Sender ! { self(), {control, full,{actor_contract : get_work_time(Config), Request}}},
+						?MODULE:processing(Config, NbWorker)
 				
 			end;
 		{Sender, {control, full, {Wait_time, Request}}} ->
 			spawn(?MODULE, wait, [self(), Wait_time,{Request, Sender}]),
 			?MODULE:processing(Config, NbWorker);
 
-		{Sender, Request} ->
-			A =	?MODULE:answer(Config, Request),
-			send_message({A,Sender}),
+		{_Sender, Request} ->
+			spawn(?MODULE, get_information, [self(), Config, Request]),
 			?MODULE:processing(Config, NbWorker);
 
 		{_Worker, end_of_work, {NewConfig, LittleAnswer, Destination}} ->
 			% Find destination in 'out' pool
 			% Send LittleAnswer
-		
-			send_message({LittleAnswer, Destination}),
+			{actor_product, ConfProd, _} = LittleAnswer,
+			send_message({{actor_product, ConfProd}, Destination}),
 			?MODULE:processing(actor_contract:set_state(NewConfig, work), NbWorker-1);
+	
+		{_Worker, information, {NewConfig, _, Information}} ->
+			send_message({Information, superviseur}),
+			%io:format(" Nouvelle config ~w ~n",[NewConfig]),
+			?MODULE:processing(NewConfig, NbWorker);
+
 		_ ->
 			?MODULE:processing(Config, NbWorker)
 	end.
 
 
-send_message( {Ans, Dest}) when is_pid(Dest) -> 
+send_message( {Ans, [Dest]}) when is_pid(Dest) -> 
+io:format("RFID Sending: ~w, ~w.~n", [self(), {Ans}]),
+	Dest ! {self(), {Ans}};
+send_message( {Ans, Dest}) when is_pid(Dest) ->
+	io:format("RFID Sending: ~w, ~w.~n", [self(), {Ans}]),
 	Dest ! {self(), {Ans}};
 send_message({Ans, Dest}) ->
 	%% @TODO: decider de la destination
-	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
+	io:format(" RFID Sending: ~w to ~w.~n", [Ans, Dest]).
+wait(Pid ,Wait_time, {Ans, [Dest]}) when is_pid(Dest)->
+	actor_contract:work(Wait_time),
+	Dest ! {Pid, {Ans}};
 
 wait(Pid ,Wait_time, {Ans, Dest}) when is_pid(Dest)->
 	actor_contract:work(Wait_time),
 	Dest ! {Pid, {Ans}};
 
-wait(_Pid ,Wait_time, {Ans, Dest}) when is_pid(Dest)->
+wait(_Pid ,Wait_time, {Ans, Dest}) ->
 	actor_contract:work(Wait_time),
-	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
+	io:format(" RFID Sending: ~w to ~w.~n", [Ans, Dest]).
 
 worker_loop(Master, MasterConfig, Request) ->
+	io:format("RFID work ~w.~n", [{MasterConfig,Request}]),
 	FullAnswer = ?MODULE:answer(MasterConfig, Request),
 	Master ! {self(), end_of_work, FullAnswer}.
+
+get_information(Master, MasterConfig, Request) ->
+	FullAnswer = ?MODULE:answer(MasterConfig, Request),
+	Master ! {self(), information, FullAnswer}.
 
 %% Tests
 
