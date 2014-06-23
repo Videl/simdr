@@ -373,8 +373,8 @@ answer_test_() ->
 	{Actor, option, [1,3]},
 	answer(Actor, {status, option, out})),
 ?_assertEqual(
-	{NewOpt, added_option,{in,4}},
-	answer(Actor, {change, option,{in,4}})),
+	{NewOpt, added_option, {in,4}},
+	answer(Actor, {add, option,{in,4}})),
 ?_assertEqual(
 	{Actor, list_data, [5,6]},
 	answer(Actor, {status, list_data}))

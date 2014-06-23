@@ -21,8 +21,12 @@
 	make_up_wait_time/1]).
 
 %% Behavior implementation
-create() ->
-	create(void).
+create() ->	
+TablePid = ets:new(test2, [duplicate_bag, public]),
+	actor_contract:add_option(
+			  actor_contract:create(?MODULE, 'BasicQueue', 10),
+			  ets,
+			  TablePid).
 
 create(Out) ->
 	TablePid = ets:new(test2, [duplicate_bag, public]),
@@ -34,7 +38,7 @@ create(Out) ->
 	Ac2.
 
 %% Possible answer: a new product arriving
-answer(BasicQueueConfig, {actor_product, ProductConfig, register}) ->
+answer(BasicQueueConfig, {actor_product, ProductConfig}) ->
 	%% Add it to ETS
 	%% @TODO: time ?!
 	[TablePid] = actor_contract:get_option(BasicQueueConfig, ets),
@@ -67,12 +71,14 @@ processing(Config, O) ->
 			% no capacity analyse here, we are infinite
 			spawn(?MODULE, worker_loop, [self(), Config, Request]),
 			?MODULE:processing(Config, O);
-		{_Pid, end_of_work, {NewConfig, _LittleAnswer, _Destination}} ->
+		{_Pid, end_of_work, {NewConfig, Trigger, _Destination}} ->
 			% Being here means: a new product has arrived to my attention and 
 			% 					has been set up in ETS.
 			% So there is quite nothing to do here.
-			%io:format("request done~n"),
-			?MODULE:processing(actor_contract:set_state(NewConfig, processing), O);
+			io:format("Basic Queue > Received ~w because of ~w.~n", [NewConfig, Trigger]),
+			?MODULE:processing(
+				actor_contract:set_state(NewConfig, processing), 
+				O);
 		_ ->
 			?MODULE:processing(Config, O)
 		after make_up_wait_time(Config) ->
@@ -81,13 +87,13 @@ processing(Config, O) ->
 			ListEntry = ets:match_object(
 							TablePid, {product, awaiting_processing, '$1'}
 						),
-			io:format("Testing... ~w~n", [ListEntry]),
+			%io:format("BasicQueue > Products waiting: ~w~n", [ListEntry]),
 			case actor_contract:list_size(ListEntry) > 0 of
 				true ->
 					%% Try to send the first product arrived in the queue to
 					%% the workstation, that should be in out.
 					[WS] = actor_contract:get_option(Config, out),
-					WS ! {something,to,send},
+					%WS ! {something,to,send},
 					%% yes -> send an item
 					%%        1) fetch the first item from ets
 					%%        2) send it
@@ -100,8 +106,8 @@ processing(Config, O) ->
 					FirstEntry = actor_contract:first(ListEntry),
 					{product, awaiting_processing, Prod} = FirstEntry,
 					%% 2)
-					WS ! {self(), {actor_product, Prod, transformation}},
-					io:format("Pauuuuuuse time!!~n"),
+					WS ! {self(), {actor_product, Prod}},
+					io:format("BasicQueue > Waiting answer from workstation.~n"),
 					%% 3)
 					receive
 							{WS, {control, acknowledged, actor_product}} ->
@@ -109,10 +115,11 @@ processing(Config, O) ->
 								ets:delete_object(TablePid, FirstEntry),
 								ets:insert(TablePid, {product, sent, Prod});
 							_ ->
-								ets:insert(TablePid, {product, error_putting_product, Prod})
+								ets:insert(TablePid, 
+									{product, error_putting_product, Prod})
 					end;
 				false ->
-					io:format("Nothing to send!!!~n"),
+					io:format("BasicQueue > Nothing to send~n"),
 					ok
 			end,
 			?MODULE:processing(Config, O)

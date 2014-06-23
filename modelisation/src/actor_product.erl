@@ -25,7 +25,7 @@ create() ->
 create(Id) ->
 	actor_contract:create(?MODULE, Id, [], raw, 0, []).
 
-answer(ProdConfig, {changed, Data,_}) ->
+answer(ProdConfig, {changed, Data}) ->
 	{ProdConfig, Data, no_change};
 
 answer(ProdConfig, Request) ->
@@ -42,13 +42,15 @@ random_id() ->
 %% ===================================================================
 
 answer_test_() ->	
-	Prod = create(),
-	NewProd = actor_contract:add_data(Prod,{21,05,02, q2}),
-	Id = actor_contract:get_id(NewProd),
-	[?_assertEqual(
-		{answer, Id, list_data, [{21,05,02, q2}]},
-		 answer(NewProd, list_data)),
+	Prod = create(123456),
+	NewProd = actor_contract:add_data(Prod, {21,05,02, q2}),
+	[?_assertEqual( %% ID test
+		123456,
+		actor_contract:get_id(NewProd)),
+	?_assertEqual( %% State test
+		raw,
+		actor_contract:get_state(NewProd)),
 	?_assertEqual(
-		{answer, Id, state, raw},
-		answer(NewProd, state))	
+		{21,05,02, q2},
+		actor_contract:get_data(NewProd))
 	].
