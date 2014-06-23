@@ -83,7 +83,7 @@ processing(Config, O) ->
 			ListEntry = ets:match_object(
 							TablePid, {product, awaiting_processing, '$1'}
 						),
-			io:format("Testing... ~w~n", [ListEntry]),
+			%io:format("BasicQueue > Products waiting: ~w~n", [ListEntry]),
 			case actor_contract:list_size(ListEntry) > 0 of
 				true ->
 					%% Try to send the first product arrived in the queue to
@@ -103,7 +103,7 @@ processing(Config, O) ->
 					{product, awaiting_processing, Prod} = FirstEntry,
 					%% 2)
 					WS ! {self(), {actor_product, Prod, transformation}},
-					io:format("Pauuuuuuse time!!~n"),
+					io:format("BasicQueue > Waiting answer from workstation.~n"),
 					%% 3)
 					receive
 							{WS, {control, acknowledged, actor_product}} ->
@@ -115,7 +115,7 @@ processing(Config, O) ->
 									{product, error_putting_product, Prod})
 					end;
 				false ->
-					io:format("Nothing to send!!!~n"),
+					io:format("BasicQueue > Nothing to send~n"),
 					ok
 			end,
 			?MODULE:processing(Config, O)

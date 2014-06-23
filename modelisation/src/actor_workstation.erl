@@ -71,7 +71,8 @@ processing(Config, NbWorker) ->
 			[N] = actor_contract:get_option(Config, capacity),
 			case NbWorker > N-1 of
 				false ->
-					io:format("STARTING TO WOOOOOORK WITH ~w~n", [ProdConf]),
+					io:format("Workstation > Starting to work on ~w~n", [ProdConf]),
+					Sender ! {self(), {control, acknowledged, actor_product}},
 					spawn(?MODULE, worker_loop, [self(), Config, Request]),
 					?MODULE:processing(
 						actor_contract:set_state(Config, processing), 
@@ -114,7 +115,7 @@ wait(Pid ,Wait_time, {Ans, Dest}) when is_pid(Dest)->
 	actor_contract:work(Wait_time),
 	Dest ! {Pid, {Ans}};
 
-wait(_Pid ,Wait_time, {Ans, Dest}) when is_pid(Dest)->
+wait(_Pid ,Wait_time, {Ans, Dest}) ->
 	actor_contract:work(Wait_time),
 	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
 
