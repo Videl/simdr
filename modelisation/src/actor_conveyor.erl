@@ -79,8 +79,8 @@ processing(Config, NbWorker) ->
 
 send_rfid( Conf, ProdConf) ->
 	case actor_contract:get_option(Conf, rfid) of 
-		[] -> {nothing};
-		[RFID] -> RFID ! { self(), {actor_product, ProdConf}}
+		[RFID] -> RFID ! {self(), {actor_product, ProdConf}};
+		_ -> {nothing}
 	end.
 
 send_message( {Ans, [Dest]}) when is_pid(Dest) -> 
