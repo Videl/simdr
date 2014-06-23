@@ -14,7 +14,8 @@
 	processing/2,
 	worker_loop/3,
 	get_information/3,
-	wait/3]).
+	wait/3,
+	send_rfid/2]).
 
 %% External API
 
@@ -45,6 +46,7 @@ processing(Config, NbWorker) ->
 			[N] = actor_contract:get_option(Config, capacity),
 			case NbWorker> N-1 of
 				false -> Sender ! { self(), {control, ok, Request}},
+						spawn(?MODULE, send_rfid, [Config, ProdConf]),
 						spawn(?MODULE, worker_loop, [self(), Config, Request]),
 						?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
 
@@ -71,11 +73,15 @@ processing(Config, NbWorker) ->
 			send_message({Information, superviseur}),
 			%io:format(" Nouvelle config ~w ~n",[NewConfig]),
 			?MODULE:processing(NewConfig, NbWorker);
-
 		_ ->
 			?MODULE:processing(Config, NbWorker)
 	end.
 
+send_rfid( Conf, ProdConf) ->
+	case actor_contract:get_option(Conf, rfid) of 
+		[] -> {nothing};
+		[RFID] -> RFID ! { self(), {actor_product, ProdConf}}
+	end.
 
 send_message( {Ans, [Dest]}) when is_pid(Dest) -> 
 io:format("Conveyor Sending: ~w to ~w.~n", [ Ans, Dest]),
