@@ -21,8 +21,12 @@
 	make_up_wait_time/1]).
 
 %% Behavior implementation
-create() ->
-	create(void).
+create() ->	
+TablePid = ets:new(test2, [duplicate_bag, public]),
+	actor_contract:add_option(
+			  actor_contract:create(?MODULE, 'BasicQueue', 10),
+			  ets,
+			  TablePid).
 
 create(Out) ->
 	TablePid = ets:new(test2, [duplicate_bag, public]),
@@ -67,11 +71,11 @@ processing(Config, O) ->
 			% no capacity analyse here, we are infinite
 			spawn(?MODULE, worker_loop, [self(), Config, Request]),
 			?MODULE:processing(Config, O);
-		{_Pid, end_of_work, {NewConfig, _LittleAnswer, _Destination}} ->
+		{_Pid, end_of_work, {NewConfig, Trigger, _Destination}} ->
 			% Being here means: a new product has arrived to my attention and 
 			% 					has been set up in ETS.
 			% So there is quite nothing to do here.
-			%io:format("request done~n"),
+			io:format("Basic Queue > Received ~w because of ~w.~n", [NewConfig, Trigger]),
 			?MODULE:processing(
 				actor_contract:set_state(NewConfig, processing), 
 				O);
@@ -89,7 +93,7 @@ processing(Config, O) ->
 					%% Try to send the first product arrived in the queue to
 					%% the workstation, that should be in out.
 					[WS] = actor_contract:get_option(Config, out),
-					WS ! {something,to,send},
+					%WS ! {something,to,send},
 					%% yes -> send an item
 					%%        1) fetch the first item from ets
 					%%        2) send it
