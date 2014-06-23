@@ -23,7 +23,7 @@
 create() ->
 	actor_contract:create(?MODULE,rfid,[{capacity, 4}], undefined, 2, []).
 
-answer(RFIDConfig, {actor_product, ProductConfig, id}) ->
+answer(RFIDConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
 	{NewRFIDConfig, NewProductConfig} = actor_contract:add_to_list_data(
 		{RFIDConfig, ProductConfig}, 
@@ -38,12 +38,12 @@ answer(RFIDConfig, Request) ->
 
 %% Main loop
 idling(Config) ->
- 	actor_contract : idling(Config).
+ 	actor_contract:idling(Config).
 
 processing(Config, NbWorker) ->
 	receive
-		{Sender, {actor_product,ProdConf, _}} ->
-			Request= {actor_product,ProdConf, id},
+		{Sender, {actor_product,ProdConf}} ->
+			Request = {actor_product,ProdConf},
 			[N] = actor_contract:get_option(Config, capacity),
 			case NbWorker> N-1 of
 				false -> 
@@ -51,7 +51,7 @@ processing(Config, NbWorker) ->
 					?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
 
 				_-> 
-					Sender ! { self(), {control, full,{actor_contract : get_work_time(Config), Request}}},
+					Sender ! {self(), {control, full, {actor_contract:get_work_time(Config), Request}}},
 					?MODULE:processing(Config, NbWorker)
 				
 			end;
@@ -75,7 +75,7 @@ processing(Config, NbWorker) ->
 	end.
 
 
-send_message( {Ans, Dest}) when is_pid(Dest) -> 
+send_message({Ans, Dest}) when is_pid(Dest) -> 
 	Dest ! {self(), {Ans}};
 send_message({Ans, Dest}) ->
 	%% @TODO: decider de la destination
@@ -107,4 +107,4 @@ answer_test_() ->
 		answer(ActorRFID, {supervisor, ping})),
 	?_assertEqual(
 		{RFIDResult,{actor_product, ProdResult, product_one}, supervisor},
-	answer(ActorRFID, {actor_product, ActorProduct, id}))	].
+	answer(ActorRFID, {actor_product, ActorProduct}))	].

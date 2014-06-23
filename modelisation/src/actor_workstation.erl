@@ -20,9 +20,9 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, work_one, [{capacity, 1}], off, 20, []).
+	actor_contract:create(?MODULE, work_one, [{capacity, 1}], off, 10, []).
 
-answer(WSConfig, {actor_product, ProductConfig, transformation}) ->
+answer(WSConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
 	{NewProductConfig, Quality} = change_product(ProductConfig),
 	% List data fillers
@@ -66,8 +66,8 @@ idling(Config) ->
 
 processing(Config, NbWorker) ->
 	receive
-		{Sender, {actor_product, ProdConf, Act}} ->
-			Request = {actor_product,ProdConf, Act},
+		{Sender, {actor_product, ProdConf}} ->
+			Request = {actor_product,ProdConf},
 			[N] = actor_contract:get_option(Config, capacity),
 			case NbWorker > N-1 of
 				false ->
@@ -80,11 +80,12 @@ processing(Config, NbWorker) ->
 
 				_ -> 
 					MD = {actor_contract:get_work_time(Config), Request},
+					io:format("Workstation > No place.~n"),
 					Sender ! {self(), {control, full, MD}},
 					?MODULE:processing(Config, NbWorker)
 			end;
 		{Sender, {control, full, {Wait_time, Request}}} ->
-			spawn(?MODULE, wait, [self(), Wait_time,{Request, Sender}]),
+			spawn(?MODULE, wait, [self(), Wait_time, {Request, Sender}]),
 			?MODULE:processing(Config, NbWorker);
 
 		{Sender, Request} ->
@@ -131,7 +132,7 @@ workstation_answer_test_() ->
 	ActorProductOne = actor_product:create(product_one),
 	{NewActor, _, 20} = answer(ActorWS, {change, work_time, 20}),
 	{_, {actor_product, ActorProductTwo, _Quality}, _Destination} = 
-		answer(ActorWS, {actor_product, ActorProductOne, transformation}),
+		answer(ActorWS, {actor_product, ActorProductOne}),
 	[
 	% ?_assertEqual(
 	% 	{ActorWS, {supervisor, pong}}, 
@@ -168,7 +169,7 @@ data_filler_test_() ->
 	BaseWS = actor_contract:set_work_time(actor_workstation:create(),1),
 	BasePO = actor_product:create(product_one),
 	{NewWS, {_, NewPO, Quality}, _} = 
-		answer(BaseWS, {actor_product, BasePO, transformation}),
+		answer(BaseWS, {actor_product, BasePO}),
 	MockProduct = actor_contract:set_state(BasePO, Quality),
 	LastDataWS = actor_contract:get_data(NewWS),
 	LastDataPO = actor_contract:get_data(NewPO),

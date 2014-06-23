@@ -25,7 +25,7 @@ create() ->
 create(Id) ->
 	actor_contract:create(?MODULE, Id, [], raw, 0, []).
 
-answer(ProdConfig, {changed, Data,_}) ->
+answer(ProdConfig, {changed, Data}) ->
 	{ProdConfig, Data, no_change};
 
 answer(ProdConfig, Request) ->

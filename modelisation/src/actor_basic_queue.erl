@@ -34,7 +34,7 @@ create(Out) ->
 	Ac2.
 
 %% Possible answer: a new product arriving
-answer(BasicQueueConfig, {actor_product, ProductConfig, register}) ->
+answer(BasicQueueConfig, {actor_product, ProductConfig}) ->
 	%% Add it to ETS
 	%% @TODO: time ?!
 	[TablePid] = actor_contract:get_option(BasicQueueConfig, ets),
@@ -102,7 +102,7 @@ processing(Config, O) ->
 					FirstEntry = actor_contract:first(ListEntry),
 					{product, awaiting_processing, Prod} = FirstEntry,
 					%% 2)
-					WS ! {self(), {actor_product, Prod, transformation}},
+					WS ! {self(), {actor_product, Prod}},
 					io:format("BasicQueue > Waiting answer from workstation.~n"),
 					%% 3)
 					receive
