@@ -14,11 +14,18 @@ lancer() ->
   RF=spawn(actor_rfid, idling, [RFID]),
   Co=spawn(actor_conveyor, idling, [Conv]),
    Co ! {start},
-  Co! {self(), {add, option, {out, RF}}},
+  
   RF! {start},
- Co!{self(), {actor_product, ProdConf, id}},
- Co!{self(), {actor_product, ProdConf2, id}},
- Co!{self(), {actor_product, ProdConf3, id}},
+  Co! {self(), {add, option, {out, RF}}},
+    actor_contract:work(1),
+ Co!{self(), {actor_product, ProdConf}},
+     actor_contract:work(1),
+  Co!{self(), {actor_product, ProdConf2}},
+%%      actor_contract:work(1),
+%% Co!{self(), {actor_product, ProdConf3}},
+% RF!{self(), {actor_product, ProdConf2}},
+ %Co!{self(), {actor_product, ProdConf2, id}},
+ %Co!{self(), {actor_product, ProdConf3, id}},
  rec().
 
 %% Ok ! {self(), {actor_product,ProdConf, id}},
@@ -35,6 +42,6 @@ lancer() ->
  receive 
  	V ->io:format("~w~n",[V]),
  		?MODULE:rec()
- 	after 60000 -> 
+ 	after 10000 -> 
  		bye
   end.
