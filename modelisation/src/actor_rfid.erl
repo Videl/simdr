@@ -21,7 +21,7 @@
 
 %% Behavior implementation
 create() ->
-	actor_contract:create(?MODULE,rfid,[{capacity, 4}], undefined, 20, []).
+	actor_contract:create(?MODULE,rfid,[{capacity, 4}], undefined, 2, []).
 
 answer(RFIDConfig, {actor_product, ProductConfig, id}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
@@ -96,14 +96,15 @@ worker_loop(Master, MasterConfig, Request) ->
 %% Tests
 
 answer_test_() ->
-	
 	ActorRFID = actor_rfid:create(),
 	ActorProduct = actor_product:create(product_one),
-	{RFIDResult, ProdResult}= actor_contract:add_to_list_data({ActorRFID, ActorProduct}, 
-		{ActorProduct, ActorRFID}),	[
+	{RFIDResult, ProdResult} = actor_contract:add_to_list_data(
+		{ActorRFID, ActorProduct}, 
+		{ActorProduct, ActorRFID}),
+	[
 	?_assertEqual(
 		{ActorRFID, {supervisor, pong}}, 
 		answer(ActorRFID, {supervisor, ping})),
 	?_assertEqual(
-		{RFIDResult,{actor_product, ProdResult, product_one}, anyone},
+		{RFIDResult,{actor_product, ProdResult, product_one}, supervisor},
 	answer(ActorRFID, {actor_product, ActorProduct, id}))	].

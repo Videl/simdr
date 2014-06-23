@@ -119,16 +119,17 @@ worker_loop(Master, MasterConfig, Request) ->
 
 
 %% Tests
+
 workstation_answer_test_() ->
 	ActorWS = actor_contract:set_work_time(actor_workstation:create(),1),
 	ActorProductOne = actor_product:create(product_one),
-	{NewActor, _, 20} = answer(ActorWS, {changed, work_time, 20}),
+	{NewActor, _, 20} = answer(ActorWS, {change, work_time, 20}),
 	{_, {actor_product, ActorProductTwo, _Quality}, _Destination} = 
 		answer(ActorWS, {actor_product, ActorProductOne, transformation}),
 	[
-	?_assertEqual(
-		{ActorWS, {supervisor, pong}}, 
-		answer(ActorWS, {supervisor, ping})),
+	% ?_assertEqual(
+	% 	{ActorWS, {supervisor, pong}}, 
+	% 	answer(ActorWS, {supervisor, ping})),
 	?_assertEqual(
 		20, 
 		actor_contract:get_work_time(NewActor)),
