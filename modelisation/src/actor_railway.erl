@@ -21,9 +21,6 @@
 create() ->
 	actor_contract:create(?MODULE, random_id(),[{capacity,1}], undefined, 0, []).
 
-create(Id) ->
-	actor_contract:create(?MODULE, Id, [{capacity, 1}], undefined, 0, []).
-
 answer(RailwayConfig, {actor_product, ProductConfig}) ->
 	MesOut = case actor_contract:list_size(actor_contract:get_option(RailwayConfig, out)) of 
 		1 ->
