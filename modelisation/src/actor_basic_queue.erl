@@ -72,7 +72,9 @@ processing(Config, O) ->
 			% 					has been set up in ETS.
 			% So there is quite nothing to do here.
 			%io:format("request done~n"),
-			?MODULE:processing(actor_contract:set_state(NewConfig, processing), O);
+			?MODULE:processing(
+				actor_contract:set_state(NewConfig, processing), 
+				O);
 		_ ->
 			?MODULE:processing(Config, O)
 		after make_up_wait_time(Config) ->
@@ -109,7 +111,8 @@ processing(Config, O) ->
 								ets:delete_object(TablePid, FirstEntry),
 								ets:insert(TablePid, {product, sent, Prod});
 							_ ->
-								ets:insert(TablePid, {product, error_putting_product, Prod})
+								ets:insert(TablePid, 
+									{product, error_putting_product, Prod})
 					end;
 				false ->
 					io:format("Nothing to send!!!~n"),

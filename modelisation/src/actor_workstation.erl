@@ -73,10 +73,13 @@ processing(Config, NbWorker) ->
 				false ->
 					io:format("STARTING TO WOOOOOORK WITH ~w~n", [ProdConf]),
 					spawn(?MODULE, worker_loop, [self(), Config, Request]),
-					?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
+					?MODULE:processing(
+						actor_contract:set_state(Config, processing), 
+						NbWorker+1);
 
 				_ -> 
-					Sender ! { self(), {control, full, {actor_contract : get_work_time(Config), Request}}},
+					MD = {actor_contract:get_work_time(Config), Request},
+					Sender ! {self(), {control, full, MD}},
 					?MODULE:processing(Config, NbWorker)
 			end;
 		{Sender, {control, full, {Wait_time, Request}}} ->
@@ -93,7 +96,9 @@ processing(Config, NbWorker) ->
 			% Send LittleAnswer
 		
 			send_message({LittleAnswer, Destination}),
-			?MODULE:processing(actor_contract:set_state(NewConfig, work), NbWorker-1);
+			?MODULE:processing(
+				actor_contract:set_state(NewConfig, work), 
+				NbWorker-1);
 		_ ->
 			?MODULE:processing(Config, NbWorker)
 	end.
@@ -139,9 +144,18 @@ workstation_answer_test_() ->
 	].
 
 get_destination_test_() ->
-	WorkerConfFewOut = actor_contract:add_option(create(), out, test1),
-	WorkerConfManyOut = actor_contract:add_option(WorkerConfFewOut, out, test2),
-	WorkerConfManyOutBis = actor_contract:add_option(WorkerConfManyOut, out, test3),
+	WorkerConfFewOut = actor_contract:add_option(
+		create(), 
+		out, 
+		test1),
+	WorkerConfManyOut = actor_contract:add_option(
+		WorkerConfFewOut, 
+		out, 
+		test2),
+	WorkerConfManyOutBis = actor_contract:add_option(
+		WorkerConfManyOut, 
+		out, 
+		test3),
 	[
 	?_assertEqual([test1], get_destination(WorkerConfFewOut)),
 	?_assertEqual(supervisor, get_destination(WorkerConfManyOut)),
