@@ -100,39 +100,41 @@ list_size(List) ->
 add_to_list_data({FirstActor, FirstData}, {SecondActor, SecondData}) ->
 	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
 
+{RailwayConf, {actor_product, ProductConf, InfoProb}, Dest}
+
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
 answer(ActorConfig, {change, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
-	{NewConfig, changed_work_time, N};
+	{NewConfig, {work_time, N, changed}, supervisor};
 
 answer(ActorConfig, {change, state, State}) ->
 	NewConfig = actor_contract:set_state(ActorConfig, State),
-	{NewConfig, changed_state, State};
+	{NewConfig, {state, State, changed}, supervisor};
 
 answer(ActorConfig, {add, option, Opt}) ->
 	{Key, Desc}=Opt,
 	NewConfig = actor_contract:add_option(ActorConfig, Key, Desc),
-	{NewConfig, added_option, Opt};
+	{NewConfig, {option, Opt, added}, supervisor};
 
 answer(ActorConfig, {status, work_time}) ->
-	{ActorConfig, work_time, actor_contract:get_work_time(ActorConfig)};
+	{ActorConfig, {work_time, actor_contract:get_work_time(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, state}) ->
-	{ActorConfig, state, actor_contract:get_state(ActorConfig)};
+	{ActorConfig, {state, actor_contract:get_state(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, list_data}) ->
-	{ActorConfig, list_data, actor_contract:get_list_data(ActorConfig)};
+	{ActorConfig, {list_data, actor_contract:get_list_data(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, option, Key}) ->
-	{ActorConfig, option, actor_contract:get_option(ActorConfig, Key)};
+	{ActorConfig, {option, actor_contract:get_option(ActorConfig, Key), status}, supervisor};
 
 answer(ActorConfig, {status, module}) ->
-	{ActorConfig, module, actor_contract:get_module(ActorConfig)};
+	{ActorConfig, {module, actor_contract:get_module(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, id}) ->
-	{ActorConfig, id, actor_contract:get_id(ActorConfig)};
+	{ActorConfig, {id, actor_contract:get_id(ActorConfig), status}, supervisor;
 
 answer(_, _Request) ->
 	exit(unknown_request).
