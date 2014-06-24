@@ -58,31 +58,54 @@
 			\textit{requêtes}, par le protocole suivant :
 
 				\{ConfigurationActeurA, 
-				\{NomActeurB, ConfigurationActeurB\},
-				 Destination\}
-				ActeurA correspond à l'acteur auquel on pose la requête, et 
+				\{NomActeurB, ConfigurationActeurB\}\}
+				ActeurA correspond à l'acteur auquel on envoie la requête, et 
 				ActeurB correspond au flux physique, dans notre cas le produit.
-				Enfin vient la destination de la requête, qui est soit dirigée
-				à l'acteur suivant, soit au superviseur.
 		\end{enumerate}
 
-		 	Cette fonction représente aussi le temps de travail via une pause
-		 	forcée, c'est pourquoi à chaque fois que cette fonction est appelée,
-		 	elle est encapsulée dans un noeud extérieur qui prévient l'acteur 
-		 	quand le travail est terminé. Cet aspect nous permet de contrôler 
-		 	plusieurs requêtes en parallèle.
+	 	Cette fonction représente aussi le temps de travail via une pause
+	 	forcée, c'est pourquoi à chaque fois que cette fonction est appelée,
+	 	elle est encapsulée dans un noeud extérieur qui prévient l'acteur 
+	 	quand le travail est terminé. Cet aspect nous permet de contrôler 
+	 	plusieurs requêtes en parallèle.
 
-		 L'interface \textbf{actor\_contract} comprend également différentes 
-		 fonctions implémentées pour accéder et modifier les données des 
-		 configurations ainsi que des réponses types pouvant être utilisées 
-		 par chaque acteur. Il est cependant toujours possible d'annuler ce 
-		 comportement via programmation.
+	 	La réponse est de la forme suivante :
 
-	\subsection*{Fonction end\_physical\_work/?}
-	\subsection*{Fonction end\_logical\_work/?}
-	\subsection*{Fonction make\_up\_timeout\_time/0}
-	\subsection*{Fonction timeout\_action/?}
-	\subsection*{Fonction sending\_product/?}
+	 	\{NouvelleConfigurationActeurA, 
+	 	\{NomActeurB, ConfigurationActeurB, Information\},
+	 	Destinaton\}
+
+	 	\begin{enumerate}
+	 		\item On retrouve les mêmes informations que tout à l'heure, mais 
+	 			légèrement modifiées : la nouvelle configuration de l'acteur A 
+	 			se retrouve en première position.
+	 		\item le nom et la nouvelle configuration de l'acteur B en deuxième 
+	 			position, et une information s'est rajoutée. Cette information 
+	 			peut représenter l'information détecté par l'acteur (exemple : 
+	 			le lecteur RFID met l'identifiant du produit ici), ou juste le 
+	 			nom de l'action qui a été exécuté sur l'acteur B.
+	 		\item Enfin vient la destination de la requête, qui est soit dirigée 
+	 			à l'acteur suivant, soit au superviseur. (Cette valeur est 
+	 			beaucoup utilisé par l'aiguilleur.)
+	 	\end{enumerate}
+
+		L'interface \textbf{actor\_contract} comprend également différentes 
+		fonctions implémentées pour accéder et modifier les données des 
+		configurations ainsi que des réponses types pouvant être utilisées 
+		par chaque acteur. Il est cependant toujours possible d'annuler ce 
+		comportement via programmation.
+
+	\subsection*{Fonction end\_physical\_work/? et end\_logical\_work/?}
+		Les requêtes entrainant des actions physiques tels que les déplacements
+		de produits sont coûteuses en temps et dépendent d'une capacité limité :
+		on a donc le besoin de séparer les requêtes produisant des réponses 
+		physiques ou logiques.
+		La destination peut aussi changer : soit un autre acteur, soit le 
+		superviseur.
+
+	\subsection*{Fonction envoi de produits /?}
+		Utilisation d'une file d'attente pour contrôler la sortie au cas où
+		l'acteur suivant refuse le produit ?
 	 
 	\begin{landscape}
 		\begin{center}
