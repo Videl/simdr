@@ -14,7 +14,8 @@
 %% External API
 
 -export([
-	create/1
+	create/1,
+	create/2
 	]).
 
 %% Behavior implementation
@@ -24,6 +25,9 @@ create() ->
 
 create(Id) ->
 	actor_contract:create(?MODULE, Id, [], raw, 0, []).
+
+create(Id, Quality) ->
+	actor_contract:create(?MODULE, Id, [{quality_required, Quality}], raw, 0, []).
 
 answer(ProdConfig, {change, Data,_}) ->
 	{ProdConfig, Data, no_change};
