@@ -35,8 +35,14 @@
 -callback answer(Config :: term(), Entering :: term()) ->
 	Exiting :: term().
 
--callback processing(Config :: term(), NbWorker :: term()) ->
-	Processing :: term().
+% -callback processing(Config :: term(), NbWorker :: term()) ->
+% 	Processing :: term().
+
+-callback end_of_physical_work(NewConfig :: term(), Response :: term(), Destination :: pid()) ->
+	term().
+
+-callback end_of_logical_work(NewConfig :: term(), Response :: term(), Destination :: pid()) ->
+	term().
 
 
 %% ===================================================================

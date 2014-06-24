@@ -44,7 +44,6 @@
 		Elle ne prend aucun argument.
 
 	\subsection*{Fonction answer/2}
-	
 		Cette fonction permet de \textbf{caractériser} le comportement du 
 		module en fonction d'une entrée précise (qui peut être un produit, mais
 		pas nécessairement). C'est cette fonction qui doit modifier/lire le 
@@ -95,7 +94,7 @@
 		par chaque acteur. Il est cependant toujours possible d'annuler ce 
 		comportement via programmation.
 
-	\subsection*{Fonction end\_physical\_work/? et end\_logical\_work/?}
+	\subsection*{Fonction end\_physical\_work/3 et end\_logical\_work/3}
 		Les requêtes entrainant des actions physiques tels que les déplacements
 		de produits sont coûteuses en temps et dépendent d'une capacité limité :
 		on a donc le besoin de séparer les requêtes produisant des réponses 
@@ -103,9 +102,16 @@
 		La destination peut aussi changer : soit un autre acteur, soit le 
 		superviseur.
 
+		Dans le cas du convoyeur, étant donné la possibilité d'avoir un lecteur
+		RFID attaché, la personnalisation de la réponse à une fin de travail physique 
+		(déplacement du produit) est nécessaire.
+
 	\subsection*{Fonction envoi de produits /?}
 		Utilisation d'une file d'attente pour contrôler la sortie au cas où
-		l'acteur suivant refuse le produit ?
+		l'acteur suivant refuse le produit ? 
+		Si oui, l'envoi d'un produit est automatique pour tout le monde, pas
+		besoin de personnalisation.
+		Si non, l'envoi d'un produit se gère au cas par cas selon les acteurs.
 	 
 	\begin{landscape}
 		\begin{center}
