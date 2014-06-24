@@ -104,7 +104,7 @@ list_size(List) ->
 	list_size_helper(List, 0).
 
 add_to_list_data({FirstActor, FirstData}, {SecondActor, SecondData}) ->
-	{add_data(FirstActor, {FirstData, erlang:now()}), add_data(SecondActor, {SecondData, erlang:now()})}.
+	{add_data(FirstActor, {FirstData, erlang:localtime()}), add_data(SecondActor, {SecondData, erlang:localtime()})}.
 
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
