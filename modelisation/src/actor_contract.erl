@@ -98,9 +98,7 @@ list_size(List) ->
 	list_size_helper(List, 0).
 
 add_to_list_data({FirstActor, FirstData}, {SecondActor, SecondData}) ->
-	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
-
-{RailwayConf, {actor_product, ProductConf, InfoProb}, Dest}
+	{add_data(FirstActor, {FirstData, erlang:now()}), add_data(SecondActor, {SecondData, erlang:now()})}.
 
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
@@ -134,7 +132,7 @@ answer(ActorConfig, {status, module}) ->
 	{ActorConfig, {module, actor_contract:get_module(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, id}) ->
-	{ActorConfig, {id, actor_contract:get_id(ActorConfig), status}, supervisor;
+	{ActorConfig, {id, actor_contract:get_id(ActorConfig), status}, supervisor};
 
 answer(_, _Request) ->
 	exit(unknown_request).
@@ -354,30 +352,30 @@ answer_test_() ->
  NewOpt = add_option(Actor,in,4),
  [
 ?_assertEqual(
-	{Actor, state,on},
+	{Actor, {state,on, status}, supervisor},
 	answer(Actor, {status, state})),
 ?_assertEqual(
-	{NewState, changed_state, off},
+	{NewState, {state, off, changed}, supervisor},
 	answer(Actor, {change, state, off})),
 ?_assertEqual(
-	{Actor, module, mod},
+	{Actor, {module, mod, status}, supervisor},
 	answer(Actor,{status, module})),
 ?_assertEqual(
-	{Actor, id, test},
+	{Actor, {id, test, status}, supervisor},
 	answer(Actor,{status, id})),
 ?_assertEqual(
-	{Actor, work_time, 42},
+	{Actor, {work_time, 42, status}, supervisor},
 	answer(Actor, {status, work_time})),
 ?_assertEqual(
-	{NewWTime, changed_work_time, 10},
+	{NewWTime, {work_time, 10, changed}, supervisor},
 	answer(Actor, {change, work_time, 10})),
 ?_assertEqual(
-	{Actor, option, [1,3]},
+	{Actor, {option, [1,3], status}, supervisor},
 	answer(Actor, {status, option, out})),
 ?_assertEqual(
-	{NewOpt, added_option, {in,4}},
+	{NewOpt, {option,{in,4}, added}, supervisor},
 	answer(Actor, {add, option,{in,4}})),
 ?_assertEqual(
-	{Actor, list_data, [5,6]},
+	{Actor, {list_data, [5,6], status}, supervisor},
 	answer(Actor, {status, list_data}))
  ].
