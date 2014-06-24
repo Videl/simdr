@@ -1,0 +1,18 @@
+%%%
+%%% Scenario:
+%%% One conveyor (with RFID attached) is linked to a queue with
+%%% its Workstation.
+%%%
+
+%% V2
+N1 = spawn(actor_conveyor, idling, [actor_conveyor:create()]).
+N2 = spawn(actor_basic_queue, idling, [actor_basic_queue:create()]).
+N3 = spawn(actor_workstation, idling, [actor_workstation:create()]).
+N_RFID = spawn(actor_rfid, idling, [actor_rfid:create()]).
+N1 ! N2 ! N3 ! N_RFID ! {start}.
+
+N1 ! {self(), {add, option, {out, N2}}}.
+N1 ! {self(), {add, option, {rfid, N_RFID}}}.
+N2 ! {self(), {add, option, {out, N3}}}.
+
+N1 ! {self(), {actor_product, actor_product:create()}}.

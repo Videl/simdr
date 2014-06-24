@@ -22,7 +22,9 @@
 		 set_state/2, 
 		 work/1,
 		 list_size/1,
-		 answer/2]).
+		 first/1,
+		 answer/2,
+		 idling/1]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -32,6 +34,9 @@
 
 -callback answer(Config :: term(), Entering :: term()) ->
 	Exiting :: term().
+
+-callback processing(Config :: term(), NbWorker :: term()) ->
+	Processing :: term().
 
 
 %% ===================================================================
@@ -93,44 +98,59 @@ list_size(List) ->
 	list_size_helper(List, 0).
 
 add_to_list_data({FirstActor, FirstData}, {SecondActor, SecondData}) ->
-	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
+	{add_data(FirstActor, {FirstData, erlang:now()}), add_data(SecondActor, {SecondData, erlang:now()})}.
 
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
 answer(ActorConfig, {change, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
-	{NewConfig, changed_work_time, N};
+	{NewConfig, {work_time, N, changed}, supervisor};
 
 answer(ActorConfig, {change, state, State}) ->
 	NewConfig = actor_contract:set_state(ActorConfig, State),
-	{NewConfig, changed_state, State};
+	{NewConfig, {state, State, changed}, supervisor};
 
-answer(ActorConfig, {change, option, Opt}) ->
+answer(ActorConfig, {add, option, Opt}) ->
 	{Key, Desc}=Opt,
 	NewConfig = actor_contract:add_option(ActorConfig, Key, Desc),
-	{NewConfig, added_option, Opt};
+	{NewConfig, {option, Opt, added}, supervisor};
 
 answer(ActorConfig, {status, work_time}) ->
-	{ActorConfig, work_time, actor_contract:get_work_time(ActorConfig)};
+	{ActorConfig, {work_time, actor_contract:get_work_time(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, state}) ->
-	{ActorConfig, state, actor_contract:get_state(ActorConfig)};
+	{ActorConfig, {state, actor_contract:get_state(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, list_data}) ->
-	{ActorConfig, list_data, actor_contract:get_list_data(ActorConfig)};
+	{ActorConfig, {list_data, actor_contract:get_list_data(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, option, Key}) ->
-	{ActorConfig, option, actor_contract:get_option(ActorConfig, Key)};
+	{ActorConfig, {option, actor_contract:get_option(ActorConfig, Key), status}, supervisor};
 
 answer(ActorConfig, {status, module}) ->
-	{ActorConfig, module, actor_contract:get_module(ActorConfig)};
+	{ActorConfig, {module, actor_contract:get_module(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, id}) ->
-	{ActorConfig, id, actor_contract:get_id(ActorConfig)};
+	{ActorConfig, {id, actor_contract:get_id(ActorConfig), status}, supervisor};
 
-answer(_, Request) ->
-	{unknown_type_of_request, Request}.
+answer(_, _Request) ->
+	exit(unknown_request).
+
+first(List) ->
+	get_head_data(List).
+
+idling(Config) ->
+	receive
+		{start} ->
+			(actor_contract:get_module(Config)):processing(actor_contract:set_state(Config, on), 0);
+		{Sender, actor_product, _, _} when is_pid(Sender) ->
+			Sender ! {state, actor_contract:get_state(Config)},
+			(actor_contract:get_module(Config)):idling(Config);
+		_ ->
+			(actor_contract:get_module(Config)):idling(Config)
+	end.
+
 	
 %% ===================================================================
 %% Internal API
@@ -332,15 +352,20 @@ answer_test_() ->
  NewOpt = add_option(Actor,in,4),
  [
 ?_assertEqual(
-	{Actor, state,on},
+	{Actor, {state,on, status}, supervisor},
 	answer(Actor, {status, state})),
 ?_assertEqual(
+<<<<<<< HEAD
 	{NewState, changed_state, off},
+=======
+	{NewState, {state, off, changed}, supervisor},
+>>>>>>> origin/loops
 	answer(Actor, {change, state, off})),
 ?_assertEqual(
-	{Actor, module, mod},
+	{Actor, {module, mod, status}, supervisor},
 	answer(Actor,{status, module})),
 ?_assertEqual(
+<<<<<<< HEAD
 	{Actor, id, test},
 	answer(Actor,{status, id})),
 ?_assertEqual(
@@ -357,5 +382,23 @@ answer_test_() ->
 	answer(Actor, {change, option,{in,4}})),
 ?_assertEqual(
 	{Actor, list_data, [5,6]},
+=======
+	{Actor, {id, test, status}, supervisor},
+	answer(Actor,{status, id})),
+?_assertEqual(
+	{Actor, {work_time, 42, status}, supervisor},
+	answer(Actor, {status, work_time})),
+?_assertEqual(
+	{NewWTime, {work_time, 10, changed}, supervisor},
+	answer(Actor, {change, work_time, 10})),
+?_assertEqual(
+	{Actor, {option, [1,3], status}, supervisor},
+	answer(Actor, {status, option, out})),
+?_assertEqual(
+	{NewOpt, {option,{in,4}, added}, supervisor},
+	answer(Actor, {add, option,{in,4}})),
+?_assertEqual(
+	{Actor, {list_data, [5,6], status}, supervisor},
+>>>>>>> origin/loops
 	answer(Actor, {status, list_data}))
  ].

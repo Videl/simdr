@@ -1,0 +1,17 @@
+%%%
+%%% Scenario:
+%%% One conveyor connected to a railway. 
+%%% The conveyor has an RFID Actor connected to it.
+%%%
+
+N1 = spawn(actor_conveyor, idling, [actor_conveyor:create()]).
+N2 = spawn(actor_railway, idling, [actor_railway:create()]).
+N_RFID = spawn(actor_rfid, idling, [actor_rfid:create()]).
+N1 ! N2 ! N_RFID ! {start}.
+
+N1 ! {self(), {add, option, {out, N2}}}.
+N1 ! {self(), {add, option, {rfid, N_RFID}}}.
+
+N2 ! {self(), {add, option, {in, N1}}}.
+
+N1 ! {self(), {actor_product, actor_product:create()}}.
