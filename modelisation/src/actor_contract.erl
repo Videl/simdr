@@ -5,7 +5,8 @@
 -include("config.hrl").
 
 -export([create/6, 
-		 create/3, 
+		 create/3,
+		 create/2, 
 		 get_module/1,
 		 add_data/2, 
 		 add_option/3,
@@ -24,7 +25,8 @@
 		 list_size/1,
 		 first/1,
 		 answer/2,
-		 idling/1]).
+		 idling/1,
+		 random_id/0]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -49,12 +51,14 @@
 %% Helper functions
 %% ===================================================================
 
-create(Module, Id, Work_time) ->
-	Actor = #config{module=Module, id=Id, opt=[], state=off, work_time=Work_time, list_data=[]},
-	Actor.
+create(Module, Work_time) ->
+	actor_contract:create(Module, actor_contract:random_id(), [], off, Work_time, []).
+
+create(Module, State, Work_time) ->
+	actor_contract:create(Module, actor_contract:random_id(), [], State, Work_time, []).
 
 create(Module, Id, Opt, State, Work_time, List_data) ->
-	Actor = #config { module=Module, id=Id, opt=Opt, state=State, work_time=Work_time, list_data=List_data },
+	Actor = #config{module=Module, id=Id, opt=Opt, state=State, work_time=Work_time, list_data=List_data},
 	Actor.
 
 get_module(Actor) ->
@@ -157,6 +161,8 @@ idling(Config) ->
 			(actor_contract:get_module(Config)):idling(Config)
 	end.
 
+random_id() ->
+	random:uniform(1000).
 	
 %% ===================================================================
 %% Internal API
@@ -352,59 +358,36 @@ add_option_list_size_test_() ->
 	].
 
 answer_test_() ->
- Actor = create(mod, test, [{out,1},{in,2},{out,3}], on, 42, [5,6]),
- NewState = set_state(Actor,off),
- NewWTime = set_work_time(Actor,10),
- NewOpt = add_option(Actor,in,4),
- [
-?_assertEqual(
-	{Actor, {state,on, status}, supervisor},
-	answer(Actor, {status, state})),
-?_assertEqual(
-<<<<<<< HEAD
-	{NewState, changed_state, off},
-=======
-	{NewState, {state, off, changed}, supervisor},
->>>>>>> origin/loops
-	answer(Actor, {change, state, off})),
-?_assertEqual(
-	{Actor, {module, mod, status}, supervisor},
-	answer(Actor,{status, module})),
-?_assertEqual(
-<<<<<<< HEAD
-	{Actor, id, test},
-	answer(Actor,{status, id})),
-?_assertEqual(
-	{Actor, work_time, 42},
-	answer(Actor, {status, work_time})),
-?_assertEqual(
-	{NewWTime, changed_work_time, 10},
-	answer(Actor, {change, work_time, 10})),
-?_assertEqual(
-	{Actor, option, [1,3]},
-	answer(Actor, {status, option, out})),
-?_assertEqual(
-	{NewOpt, added_option,{in,4}},
-	answer(Actor, {change, option,{in,4}})),
-?_assertEqual(
-	{Actor, list_data, [5,6]},
-=======
-	{Actor, {id, test, status}, supervisor},
-	answer(Actor,{status, id})),
-?_assertEqual(
-	{Actor, {work_time, 42, status}, supervisor},
-	answer(Actor, {status, work_time})),
-?_assertEqual(
-	{NewWTime, {work_time, 10, changed}, supervisor},
-	answer(Actor, {change, work_time, 10})),
-?_assertEqual(
-	{Actor, {option, [1,3], status}, supervisor},
-	answer(Actor, {status, option, out})),
-?_assertEqual(
-	{NewOpt, {option,{in,4}, added}, supervisor},
-	answer(Actor, {add, option,{in,4}})),
-?_assertEqual(
-	{Actor, {list_data, [5,6], status}, supervisor},
->>>>>>> origin/loops
-	answer(Actor, {status, list_data}))
- ].
+	Actor = create(mod, test, [{out,1},{in,2},{out,3}], on, 42, [5,6]),
+	NewState = set_state(Actor,off),
+	NewWTime = set_work_time(Actor,10),
+	NewOpt = add_option(Actor,in,4),
+	[
+	?_assertEqual(
+		{Actor, {state,on, status}, supervisor},
+		answer(Actor, {status, state})),
+	?_assertEqual(
+		{NewState, {state, off, changed}, supervisor},
+		answer(Actor, {change, state, off})),
+	?_assertEqual(
+		{Actor, {module, mod, status}, supervisor},
+		answer(Actor,{status, module})),
+	?_assertEqual(
+		{Actor, {id, test, status}, supervisor},
+		answer(Actor,{status, id})),
+	?_assertEqual(
+		{Actor, {work_time, 42, status}, supervisor},
+		answer(Actor, {status, work_time})),
+	?_assertEqual(
+		{NewWTime, {work_time, 10, changed}, supervisor},
+		answer(Actor, {change, work_time, 10})),
+	?_assertEqual(
+		{Actor, {option, [1,3], status}, supervisor},
+		answer(Actor, {status, option, out})),
+	?_assertEqual(
+		{NewOpt, {option,{in,4}, added}, supervisor},
+		answer(Actor, {add, option,{in,4}})),
+	?_assertEqual(
+		{Actor, {list_data, [5,6], status}, supervisor},
+		answer(Actor, {status, list_data}))
+	].

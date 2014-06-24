@@ -21,10 +21,10 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, random_id(), [], raw, 0, []).
+	actor_contract:create(?MODULE, raw, 0).
 
-create(Id) ->
-	actor_contract:create(?MODULE, Id, [], raw, 0, []).
+create(Quality) ->
+	actor_contract:create(?MODULE, actor_contract:random_id(), [{quality_required, Quality}], raw, 0, []).
 
 create(Id, Quality) ->
 	actor_contract:create(?MODULE, Id, [{quality_required, Quality}], raw, 0, []).
@@ -37,9 +37,6 @@ answer(ProdConfig, Request) ->
 
 
 %% Internal API
-
-random_id() ->
-	random:uniform(1000).
 
 %% ===================================================================
 %% Tests

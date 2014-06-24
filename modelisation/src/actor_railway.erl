@@ -18,7 +18,7 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, random_id(),[{capacity,infinity}], undefined, 0, []).
+	actor_contract:create(?MODULE, actor_contract:random_id(),[{capacity,infinity}], undefined, 0, []).
 
 answer(RailwayConfig, {actor_product, ProductConfig}) ->
 	MesOut = case actor_contract:list_size(actor_contract:get_option(RailwayConfig, out)) of 
@@ -149,9 +149,6 @@ logical_work(Master, MasterConfig, Request) ->
 
 %Internal API
 
-
-random_id() ->
-	random:uniform(1000).
 %% ===================================================================
 %% Tests
 %% ===================================================================

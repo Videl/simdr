@@ -18,7 +18,7 @@
 
 
 create() ->
-   actor_contract:create(?MODULE, actor_conveyor,  [{capacity,1}], off, 5, []).
+   actor_contract:create(?MODULE, actor_contract:random_id(),  [{capacity,1}], off, 5, []).
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),

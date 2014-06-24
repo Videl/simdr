@@ -22,16 +22,16 @@
 
 %% Behavior implementation
 create() ->
-	TablePid = ets:new(test2, [duplicate_bag, public]),
+	TablePid = ets:new(basic_queue, [duplicate_bag, public]),
 	actor_contract:add_option(
-			  actor_contract:create(?MODULE, 'BasicQueue', 0),
+			  actor_contract:create(?MODULE, off, 0),
 			  ets,
 			  TablePid).
 
 create(Out) ->
-	TablePid = ets:new(test2, [duplicate_bag, public]),
+	TablePid = ets:new(basic_queue, [duplicate_bag, public]),
 	Ac1 = actor_contract:add_option(
-			  actor_contract:create(?MODULE, 'BasicQueue', 0),
+			  actor_contract:create(?MODULE, off, 0),
 			  ets,
 			  TablePid),
 	Ac2 = actor_contract:add_option(Ac1, out, Out),
