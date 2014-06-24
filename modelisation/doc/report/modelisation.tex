@@ -50,7 +50,7 @@
 		pas nécessairement). C'est cette fonction qui doit modifier/lire le 
 		produit si il y a lieu.
 
-		Elle prend deux arguments :
+		Elle prend deux arguments en entrée:
 
 		\begin{enumerate}
 			\item La configuration de l'acteur
@@ -66,9 +66,12 @@
 				à l'acteur suivant, soit au superviseur.
 		\end{enumerate}
 
-		 Le produit étant le seul acteur qui est un flux physique, 
-		 il ne répond pas parfaitement au protocole. 
-		 
+		 	Cette fonction représente aussi le temps de travail via une pause
+		 	forcée, c'est pourquoi à chaque fois que cette fonction est appelée,
+		 	elle est encapsulée dans un noeud extérieur qui prévient l'acteur 
+		 	quand le travail est terminé. Cet aspect nous permet de contrôler 
+		 	plusieurs requêtes en parallèle.
+
 		 L'interface \textbf{actor\_contract} comprend également différentes 
 		 fonctions implémentées pour accéder et modifier les données des 
 		 configurations ainsi que des réponses types pouvant être utilisées 
@@ -85,19 +88,61 @@
 		\begin{center}
 			\begin{tabularx}{1.55\textwidth}{|X|X|X|X|X|X|X|}
 				\hline
-				Configuration & Module & Id & opt (options) & State & Worktime & list\_data \\
+				Configuration & 
+				Module & 
+				Id & 
+				opt (options) & 
+				State & 
+				Worktime & 
+				list\_data \\
 				\hline
-				Convoyeur & actor\_conveyor & Hasard & sortie & on/off & Temps de transport & Produits transférés \\
+				Convoyeur & 
+				actor\_conveyor & 
+				Hasard & 
+				sortie & 
+				on/off & 
+				Temps de transport & 
+				Produits transférés \\
 				\hline
-				Aiguilleur & actor\_railway & Hasard & entrée/sortie/règle de priorité & {in, out} (son état physique) & Temps d'aiguillage & Produits transférés, état aiguilleur \\
+				Aiguilleur & 
+				actor\_railway & 
+				Hasard & 
+				entrée/sortie/règle de priorité & 
+				{in, out} (son état physique) & 
+				Temps d'aiguillage & 
+				Produits transférés, état aiguilleur \\
 				\hline
-				RFID & actor\_rfid & Hasard & entrée & on/off & Temps de détection & Produits détectés\\
+				RFID & 
+				actor\_rfid & 
+				Hasard & 
+				entrée & 
+				on/off & 
+				Temps de détection & 
+				Produits détectés\\
 				\hline
-				Station de travail & actor\_workstation & Hasard & entrée/sortie & on/work/off & Temps de fabrication & Liste des produits crées, avec la qualité \\
+				Station de travail & 
+				actor\_workstation & 
+				Hasard & 
+				entrée/sortie & 
+				on/work/off & 
+				Temps de fabrication & 
+				Liste des produits crées, avec la qualité \\
 				\hline
-				Produit & actor\_product & Hasard & Qualité demandée & raw/Q1/Q2/Q3 & Aucun & Emplacements parcourus \\
+				Produit & 
+				actor\_product & 
+				Hasard & 
+				Qualité demandée & 
+				raw/Q1/Q2/Q3 & 
+				Aucun & 
+				Emplacements parcourus \\
 				\hline
-				File d'attente basique & actor\_basic\_queue & Hasard & Pas d'options & on/processing/off & Temps minimum avant qu'un produit soit disponible & Liste de produits avec temps d'entrée et temps de sortie \\
+				File d'attente basique & 
+				actor\_basic\_queue & 
+				Hasard & 
+				Pas d'options & 
+				on/processing/off & 
+				Temps minimum avant qu'un produit soit disponible & 
+				Liste de produits avec temps d'entrée et temps de sortie \\
 				\hline
 			\end{tabularx}
 		\end{center}
@@ -106,29 +151,39 @@
 
 	\section{Acteurs actuellement implémentés}
 	
+		Voici des acteurs qui ont déjà été implémentés dans le but de pouvoir 
+		mettre en place le scénario donné par nos encadrants.
+
 		\subsection{Lecteur RFID}
-		 	Lorsque le lecteur reçoit un produit, nous avons alors un temps de 
-		 	travail, puis le lecteur enregistre alors les données du produit dans 
-		 	sa base et ses données à lui dans la base du produit. Le lecteur envoie 
-		 	alors l'Id du produit qu'il a lu en réponse.
+		 	Lorsque le lecteur reçoit un produit, nous avons utilisé le temps
+		 	de travail comme temps de détection (qui peut-être mit à zéro par
+		 	défaut, s'il le faut) qui crée une pause.
+		 	Puis le lecteur enregistre alors les données du produit dans 
+		 	sa base et ses données à lui dans la base du produit. 
+		 	Le lecteur envoie alors l'Id du produit qu'il a lu en réponse.
 		 
 		\subsection{Convoyeur}
-			Lorsqu'un produit arrive au convoyeur, un temps de travail se passe, 
+			Lorsqu'un produit arrive au convoyeur, une pause correspondant au
+			temps de travail de la configuration de l'acteur se passe, c'est
 			le temps de transport du produit. Les données du produit sont 
 			enregistrées dans la base du convoyeur, celles du convoyeur dans la 
 			base du produit. Le produit est alors envoyé à l'acteur suivant.
 
 		\subsection{Aiguilleur}
-			A partir du moment, où l'aiguilleur reçoit le produit, sa réponse 
+			À partir du moment, où l'aiguilleur reçoit le produit, sa réponse 
 			dépendra des entrées sorties de celui-ci : 
-			- plusieurs entrées ou plusieurs sorties, un message est envoyé au 
-			superviseur, contenant la description du conflit et les données du 
-			produit et de l'aiguilleur pour que le superviseur puisse prendre 
-			sa décision (un ordre de priorité contenu dans les options de 
-			l'aiguilleur, et la qualité demandé du produit peut l'aider)
-			- une entrée et une sortie, on ajoute le produit ainsi que l'état de 
-			l'aiguilleur à la base de l'aiguilleur et on envoie 
-			le produit à l'acteur suivant
+
+			\begin{itemize}
+				\item plusieurs entrées ou plusieurs sorties, un message est 
+					envoyé au superviseur, contenant la description du conflit 
+					et les données du produit et de l'aiguilleur pour que le 
+					superviseur puisse prendre sa décision (un ordre de 
+					priorité contenu dans les options de l'aiguilleur, et la 
+					qualité demandé du produit peut l'aider).
+				\item une entrée et une sortie, on ajoute le produit ainsi que 
+					l'état de l'aiguilleur à la base de l'aiguilleur et on 
+					envoie le produit à l'acteur suivant.
+			\end{itemize}
 			
 			S'il y a eu conflit, l'aiguilleur recevra alors la décision du 
 			superviseur sur l'aiguillage du produit. On pourra ajouter les 
@@ -139,16 +194,32 @@
 			identique qu'à l'état actuelle de l'aiguilleur celui-ci n'a donc pas 
 			à changer d'état et il n'y a donc pas de temps de travail.
 
-		\subsection{File d'attente basique}
-
 		\subsection{Station de travail}
-			attente des files d'attente. 
+			Les stations de travail peuvent recevoir un seul produit à la fois, 
+			et permettent de modifier l'état du produit. Pour le moment, il y a
+			une chance équiprobable d'avoir un support de qualité Q1, Q2, ou Q3,
+			mais dans le futur, cette `chance' sera exprimable dans les options
+			de la station sous forme d'un pourcentage.
+
+		\subsection{File d'attente basique}
+			Les files d'attentes sont juste avant les stations : elles 
+			permettent de contrôler l'arrivée des objets selon la capacité
+			de la station.
+
+			Un temps minimum de transport est possible dans le cas où la file 
+			d'attente est utilisé comme convoyeur : le temps représente le
+			déplacement du produit. Cet élement est à zéro par défaut, soit le 
+			fonctionnement de base.
+
+			Plus tard, il sera possible d'implémenter des files spéciales à
+			plusieurs entrées.
 		 
 		\subsection{Le produit}
 			 Comme dit précédemment, le produit est un flux physique donc il 
-			 ne répond pas à un protocole pour ce qui est de ses réponses au 
-			 superviseur. On lui demandera alors juste de répondre par ses données. 
+			 n'a pas particulièrement besoin d'un protocole. On a donc désactivé
+			 plusieurs type de requêtes qui permettent de le modifier. 
+			 On lui demandera alors juste de répondre par ses données. 
 			 Ce type de réponses pourra aussi être utilisé par les autres acteurs 
 			 si on veut récupérer/modifier certaines de leurs données de 
-			 manières simplifiés.
+			 manières simplifié.
 \end{document}
