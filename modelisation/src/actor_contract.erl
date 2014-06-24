@@ -361,12 +361,34 @@ answer_test_() ->
 	{Actor, {state,on, status}, supervisor},
 	answer(Actor, {status, state})),
 ?_assertEqual(
+<<<<<<< HEAD
+	{NewState, changed_state, off},
+=======
 	{NewState, {state, off, changed}, supervisor},
+>>>>>>> origin/loops
 	answer(Actor, {change, state, off})),
 ?_assertEqual(
 	{Actor, {module, mod, status}, supervisor},
 	answer(Actor,{status, module})),
 ?_assertEqual(
+<<<<<<< HEAD
+	{Actor, id, test},
+	answer(Actor,{status, id})),
+?_assertEqual(
+	{Actor, work_time, 42},
+	answer(Actor, {status, work_time})),
+?_assertEqual(
+	{NewWTime, changed_work_time, 10},
+	answer(Actor, {change, work_time, 10})),
+?_assertEqual(
+	{Actor, option, [1,3]},
+	answer(Actor, {status, option, out})),
+?_assertEqual(
+	{NewOpt, added_option,{in,4}},
+	answer(Actor, {change, option,{in,4}})),
+?_assertEqual(
+	{Actor, list_data, [5,6]},
+=======
 	{Actor, {id, test, status}, supervisor},
 	answer(Actor,{status, id})),
 ?_assertEqual(
@@ -383,5 +405,6 @@ answer_test_() ->
 	answer(Actor, {add, option,{in,4}})),
 ?_assertEqual(
 	{Actor, {list_data, [5,6], status}, supervisor},
+>>>>>>> origin/loops
 	answer(Actor, {status, list_data}))
  ].
