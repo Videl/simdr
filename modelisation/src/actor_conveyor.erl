@@ -7,22 +7,18 @@
 %% Actor Contract Behaviors Callbacks
 
 -export([
-	answer/2
-	]).
--export([
+	create/0,
+	answer/2,
 	idling/1,
-	processing/2,
-	worker_loop/3,
-	get_information/3,
+	send_rfid/2,
+	processing/2, 
+	logical_work/3,
 	wait/3,
-	send_rfid/2]).
+	physical_work/3]).
 
-%% External API
-
--export([create/0]).
 
 create() ->
-   actor_contract:create(?MODULE, actor_conveyor,  [{capacity,1}], off, 10, []).
+   actor_contract:create(?MODULE, actor_conveyor,  [{capacity,1}], off, 5, []).
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
@@ -44,10 +40,10 @@ processing(Config, NbWorker) ->
 		{Sender, {actor_product,ProdConf}} ->
 			Request= {actor_product,ProdConf},
 			[N] = actor_contract:get_option(Config, capacity),
-			case NbWorker> N-1 of
+			case NbWorker+1> N of
 				false -> Sender ! { self(), {control, ok, Request}},
 						spawn(?MODULE, send_rfid, [Config, ProdConf]),
-						spawn(?MODULE, worker_loop, [self(), Config, Request]),
+						spawn(?MODULE, physical_work, [self(), Config, Request]),
 						?MODULE:processing(actor_contract:set_state(Config, processing), NbWorker+1);
 
 				_-> Sender ! { self(), {control, full,{actor_contract : get_work_time(Config), Request}}},
@@ -59,17 +55,17 @@ processing(Config, NbWorker) ->
 			?MODULE:processing(Config, NbWorker);
 
 		{_Sender, Request} ->
-			spawn(?MODULE, get_information, [self(), Config, Request]),
+			spawn(?MODULE, logical_work, [self(), Config, Request]),
 			?MODULE:processing(Config, NbWorker);
 
-		{_Worker, end_of_work, {NewConfig, LittleAnswer, Destination}} ->
+		{_Worker, end_physical_work, {NewConfig, LittleAnswer, Destination}} ->
 			% Find destination in 'out' pool
 			% Send LittleAnswer
 		 	{actor_product, ConfProd, _} = LittleAnswer,
 			send_message({{actor_product, ConfProd}, Destination}),
 			?MODULE:processing(actor_contract:set_state(NewConfig, free), NbWorker-1);
 	
-		{_Worker, information, {NewConfig, LittleAnswer, Destination}} ->
+		{_Worker, end_logical_work, {NewConfig, LittleAnswer, Destination}} ->
 			send_message({LittleAnswer, Destination}),
 			%io:format(" Nouvelle config ~w ~n",[NewConfig]),
 			?MODULE:processing(NewConfig, NbWorker);
@@ -100,14 +96,14 @@ wait(_Pid ,Wait_time, {Ans, Dest}) when is_pid(Dest)->
 	actor_contract:work(Wait_time),
 	io:format("Conveyor Sending: ~w to ~w.~n", [Ans, Dest]).
 
-worker_loop(Master, MasterConfig, Request) ->
+physical_work(Master, MasterConfig, Request) ->
 	io:format("Conveyor work ~w.~n", [{MasterConfig,Request}]),
 	FullAnswer = ?MODULE:answer(MasterConfig, Request),
-	Master ! {self(), end_of_work, FullAnswer}.
+	Master ! {self(), end_physical_work, FullAnswer}.
 
-get_information(Master, MasterConfig, Request) ->
+logical_work(Master, MasterConfig, Request) ->
 	FullAnswer = ?MODULE:answer(MasterConfig, Request),
-	Master ! {self(), information, FullAnswer}.
+	Master ! {self(), end_logical_work, FullAnswer}.
 
 
 %% ===================================================================
@@ -122,10 +118,7 @@ answer_test_() ->
 		{Prod, NewConv}),
 	{_, _, Destination} = answer(Conv, {actor_product, Prod}),
 	{_, _, DestinationTwo} = answer(NewConv, {actor_product, Prod}),
-	Result = answer(NewConv, {actor_product, Prod}),
-	[
-
-	?_assertEqual(
+	[?_assertEqual(
 		%{Conv, {actor_product, Prod, unknown_option}, unknown_option}
 		unknown_option,
 		Destination),
@@ -134,5 +127,4 @@ answer_test_() ->
 		DestinationTwo),
 	?_assertEqual(
 		{ConvResult, {actor_product, ProdResult, [2]}, [2]},
-		Result)
-	].
+		answer(NewConv, {actor_product, Prod}))].

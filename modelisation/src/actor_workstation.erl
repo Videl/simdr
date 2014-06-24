@@ -69,7 +69,7 @@ processing(Config, NbWorker) ->
 		{Sender, {actor_product, ProdConf}} ->
 			Request = {actor_product,ProdConf},
 			[N] = actor_contract:get_option(Config, capacity),
-			case NbWorker > N-1 of
+			case NbWorker+1 > N of
 				false ->
 					io:format("Workstation > Starting to work on ~w~n", [ProdConf]),
 					Sender ! {self(), {control, acknowledged, actor_product}},
