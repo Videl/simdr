@@ -98,41 +98,41 @@ list_size(List) ->
 	list_size_helper(List, 0).
 
 add_to_list_data({FirstActor, FirstData}, {SecondActor, SecondData}) ->
-	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
+	{add_data(FirstActor, {FirstData, erlang:now()}), add_data(SecondActor, {SecondData, erlang:now()})}.
 
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
 answer(ActorConfig, {change, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
-	{NewConfig, changed_work_time, N};
+	{NewConfig, {work_time, N, changed}, supervisor};
 
 answer(ActorConfig, {change, state, State}) ->
 	NewConfig = actor_contract:set_state(ActorConfig, State),
-	{NewConfig, changed_state, State};
+	{NewConfig, {state, State, changed}, supervisor};
 
 answer(ActorConfig, {add, option, Opt}) ->
 	{Key, Desc}=Opt,
 	NewConfig = actor_contract:add_option(ActorConfig, Key, Desc),
-	{NewConfig, added_option, Opt};
+	{NewConfig, {option, Opt, added}, supervisor};
 
 answer(ActorConfig, {status, work_time}) ->
-	{ActorConfig, work_time, actor_contract:get_work_time(ActorConfig)};
+	{ActorConfig, {work_time, actor_contract:get_work_time(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, state}) ->
-	{ActorConfig, state, actor_contract:get_state(ActorConfig)};
+	{ActorConfig, {state, actor_contract:get_state(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, list_data}) ->
-	{ActorConfig, list_data, actor_contract:get_list_data(ActorConfig)};
+	{ActorConfig, {list_data, actor_contract:get_list_data(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, option, Key}) ->
-	{ActorConfig, option, actor_contract:get_option(ActorConfig, Key)};
+	{ActorConfig, {option, actor_contract:get_option(ActorConfig, Key), status}, supervisor};
 
 answer(ActorConfig, {status, module}) ->
-	{ActorConfig, module, actor_contract:get_module(ActorConfig)};
+	{ActorConfig, {module, actor_contract:get_module(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, id}) ->
-	{ActorConfig, id, actor_contract:get_id(ActorConfig)};
+	{ActorConfig, {id, actor_contract:get_id(ActorConfig), status}, supervisor};
 
 answer(_, _Request) ->
 	exit(unknown_request).
@@ -352,30 +352,30 @@ answer_test_() ->
  NewOpt = add_option(Actor,in,4),
  [
 ?_assertEqual(
-	{Actor, state,on},
+	{Actor, {state,on, status}, supervisor},
 	answer(Actor, {status, state})),
 ?_assertEqual(
-	{NewState, changed_state, off},
+	{NewState, {state, off, changed}, supervisor},
 	answer(Actor, {change, state, off})),
 ?_assertEqual(
-	{Actor, module, mod},
+	{Actor, {module, mod, status}, supervisor},
 	answer(Actor,{status, module})),
 ?_assertEqual(
-	{Actor, id, test},
+	{Actor, {id, test, status}, supervisor},
 	answer(Actor,{status, id})),
 ?_assertEqual(
-	{Actor, work_time, 42},
+	{Actor, {work_time, 42, status}, supervisor},
 	answer(Actor, {status, work_time})),
 ?_assertEqual(
-	{NewWTime, changed_work_time, 10},
+	{NewWTime, {work_time, 10, changed}, supervisor},
 	answer(Actor, {change, work_time, 10})),
 ?_assertEqual(
-	{Actor, option, [1,3]},
+	{Actor, {option, [1,3], status}, supervisor},
 	answer(Actor, {status, option, out})),
 ?_assertEqual(
-	{NewOpt, added_option, {in,4}},
+	{NewOpt, {option,{in,4}, added}, supervisor},
 	answer(Actor, {add, option,{in,4}})),
 ?_assertEqual(
-	{Actor, list_data, [5,6]},
+	{Actor, {list_data, [5,6], status}, supervisor},
 	answer(Actor, {status, list_data}))
  ].

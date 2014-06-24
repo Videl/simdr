@@ -67,10 +67,10 @@ processing(Config, NbWorker) ->
 			% Send LittleAnswer
 		 	{actor_product, ConfProd, _} = LittleAnswer,
 			send_message({{actor_product, ConfProd}, Destination}),
-			?MODULE:processing(actor_contract:set_state(NewConfig, work), NbWorker-1);
+			?MODULE:processing(actor_contract:set_state(NewConfig, free), NbWorker-1);
 	
-		{_Worker, information, {NewConfig, _, Information}} ->
-			send_message({Information, superviseur}),
+		{_Worker, information, {NewConfig, LittleAnswer, Destination}} ->
+			send_message({LittleAnswer, Destination}),
 			%io:format(" Nouvelle config ~w ~n",[NewConfig]),
 			?MODULE:processing(NewConfig, NbWorker);
 		_ ->

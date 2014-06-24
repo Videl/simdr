@@ -21,8 +21,8 @@
 	make_up_wait_time/1]).
 
 %% Behavior implementation
-create() ->	
-TablePid = ets:new(test2, [duplicate_bag, public]),
+create() ->
+	TablePid = ets:new(test2, [duplicate_bag, public]),
 	actor_contract:add_option(
 			  actor_contract:create(?MODULE, 'BasicQueue', 0),
 			  ets,
@@ -46,8 +46,11 @@ answer(BasicQueueConfig, {actor_product, ProductConfig}) ->
 	%% @TODO: time ?!
 	[TablePid] = actor_contract:get_option(BasicQueueConfig, ets),
 	ets:insert(TablePid, {product, awaiting_processing, ProductConfig}),
+	{NewBasicQueueConfig, NewProductConfig} = actor_contract:add_to_list_data(
+		{BasicQueueConfig, ProductConfig}, 
+		{ProductConfig, BasicQueueConfig}),
 	%% @TODO: Add it to list_data (this actor + the product) to know we had it
-	{BasicQueueConfig, {actor_product, ProductConfig, saved_ets}, main_loop};
+	{NewBasicQueueConfig, {actor_product, NewProductConfig, saved_ets}, main_loop};
 answer(BasicQueueConfig, Request) ->
 	actor_contract:answer(BasicQueueConfig, Request).
 
