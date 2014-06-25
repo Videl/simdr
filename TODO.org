@@ -1,0 +1,22 @@
+* INTERNSHIP
+  - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
+  --- 2014-06-25 12:07 ---
+  ** TODO [1/6]
+   - [ ] Refactor
+   - [ ] ETS
+    - [ ] Function set_option
+   - [ ] Need to use the *states*! :tests:
+   - [ ] If end of path, send to supervisor
+   - [X] RFID needs to receive messages :done: 2014-06-25 17:24
+   - [ ] Queue needs to send products.. 
+  
+ ** Tests
+  - [ ] Scenario 1
+  - [ ] Scenario 2
+  - [ ] Scenario 3
+  - [ ] Scenario 4
+  - [ ] Scenario 5
+  - [ ] Container
+    - [ ] Physical Work
+    - [ ] Logical Work
+    - [ ] Fonction set_option
