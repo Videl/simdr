@@ -33,6 +33,7 @@ processing(Config, NbWorkers) ->
 			processing(Config, NbWorkers);
 
 		{Sender, Request} ->
+			io:format("~w Received >>> ~w~n", [self(), Request]),
 			NewWorkers = manage_request({Config, NbWorkers, Sender}, Request),
 			processing(Config, NewWorkers);
 		
@@ -48,9 +49,23 @@ processing(Config, NbWorkers) ->
 				Request),
 			processing(NewConfig, NewNbWorkers);
 
-		_ ->
+		V ->
+			io:format(">>>UNKNOW REQUEST<<< (~w)~n", [V]),
 			?MODULE:processing(Config, NbWorkers)
 	end.
+
+
+physical_work(Master, MasterConfig, Request) ->
+	io:format("~w work ~w.~n", [actor_contract:get_module(MasterConfig), 
+								{MasterConfig, Request}]),
+	FullAnswer = (actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
+	Master ! {self(), end_physical_work, FullAnswer}.
+
+
+logical_work(Master, MasterConfig, Request) ->
+	FullAnswer = (actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
+	Master ! {self(), end_logical_work, FullAnswer}.
+
 
 %%% Special case for Basic Queue: the product is not to be sent straight away.
 end_of_physical_work({_Config, NbWorkers}, {NewConfig, {}, _Destination}) ->
@@ -60,13 +75,13 @@ end_of_physical_work({_Config, NbWorkers}, {NewConfig, LittleAnswer, Destination
 	%% Set up the item in the ETS table
 	%% for later sending.
 	{actor_product, ConfProd, _} = LittleAnswer,
-	send_message({{actor_product, ConfProd}, Destination}),
+	send_message({actor_product, ConfProd}, Destination),
 	%% @todo: Change config
 	{NewConfig, NbWorkers-1}.
 
 
 end_of_logical_work({_Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}) ->
-	send_message({LittleAnswer, Destination}),
+	send_message(LittleAnswer, Destination),
 	{NewConfig, NbWorkers}.
 
 
@@ -89,10 +104,10 @@ manage_request({Config, NbWorkers, _Sender}, Request) ->
 	NbWorkers.
 
 
-send_message({Ans, [Dest]}) when is_pid(Dest) -> 
+send_message(Ans, [Dest]) when is_pid(Dest) -> 
 	io:format("Container Sending: ~w, ~w.~n", [self(), {Ans}]),
-	Dest ! {self(), {Ans}};
-send_message({Ans, Dest}) ->
+	Dest ! {self(), Ans};
+send_message(Ans, Dest) ->
 	%% @TODO: decider de la destination
 	io:format("Container Sending: ~w to ~w.~n", [Ans, Dest]).
 
@@ -107,14 +122,3 @@ wait(_Pid, Wait_time, {Ans, Dest}) ->
 	actor_contract:work(Wait_time),
 	io:format("Container Sending: ~w to ~w.~n", [Ans, Dest]).
 
-
-physical_work(Master, MasterConfig, Request) ->
-	io:format("~w work ~w.~n", [actor_contract:get_module(MasterConfig), 
-								{MasterConfig, Request}]),
-	FullAnswer = (actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
-	Master ! {self(), end_physical_work, FullAnswer}.
-
-
-logical_work(Master, MasterConfig, Request) ->
-	FullAnswer = (actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
-	Master ! {self(), end_logical_work, FullAnswer}.

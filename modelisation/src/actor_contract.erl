@@ -133,7 +133,8 @@ answer(ActorConfig, {status, module}) ->
 answer(ActorConfig, {status, id}) ->
 	{ActorConfig, {id, actor_contract:get_id(ActorConfig), status}, supervisor};
 
-answer(_, _Request) ->
+answer(_, Request) ->
+	io:format(">>>UNKNOWN ANSWER<<< (~w) (~w:~w)~n", [Request, ?MODULE, ?LINE]),
 	exit(unknown_request).
 
 first(List) ->
