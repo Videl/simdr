@@ -28,7 +28,7 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	% List data fillers
 	{NewWSConfig, NewProductConfigBis} = actor_contract:add_to_list_data(
 		{WSConfig, {NewProductConfig, Quality}}, 
-		{NewProductConfig, {workstation, WSConfig}}),
+		{NewProductConfig, {WSConfig}}),
 	% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Quality}, 
@@ -130,7 +130,7 @@ worker_loop(Master, MasterConfig, Request) ->
 workstation_answer_test_() ->
 	ActorWS = actor_contract:set_work_time(actor_workstation:create(),1),
 	ActorProductOne = actor_product:create(product_one),
-	{NewActor, _, 20} = answer(ActorWS, {change, work_time, 20}),
+	{NewActor, {work_time, 20, changed}, supervisor}= answer(ActorWS, {change, work_time, 20}),
 	{_, {actor_product, ActorProductTwo, _Quality}, _Destination} = 
 		answer(ActorWS, {actor_product, ActorProductOne}),
 	[
@@ -167,13 +167,13 @@ get_destination_test_() ->
 
 data_filler_test_() ->
 	BaseWS = actor_contract:set_work_time(actor_workstation:create(),1),
-	BasePO = actor_product:create(product_one),
+	BasePO = actor_product:create(product_one,2),
 	{NewWS, {_, NewPO, Quality}, _} = 
 		answer(BaseWS, {actor_product, BasePO}),
 	MockProduct = actor_contract:set_state(BasePO, Quality),
 	LastDataWS = actor_contract:get_data(NewWS),
 	LastDataPO = actor_contract:get_data(NewPO),
 	[
-	?_assertEqual({MockProduct, Quality}, LastDataWS),
-	?_assertEqual({workstation, BaseWS}, LastDataPO)
+	?_assertMatch({{{config, actor_product, product_one, [{quality_required, 2}], Quality,0,[]},Quality},_}, LastDataWS),
+	?_assertMatch({{{config, actor_workstation, _, [{capacity, 1}], off,1,[]}},_}, LastDataPO)
 	].
