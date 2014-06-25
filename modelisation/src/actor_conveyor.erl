@@ -21,6 +21,7 @@ create() ->
    actor_contract:create(?MODULE, actor_contract:random_id(),  [{capacity, 1}], off, 5, []).
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
+	spawn(?MODULE, send_rfid, [ConveyorConfig, ProductConfig]),
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
 	Destination = actor_contract:get_option(ConveyorConfig, out),
 	{NewConveyorConfig, NewProductConfig} = actor_contract:add_to_list_data(
