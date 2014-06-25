@@ -5,6 +5,12 @@
    - [ ] Refactor
    - [X] ETS
     - [X] Function set_option 2014-06-25 17:56
+    - [ ] Sending product side
+      - [ ] Send a request of new available product every time
+    - [ ] Receiving product side
+      - [ ] Have a marker of when you receive a notice of product
+            add number?
+      - [ ] Be careful about losing that marker
    - [ ] Need to use the *states*! :tests:
    - [ ] If end of path, send to supervisor
    - [X] RFID needs to receive messages :done: 2014-06-25 17:24
