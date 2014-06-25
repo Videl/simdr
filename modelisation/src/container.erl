@@ -6,7 +6,9 @@
 
 -export([wait/3,
 		 idling/1,
-		 processing/2]).
+		 processing/2,
+		 physical_work/3,
+		 logical_work/3]).
 
 %% ===================================================================
 %% Loops functions
@@ -85,11 +87,11 @@ manage_request({Config, NbWorkers, _Sender}, Request) ->
 
 
 send_message({Ans, [Dest]}) when is_pid(Dest) -> 
-	io:format("Sending: ~w, ~w.~n", [self(), {Ans}]),
+	io:format("Container Sending: ~w, ~w.~n", [self(), {Ans}]),
 	Dest ! {self(), {Ans}};
 send_message({Ans, Dest}) ->
 	%% @TODO: decider de la destination
-	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
+	io:format("Container Sending: ~w to ~w.~n", [Ans, Dest]).
 
 
 wait(Pid, Wait_time, {Ans, [Dest]}) when is_pid(Dest)->
@@ -100,4 +102,16 @@ wait(Pid, Wait_time, {Ans, Dest}) when is_pid(Dest)->
 	Dest ! {Pid, {Ans}};
 wait(_Pid, Wait_time, {Ans, Dest}) ->
 	actor_contract:work(Wait_time),
-	io:format("Sending: ~w to ~w.~n", [Ans, Dest]).
+	io:format("Container Sending: ~w to ~w.~n", [Ans, Dest]).
+
+
+physical_work(Master, MasterConfig, Request) ->
+	io:format("~w work ~w.~n", [actor_contract:get_module(MasterConfig), 
+								{MasterConfig, Request}]),
+	FullAnswer = (actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
+	Master ! {self(), end_physical_work, FullAnswer}.
+
+
+logical_work(Master, MasterConfig, Request) ->
+	FullAnswer = (actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
+	Master ! {self(), end_logical_work, FullAnswer}.
