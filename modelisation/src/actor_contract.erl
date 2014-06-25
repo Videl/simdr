@@ -268,7 +268,7 @@ add_data_test() ->
 	[3,1,2] = NewActor#config.list_data.
 
 get_id_test() ->
-	Actor = create(mod, test, 0),
+	Actor = create(mod, test, [], off, 0, []),
 	test = get_id(Actor).
 
 get_opt_1_test() ->
@@ -292,7 +292,7 @@ get_state_1_test() ->
 	on = get_state(Actor).
 
 get_state_2_test() ->
-	Actor =create(mod, test, 0),
+	Actor =create(mod, off, 0),
 	off = get_state(Actor).
 
 set_work_time_test()->
