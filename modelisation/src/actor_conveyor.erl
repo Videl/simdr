@@ -18,7 +18,7 @@
 
 
 create() ->
-   actor_contract:create(?MODULE, actor_contract:random_id(),  [{capacity,1}], off, 5, []).
+   actor_contract:create(?MODULE, actor_contract:random_id(),  [{capacity,1}], off, 2, []).
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
@@ -107,17 +107,18 @@ logical_work(Master, MasterConfig, Request) ->
 
 
 %% ===================================================================
-%% Tests
+%% Tests 
 %% ===================================================================
 
 answer_test_() ->
 	Conv = create(),
-	Prod = actor_product:create(),
+	Prod = actor_product:create(2),
+	Id = actor_contract:get_id(Conv),
 	NewConv = actor_contract:add_option(Conv, out, 2),
-	{ConvResult, ProdResult}= actor_contract:add_to_list_data({NewConv, Prod}, 
-		{Prod, NewConv}),
+%%	{ConvResult, ProdResult}= actor_contract:add_to_list_data({NewConv, Prod}, 
+%%		{Prod, NewConv}),
 	{_, _, Destination} = answer(Conv, {actor_product, Prod}),
-	{_, _, DestinationTwo} = answer(NewConv, {actor_product, Prod}),
+	{Conveyor, _, DestinationTwo} = answer(NewConv, {actor_product, Prod}),
 	[?_assertEqual(
 		%{Conv, {actor_product, Prod, unknown_option}, unknown_option}
 		unknown_option,
@@ -125,6 +126,7 @@ answer_test_() ->
 	?_assertEqual(
 		[2],
 		DestinationTwo),
-	?_assertEqual(
-		{ConvResult, {actor_product, ProdResult, [2]}, [2]},
-		answer(NewConv, {actor_product, Prod}))].
+	?_assertMatch(
+	{config, actor_conveyor, Id, [{out,2},{capacity,1}], off, 2,[{Prod, _}]},
+	Conveyor)
+].
