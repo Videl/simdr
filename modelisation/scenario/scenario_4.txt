@@ -5,10 +5,10 @@
 %%%
 
 %% V2
-N1 = spawn(actor_conveyor, idling, [actor_conveyor:create()]).
-N2 = spawn(actor_basic_queue, idling, [actor_basic_queue:create()]).
-N3 = spawn(actor_workstation, idling, [actor_workstation:create()]).
-N_RFID = spawn(actor_rfid, idling, [actor_rfid:create()]).
+N1 = spawn(container, idling, [actor_conveyor:create()]).
+N2 = spawn(container, idling, [actor_basic_queue:create()]).
+N3 = spawn(container, idling, [actor_workstation:create()]).
+N_RFID = spawn(container, idling, [actor_rfid:create()]).
 N1 ! N2 ! N3 ! N_RFID ! {start}.
 
 N1 ! {self(), {add, option, {out, N2}}}.

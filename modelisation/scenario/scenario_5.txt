@@ -9,17 +9,17 @@
 %%%					Workstation (N3c).
 %%% 	Output two: A simple conveyor (N4).
 
-N1 = spawn(actor_conveyor, idling, [actor_conveyor:create()]).
-N_RFID = spawn(actor_rfid, idling, [actor_rfid:create()]).
+N1 = spawn(container, idling, [actor_conveyor:create()]).
+N_RFID = spawn(container, idling, [actor_rfid:create()]).
 
-N2 = spawn(actor_railway, idling, [actor_railway:create()]).
+N2 = spawn(container, idling, [actor_railway:create()]).
 
-N3a = spawn(actor_conveyor, idling, [actor_conveyor:create()]).
+N3a = spawn(container, idling, [actor_conveyor:create()]).
 
-N4 = spawn(actor_conveyor, idling, [actor_conveyor:create()]).
+N4 = spawn(container, idling, [actor_conveyor:create()]).
 
-N3b = spawn(actor_basic_queue, idling, [actor_basic_queue:create()]).
-N3c = spawn(actor_workstation, idling, [actor_workstation:create()]).
+N3b = spawn(container, idling, [actor_basic_queue:create()]).
+N3c = spawn(container, idling, [actor_workstation:create()]).
 
 N1 ! N2 ! N3a ! N3b ! N3c ! N4 ! N_RFID ! {start}.
 

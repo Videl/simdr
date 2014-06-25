@@ -25,7 +25,6 @@
 		 list_size/1,
 		 first/1,
 		 answer/2,
-		 idling/1,
 		 random_id/0]).
 
 %% ===================================================================
@@ -36,16 +35,6 @@
 
 -callback answer(Config :: term(), Entering :: term()) ->
 	Exiting :: term().
-
-% -callback processing(Config :: term(), NbWorker :: term()) ->
-% 	Processing :: term().
-
--callback end_of_physical_work(NewConfig :: term(), Response :: term(), Destination :: pid()) ->
-	term().
-
--callback end_of_logical_work(NewConfig :: term(), Response :: term(), Destination :: pid()) ->
-	term().
-
 
 %% ===================================================================
 %% Helper functions
@@ -149,17 +138,6 @@ answer(_, _Request) ->
 
 first(List) ->
 	get_head_data(List).
-
-idling(Config) ->
-	receive
-		{start} ->
-			(actor_contract:get_module(Config)):processing(actor_contract:set_state(Config, on), 0);
-		{Sender, actor_product, _, _} when is_pid(Sender) ->
-			Sender ! {state, actor_contract:get_state(Config)},
-			(actor_contract:get_module(Config)):idling(Config);
-		_ ->
-			(actor_contract:get_module(Config)):idling(Config)
-	end.
 
 random_id() ->
 	random:uniform(1000).
