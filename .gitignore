@@ -1,6 +1,14 @@
 .eunit
+.eunit/
+.rebar/
 deps
 *.o
 *.beam
 *.plt
 erl_crash.dump
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.pdf
+*.synctex.gz
