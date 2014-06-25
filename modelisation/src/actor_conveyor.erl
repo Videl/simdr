@@ -127,6 +127,6 @@ answer_test_() ->
 		[2],
 		DestinationTwo),
 	?_assertMatch(
-	{config, actor_conveyor, Id, [{out,2},{capacity,1}], off, 2,[{Prod, _}]},
+	{config, actor_conveyor, Id, [{out,2},{capacity,1}], off, _,[{Prod, _}]},
 	Conveyor)
 ].
