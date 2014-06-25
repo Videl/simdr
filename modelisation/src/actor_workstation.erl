@@ -170,7 +170,6 @@ data_filler_test_() ->
 	BasePO = actor_product:create(product_one,2),
 	{NewWS, {_, NewPO, Quality}, _} = 
 		answer(BaseWS, {actor_product, BasePO}),
-	MockProduct = actor_contract:set_state(BasePO, Quality),
 	LastDataWS = actor_contract:get_data(NewWS),
 	LastDataPO = actor_contract:get_data(NewPO),
 	[

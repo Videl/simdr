@@ -43,11 +43,9 @@ answer(ProdConfig, Request) ->
 %% ===================================================================
 
 answer_test_() ->	
-	Prod = create(123456),
+	Prod = create(),
 	NewProd = actor_contract:add_data(Prod, {21,05,02, q2}),
-	[?_assertEqual( %% ID test
-		123456,
-		actor_contract:get_id(NewProd)),
+	[
 	?_assertEqual( %% State test
 		raw,
 		actor_contract:get_state(NewProd)),
