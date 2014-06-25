@@ -20,7 +20,8 @@
 		 get_work_time/1, 
 		 get_state/1, 
 		 set_work_time/2,
-		 set_state/2, 
+		 set_state/2,
+		 set_option/3, 
 		 work/1,
 		 list_size/1,
 		 first/1,
@@ -98,6 +99,14 @@ get_option(Actor, Key) ->
 	Opts = Actor#config.opt,
 	get_option_helper(Opts, Key).
 
+set_option(Actor, Key, Value) ->
+	NewActor = delete_option(Actor, Key),
+	add_option(NewActor, Key, Value).
+	
+delete_option( Actor, Key) ->	
+	Option = delete_option_helper(Key, get_opt(Actor), [] ),
+	Actor#config {opt = Option}.
+
 add_option(Actor, Key, Value) ->
 	Actor#config{opt = [{Key, Value}] ++ Actor#config.opt}.
 
@@ -167,6 +176,22 @@ random_id() ->
 %% ===================================================================
 %% Internal API
 %% ===================================================================
+delete_option_helper(Filtre, [Head| Tail], []) ->
+	{Key,_ }=Head,
+	case Key=:=Filtre of
+		true -> delete_option_helper(Filtre, Tail, []);
+		false -> delete_option_helper(Filtre, Tail, [Head])
+	end;
+
+delete_option_helper(Filtre, [Head| Tail], Result) ->
+	{Key,_ }=Head,
+	case Key=:=Filtre of
+		true -> delete_option_helper(Filtre, Tail, Result);
+		false -> delete_option_helper(Filtre, Tail, [Head]++Result)
+	end;
+
+delete_option_helper(_Filtre, [], Result) ->
+	Result.
 
 get_head_data([]) ->
 	undefined;
@@ -355,6 +380,15 @@ add_option_list_size_test_() ->
 	[
 	?_assertEqual(2, actor_contract:list_size(actor_contract:get_opt(ActorA))),
 	?_assertEqual(2, list_size(actor_contract:get_option(ActorA, friend)))
+	].
+
+set_option_test_() ->
+	Actor = create(mod, test, [{del, 3},{save, 9}], on, 42, [1,2]),
+	ActorD = create(mod, test, [{save, 9}], on, 42, [1,2]),
+	ActorS = create(mod, test, [{save, 50}], on, 42, [1,2]),
+	[
+	?_assertEqual(ActorD, delete_option(Actor, del)),
+	?_assertEqual(ActorS, set_option(ActorD, save, 50))
 	].
 
 answer_test_() ->
