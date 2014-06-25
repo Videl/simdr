@@ -3,6 +3,7 @@
   --- 2014-06-25 12:07 ---
   ** TODO [2/6]
    - [ ] Refactor
+    - [ ] Cleaning other files
    - [X] ETS
     - [X] Function set_option 2014-06-25 17:56
     - [ ] Sending product side
