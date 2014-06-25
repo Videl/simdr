@@ -17,6 +17,7 @@
 	wait/3,
 	worker_loop/3	
 	]).
+
 %% Behavior implementation
 
 create() ->
