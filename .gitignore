@@ -12,3 +12,4 @@ erl_crash.dump
 *.log
 *.pdf
 *.synctex.gz
+ebin/*
