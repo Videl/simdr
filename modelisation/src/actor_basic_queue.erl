@@ -43,13 +43,14 @@ answer(BasicQueueConfig, {actor_product, ProductConfig}) ->
 	%% is used as a conveyor
 	actor_contract:work(actor_contract:get_work_time(BasicQueueConfig)),
 	%% @TODO: time ?!
-	[TablePid] = actor_contract:get_option(BasicQueueConfig, ets),
-	ets:insert(TablePid, {product, awaiting_processing, ProductConfig}),
 	{NewBasicQueueConfig, NewProductConfig} = actor_contract:add_to_list_data(
 		{BasicQueueConfig, ProductConfig}, 
 		{ProductConfig, BasicQueueConfig}),
-	%% @TODO: Add it to list_data (this actor + the product) to know we had it
-	{NewBasicQueueConfig, {actor_product, NewProductConfig, saved_ets}, main_loop};
+	[TablePid] = actor_contract:get_option(BasicQueueConfig, ets),
+	ets:insert(TablePid, {product, awaiting_processing, NewProductConfig}),
+	% Empty to notify the container there is nothing to send, 
+	% not even to supervisor.
+	{NewBasicQueueConfig, {}, main_loop};
 answer(BasicQueueConfig, Request) ->
 	actor_contract:answer(BasicQueueConfig, Request).
 

@@ -52,7 +52,10 @@ processing(Config, NbWorkers) ->
 			?MODULE:processing(Config, NbWorkers)
 	end.
 
-
+%%% Special case for Basic Queue: the product is not to be sent straight away.
+end_of_physical_work({_Config, NbWorkers}, {NewConfig, {}, _Destination}) ->
+	io:format("~nWOOO QUEUE GEAR ON!~n"),
+	{NewConfig, NbWorkers-1};
 end_of_physical_work({_Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}) ->
 	%% Set up the item in the ETS table
 	%% for later sending.
