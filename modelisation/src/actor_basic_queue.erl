@@ -22,11 +22,7 @@
 
 %% Behavior implementation
 create() ->
-	TablePid = ets:new(basic_queue, [duplicate_bag, public]),
-	Ac1 = actor_contract:add_option(
-			  actor_contract:create(?MODULE, off, 0),
-			  ets,
-			  TablePid),
+	Ac1 = actor_contract:create(?MODULE, off, 0),
 	actor_contract:add_option(
 		Ac1,
 		capacity,

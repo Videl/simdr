@@ -1,23 +1,29 @@
 * INTERNSHIP
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
-  ** TODO [2/6]
+  ** TODO [2/7]
    - [ ] Refactor
-    - [ ] Cleaning other files
+    - [ ] Cleaning actor conveyor
+    - [ ] Cleaning actor rfid
+    - [ ] Cleaning actor basic queue
+    - [ ] Cleaning actor Railway
+    - [ ] Cleaning actor workstation
    - [X] ETS
     - [X] Function set_option 2014-06-25 17:56
-    - [ ] Sending product side
-      - [ ] Send a request of new available product every time
-    - [ ] Receiving product side
-      - [ ] Have a marker of when you receive a notice of product
-            add number?
-      - [ ] Be careful about losing that marker
+    - [X] Sending product side
+      - [X] Send a request of new available product every time
+    - [X] Receiving product side
+      - [X] Have a marker of when you receive a notice of product
+            add number 2014-06-26 17:35
    - [ ] Need to use the *states*! :tests:
-   - [ ] If end of path, send to supervisor
+   - [ ] If end of path, send to supervisor 
    - [X] RFID needs to receive messages :done: 2014-06-25 17:24
    - [ ] Queue needs to send products.. 
+   - [ ] Change list data into ETS tables
   
- ** Tests
+ ** Tests [0/8]
+  - [ ] Fix Conveyor's test
+  - [ ] Fix tests induced by ETS
   - [ ] Ability to disable tests
   - [ ] Scenario 1
   - [ ] Scenario 2
