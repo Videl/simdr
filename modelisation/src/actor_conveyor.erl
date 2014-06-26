@@ -67,6 +67,7 @@ processing(Config, NbWorker) ->
 			end;
 
 		{Sender, awaiting_product} ->
+			io:format("JE SUIS ~w ET JE VEUX UN PRODUIT!~n", [self()]),
 			[Capacity]= actor_contract:get_option(Config, capacity),
 			case NbWorker+1<Capacity of 
 				true -> 
@@ -90,11 +91,14 @@ processing(Config, NbWorker) ->
 			ets:insert(TablePid, {product, awaiting_sending, ConfProd}),
 		 	[Next]=Destination,
 		 	io:format("await"),
-		 	Next ! {self(), {awaiting_product}},
+		 	Next ! {self(), awaiting_product},
 			[Awaiting] = actor_contract:get_option(Config, awaiting),
 			 case Awaiting>0 of
-			  	true -> actor_contract:get_option(Config, in) ! {self(), {control, ok}};
-			 	false -> wait
+			  	true -> 
+			  		actor_contract:get_option(Config, in) ! {self(), {control, ok}};
+			 	false -> 
+			 		io:format("J'attends.~n"),
+					wait
 			 end,
 			?MODULE:processing(actor_contract:set_state(NewConfig, free), NbWorker-1);
 	
