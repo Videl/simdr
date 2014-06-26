@@ -42,11 +42,10 @@ answer(BasicQueueConfig, {actor_product, ProductConfig}) ->
 	{NewBasicQueueConfig, NewProductConfig} = actor_contract:add_to_list_data(
 		{BasicQueueConfig, ProductConfig}, 
 		{ProductConfig, BasicQueueConfig}),
-	[TablePid] = actor_contract:get_option(BasicQueueConfig, ets),
-	ets:insert(TablePid, {product, awaiting_processing, NewProductConfig}),
+	Destination = actor_contract:get_option(BasicQueueConfig, out),
 	% Empty to notify the container there is nothing to send, 
 	% not even to supervisor.
-	{NewBasicQueueConfig, {}, main_loop};
+	{NewBasicQueueConfig, {actor_product, NewProductConfig, buffered}, Destination};
 answer(BasicQueueConfig, Request) ->
 	actor_contract:answer(BasicQueueConfig, Request).
 

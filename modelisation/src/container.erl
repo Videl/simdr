@@ -67,10 +67,6 @@ logical_work(Master, MasterConfig, Request) ->
 	Master ! {self(), end_logical_work, FullAnswer}.
 
 
-%%% Special case for Basic Queue: the product is not to be sent straight away.
-end_of_physical_work({_Config, NbWorkers}, {NewConfig, {}, _Destination}) ->
-	io:format("~nWOOO QUEUE GEAR ON!~n"),
-	{NewConfig, NbWorkers-1};
 end_of_physical_work({Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}) ->
 	[TablePid] = actor_contract:get_option(Config, ets), 
 	{actor_product, ConfProd, _} = LittleAnswer,
@@ -78,10 +74,15 @@ end_of_physical_work({Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}
 	%io:format("await"),
  	send_message(awaiting_product, Destination),
 	[Awaiting] = actor_contract:get_option(Config, awaiting),
+	%io:format("~n~n Awaiting (~w): ~w ~n~n", [actor_contract:get_module(Config), Awaiting]),
 	case Awaiting > 0 of
 		true -> 
-			actor_contract:get_option(Config, in) ! {self(), {control, ok}};
+			%io:format("~n~n TRUE == ~w > 0 ~n~n", [Awaiting]),
+			[InActor] = actor_contract:get_option(Config, in),
+			%io:format("So I send the message to... ~w~n", [InActor]),
+			InActor ! {self(), {control, ok}};
 		false -> 
+			%io:format("~n~n FALSE: ~w > 0 ~n~n", [Awaiting]),
 			%io:format("J'attends.~n"),
 		wait
 	end,
