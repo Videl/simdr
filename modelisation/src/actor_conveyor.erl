@@ -38,6 +38,7 @@ idling(Config) ->
 processing(Config, NbWorker) ->
 	receive
 		{Sender, {actor_product,ProdConf}} ->
+			%io:format("Receiving product (~w)..~n", [self()]),
 			[Awaiting] = actor_contract: get_option(Config, awaiting),
 			case Awaiting > 0 of 
 				true ->  NewConfig = actor_contract:set_option(Config, awaiting, Awaiting-1);
@@ -49,33 +50,38 @@ processing(Config, NbWorker) ->
 			?MODULE:processing(actor_contract:set_state(NewConfig, processing), NbWorker+1);
 
 		{Sender, {control, ok}} ->
+			%io:format("Receiving request of product~n"),
 			[TablePid] = actor_contract:get_option(Config, ets),
 			ListEntry = ets:match_object(
 							TablePid, {product, awaiting_sending, '$1'}
 						),
 			case actor_contract:list_size(ListEntry) > 0 of
 				true ->
-						FirstEntry = actor_contract:first(ListEntry),
-						{product, awaiting_processing, Prod} = FirstEntry,
-						send_message( {{actor_product, Prod}, Sender}),
-						ets:delete_object(TablePid, FirstEntry),
-						ets:insert(TablePid, {product, sent, Prod}),
-						?MODULE:processing(actor_contract:set_state(Config, free), NbWorker-1);
+					%io:format("Sending product..~n"),
+					FirstEntry = actor_contract:first(ListEntry),
+					{product, awaiting_sending, Prod} = FirstEntry,
+					send_message({{actor_product, Prod}, Sender}),
+					ets:delete_object(TablePid, FirstEntry),
+					ets:insert(TablePid, {product, sent, Prod}),
+					%io:format("End of sending product..~n"),
+					processing(actor_contract:set_state(Config, free), NbWorker-1);
 
 				false ->
-						?MODULE:processing(Config, NbWorker)
+					processing(Config, NbWorker)
 			end;
 
 		{Sender, awaiting_product} ->
-			io:format("JE SUIS ~w ET JE VEUX UN PRODUIT!~n", [self()]),
 			[Capacity]= actor_contract:get_option(Config, capacity),
-			case NbWorker+1<Capacity of 
+			%io:format("NbWorker: ~w/Capacity: ~w~n", [NbWorker, Capacity]),
+			case NbWorker<Capacity of 
 				true -> 
 					Sender ! {self(),{control, ok}},
-					?MODULE:processing(Config, NbWorker);
+					%io:format("JE SUIS ~w ET JE VEUX UN PRODUIT!~n", [self()]),
+					processing(Config, NbWorker);
 
-				false -> [Awaiting] = actor_contract:get_option(Config, awaiting),
-				?MODULE:processing(actor_contract:set_option(Config, awaiting, Awaiting+1), NbWorker)
+				false -> 
+					[Awaiting] = actor_contract:get_option(Config, awaiting),
+					processing(actor_contract:set_option(Config, awaiting, Awaiting+1), NbWorker)
 			end;
 			
 
@@ -90,14 +96,14 @@ processing(Config, NbWorker) ->
 			{actor_product, ConfProd, _} = LittleAnswer,
 			ets:insert(TablePid, {product, awaiting_sending, ConfProd}),
 		 	[Next]=Destination,
-		 	io:format("await"),
+		 	%io:format("await"),
 		 	Next ! {self(), awaiting_product},
 			[Awaiting] = actor_contract:get_option(Config, awaiting),
 			 case Awaiting>0 of
 			  	true -> 
 			  		actor_contract:get_option(Config, in) ! {self(), {control, ok}};
 			 	false -> 
-			 		io:format("J'attends.~n"),
+			 		%io:format("J'attends.~n"),
 					wait
 			 end,
 			?MODULE:processing(actor_contract:set_state(NewConfig, free), NbWorker-1);
@@ -117,10 +123,14 @@ send_rfid( Conf, ProdConf) ->
 	end.
 
 send_message( {Ans, [Dest]}) when is_pid(Dest) -> 
-io:format("Conveyor Sending: ~w to ~w.~n", [ Ans, Dest]),
-	Dest ! {self(), Ans};
-send_message( {Ans, Dest}) when is_pid(Dest) -> 
-	Dest ! {self(), {Ans}};
+	%io:format("Conveyor Sending: ~w to ~w.~n", [ Ans, Dest]),
+	Message = {self(), Ans},
+	io:format("send_message(),~w:~w -> ~w~n", [?MODULE, ?LINE, Message]),
+	Dest ! Message;
+send_message( {Ans, Dest}) when is_pid(Dest) ->
+	Message = {self(), Ans},
+	io:format("send_message(),~w:~w -> ~w~n", [?MODULE, ?LINE, Message]),
+	Dest ! Message;
 send_message({Ans, Dest}) ->
 	%% @TODO: decider de la destination
 	io:format("Conveyor Sending: ~w to ~w.~n", [Ans, Dest]).
@@ -158,4 +168,4 @@ answer_test_() ->
 	?_assertMatch(
 	{config, actor_conveyor, Id, [{out,2},{capacity,1}], off, 2,[{Prod, _}]},
 	Conveyor)
-].
+	].
