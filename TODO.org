@@ -1,16 +1,16 @@
 * INTERNSHIP
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
-  ** TODO [2/8]
-   - [ ] Refactor [2/8]
+  ** TODO [3/8]
+   - [ ] Refactor [3/6]
     - [X] Cleaning actor conveyor 2014-06-26 18:00
-    - [ ] Cleaning actor rfid
+    - [X] Cleaning actor rfid 2014-06-26 19:15
     - [X] Cleaning actor basic queue 2014-06-26 18:58
     - [ ] Cleaning actor Railway
     - [ ] Cleaning actor workstation
     - [ ] end_of_physical_work case Awaiting > 0 TRUE : 
-    - [ ] Pas d'entrée ?
-    - [ ] Deux d'entrée ?
+      - [ ] What happens if there is no `in'?
+      - [ ] What happens if there are more than one `in' field?
    - [X] ETS
     - [X] Function set_option 2014-06-25 17:56
     - [X] Sending product side
@@ -21,8 +21,10 @@
    - [ ] Need to use the *states*! :tests:
    - [ ] If end of path, send to supervisor 
    - [X] RFID needs to receive messages :done: 2014-06-25 17:24
-   - [ ] Queue needs to send products.. 
+   - [X] Queue needs to send products.. 
    - [ ] Change list data into ETS tables
+   - [ ] Easier debug
+   - [ ] Product path tracer
    - [ ] Which scenarios works?
     - [X] Scenario 1
     - [X] Scenario 2
@@ -31,8 +33,11 @@
     - [ ] Scenario 5
   
  ** Tests [0/9]
-  - [ ] Fix Conveyor's test
   - [ ] Fix tests induced by ETS
+    - [ ] Conveyor
+    - [ ] RFID
+    - [ ] Workstation
+    - [ ] Railway
   - [ ] Does ETS really returns the last item inputted when sending a product?
   - [ ] Ability to disable tests
   - [ ] Scenario 1
