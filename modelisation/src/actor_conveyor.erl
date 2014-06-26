@@ -8,9 +8,13 @@
 
 -export([
 	create/0,
-	answer/2,
+	answer/2]).
+
+%% Export for spawns
+-export([
 	send_rfid/2]).
 
+%% Behavior implementation
 
 create() ->
 	actor_contract:create(?MODULE, actor_contract:random_id(),  [{capacity,1}], off, 5, []).
@@ -25,91 +29,10 @@ answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 		{ProductConfig, ConveyorConfig}),
 	% Answer
 	{NewConveyorConfig, {actor_product, NewProductConfig, Destination}, Destination};
-
 answer(ConveyorConfig, Request) ->
 	actor_contract:answer(ConveyorConfig, Request).
 
-
-
-
-
-
-
-
-% processing(Config, NbWorker) ->
-% 	receive
-% 		{Sender, {actor_product,ProdConf}} ->
-% 			%io:format("Receiving product (~w)..~n", [self()]),
-% 			[Awaiting] = actor_contract: get_option(Config, awaiting),
-% 			case Awaiting > 0 of 
-% 				true ->  NewConfig = actor_contract:set_option(Config, awaiting, Awaiting-1);
-% 				false -> NewConfig = Config
-% 			end,
-% 			Request= {actor_product,ProdConf},	
-% 			spawn(?MODULE, send_rfid, [NewConfig, ProdConf]),
-% 			spawn(?MODULE, physical_work, [self(), NewConfig, Request]),
-% 			?MODULE:processing(actor_contract:set_state(NewConfig, processing), NbWorker+1);
-
-% 		{Sender, {control, ok}} ->
-% 			%io:format("Receiving request of product~n"),
-% 			[TablePid] = actor_contract:get_option(Config, ets),
-% 			ListEntry = ets:match_object(
-% 							TablePid, {product, awaiting_sending, '$1'}
-% 						),
-% 			case actor_contract:list_size(ListEntry) > 0 of
-% 				true ->
-% 					%io:format("Sending product..~n"),
-% 					FirstEntry = actor_contract:first(ListEntry),
-% 					{product, awaiting_sending, Prod} = FirstEntry,
-% 					send_message({{actor_product, Prod}, Sender}),
-% 					ets:delete_object(TablePid, FirstEntry),
-% 					ets:insert(TablePid, {product, sent, Prod}),
-% 					%io:format("End of sending product..~n"),
-% 					processing(actor_contract:set_state(Config, free), NbWorker-1);
-
-% 				false ->
-% 					processing(Config, NbWorker)
-% 			end;
-
-% 		{Sender, awaiting_product} ->
-% 			[Capacity]= actor_contract:get_option(Config, capacity),
-% 			%io:format("NbWorker: ~w/Capacity: ~w~n", [NbWorker, Capacity]),
-% 			case NbWorker<Capacity of 
-% 				true -> 
-% 					Sender ! {self(),{control, ok}},
-% 					%io:format("JE SUIS ~w ET JE VEUX UN PRODUIT!~n", [self()]),
-% 					processing(Config, NbWorker);
-
-% 				false -> 
-% 					[Awaiting] = actor_contract:get_option(Config, awaiting),
-% 					processing(actor_contract:set_option(Config, awaiting, Awaiting+1), NbWorker)
-% 			end;
-			
-
-% 		{_Sender, Request} ->
-% 			spawn(?MODULE, logical_work, [self(), Config, Request]),
-% 			?MODULE:processing(Config, NbWorker);
-
-% 		{_Worker, end_physical_work, {NewConfig, LittleAnswer, Destination}} ->
-% 			% Find destination in 'out' pool
-% 			% Send LittleAnswer
-% 			[TablePid] = actor_contract:get_option(Config, ets), 
-% 			{actor_product, ConfProd, _} = LittleAnswer,
-% 			ets:insert(TablePid, {product, awaiting_sending, ConfProd}),
-% 		 	[Next]=Destination,
-% 		 	%io:format("await"),
-% 		 	Next ! {self(), awaiting_product},
-% 			[Awaiting] = actor_contract:get_option(Config, awaiting),
-% 			 case Awaiting>0 of
-% 			  	true -> 
-% 			  		actor_contract:get_option(Config, in) ! {self(), {control, ok}};
-% 			 	false -> 
-% 			 		%io:format("J'attends.~n"),
-% 					wait
-% 			 end,
-% 			?MODULE:processing(actor_contract:set_state(NewConfig, free), NbWorker-1)
-% 		end.
-
+%% Internal API
 
 send_rfid(Conf, ProdConf) ->
 	case actor_contract:get_option(Conf, rfid) of 
@@ -125,12 +48,12 @@ send_rfid(Conf, ProdConf) ->
 answer_test_() ->
 	Conv = create(),
 	Prod = actor_product:create(2),
-	Id = actor_contract:get_id(Conv),
+	%Id = actor_contract:get_id(Conv),
 	NewConv = actor_contract:add_option(Conv, out, 2),
 %%	{ConvResult, ProdResult}= actor_contract:add_to_list_data({NewConv, Prod}, 
 %%		{Prod, NewConv}),
 	{_, _, Destination} = answer(Conv, {actor_product, Prod}),
-	{Conveyor, _, DestinationTwo} = answer(NewConv, {actor_product, Prod}),
+	{_Conveyor, _, DestinationTwo} = answer(NewConv, {actor_product, Prod}),
 	[?_assertEqual(
 		%{Conv, {actor_product, Prod, unknown_option}, unknown_option}
 		unknown_option,
