@@ -18,6 +18,7 @@
    - [ ] Queue needs to send products.. 
   
  ** Tests
+  - [ ] Ability to disable tests
   - [ ] Scenario 1
   - [ ] Scenario 2
   - [ ] Scenario 3
