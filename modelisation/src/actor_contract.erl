@@ -215,12 +215,12 @@ list_size_helper([_H|T], Acc) ->
 %% ===================================================================
 
 mock_actor() ->
-	Actor = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
+	Actor = create(mod, test, [{opt1, v2}, {opt2, v1}], busy, 3, [1,2,3]),
 	Actor.
 
 get_module_test() ->
-	Actor = create(mod, test, {opt1, opt2}, busy, 3, [1,2,3]),
-	 mod = get_module(Actor).
+	Actor = create(mod, test, [{opt1, v2}, {opt2, v1}], busy, 3, [1,2,3]),
+	mod = get_module(Actor).
 
 get_list_data_test() ->
 	Actor = create(mod, test, 0),
@@ -270,7 +270,7 @@ get_previous_data_helper_6_test() ->
 	4 = get_previous_data_helper([1,2,3, 4], 4).
 
 add_data_test() ->
-	Actor = create(mod, test, undefined, on, 0, [1,2]),
+	Actor = create(mod, test, [], on, 0, [1,2]),
 	NewActor = add_data(Actor, 3),
 	[3,1,2] = NewActor#config.list_data.
 
@@ -279,16 +279,16 @@ get_id_test() ->
 	test = get_id(Actor).
 
 get_opt_1_test() ->
-	Actor = create(mod, test, opt1, on, 0, [1,2]),
-	opt1= get_opt(Actor).
+	Actor = create(mod, test, [{key, value}], on, 0, [1,2]),
+	[{value}]= get_opt(Actor).
 
 get_opt_2_test() ->
 	Actor = create(mod, test, 0),
 	[] = get_opt(Actor).
 
 get_opt_3_test() ->
-	Actor = create(mod, test, [opt1, opt2], on, 0, [1,2]),
-	[opt1, opt2] = get_opt(Actor).
+	Actor = create(mod, test, [{opt1, v2}, {opt2, v1}], on, 0, [1,2]),
+	[{opt1, v2}, {opt2, v1}] = get_opt(Actor).
 
 get_work_time_test() ->
 	Actor = create(mod, test, [opt1, opt2], on, 42, [1,2]),
