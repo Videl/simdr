@@ -1,8 +1,11 @@
 -module(actor_workstation).
+-include("app_configuration.hrl").
+
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -behaviour(actor_contract).
--include("config.hrl").
 
 %% Actor Contract Behaviors Callbacks
 
@@ -55,6 +58,7 @@ get_destination(Config) ->
 
 
 %% Tests
+-ifdef(TEST).
 
 workstation_answer_test_() ->
 	ActorWS = actor_contract:set_work_time(actor_workstation:create(),1),
@@ -107,3 +111,5 @@ data_filler_test_() ->
 		{{{config, actor_workstation, _, [{ets, _}, {capacity, 1}, {awaiting, 0}], off,1,[]}},_}, 
 		LastDataPO)
 	].
+
+-endif.

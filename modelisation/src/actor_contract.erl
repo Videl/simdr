@@ -1,8 +1,9 @@
 -module(actor_contract).
--include_lib("eunit/include/eunit.hrl").
+-include("app_configuration.hrl").
 
-% config record
--include("config.hrl").
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -export([create/6, 
 		 create/3,
@@ -210,6 +211,8 @@ list_size_helper(unknown_option, 0) ->
 list_size_helper([_H|T], Acc) ->
 	list_size_helper(T, Acc+1).
 
+
+-ifdef(TEST).
 %% ===================================================================
 %% Tests
 %% ===================================================================
@@ -423,3 +426,5 @@ answer_test_() ->
 		{Actor, {list_data, [5,6], status}, supervisor},
 		answer(Actor, {status, list_data}))
 	].
+
+-endif.

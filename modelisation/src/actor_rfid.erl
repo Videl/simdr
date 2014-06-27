@@ -1,8 +1,11 @@
 -module(actor_rfid).
+-include("app_configuration.hrl").
+
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -behaviour(actor_contract).
--include("config.hrl").
 
 %% Actor Contract Behaviors Callbacks
 
@@ -29,6 +32,7 @@ answer(RFIDConfig, Request) ->
 	actor_contract:answer(RFIDConfig, Request).
 
 %% Tests
+-ifdef(TEST).
 
 answer_test_() ->
 	ActorRFID = actor_rfid:create(),
@@ -43,3 +47,5 @@ answer_test_() ->
 	{config, actor_rfid, Id, [{ets, _}, {capacity,4}, {awaiting, 0}], undefined, 2,[{ActorProduct, _}]},
 	RFID)
 ].
+
+-endif.

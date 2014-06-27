@@ -1,7 +1,12 @@
 -module(actor_railway).
--behaviour(actor_contract).
+-include("app_configuration.hrl").
+
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
--include("config.hrl").
+-endif.
+
+-behaviour(actor_contract).
+
 
 %% Actor Contract Behaviors Callbacks
 
@@ -70,6 +75,7 @@ answer(RailwayConfig, Request) ->
 %% ===================================================================
 %% Tests
 %% ===================================================================
+-ifdef(TEST).
 
 answer_test_() ->
 	Rail = create(),
@@ -105,3 +111,5 @@ answer_test_() ->
 		{Rail, {supervisor, pong}}, 
 		answer(Rail, {supervisor, ping}))
 	].
+
+-endif.

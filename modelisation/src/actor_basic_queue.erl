@@ -1,8 +1,11 @@
 -module(actor_basic_queue).
+-include("app_configuration.hrl").
+
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -behaviour(actor_contract).
--include("config.hrl").
 -include("debug.hrl").
 
 %% Actor Contract Behaviors Callbacks

@@ -1,8 +1,11 @@
 -module(actor_product).
+-include("app_configuration.hrl").
+
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -behaviour(actor_contract).
--include("config.hrl").
 
 %% Actor Contract Behaviors Callbacks
 
@@ -41,6 +44,7 @@ answer(ProdConfig, Request) ->
 %% ===================================================================
 %% Tests
 %% ===================================================================
+-ifdef(TEST).
 
 answer_test_() ->	
 	Prod = create(),
@@ -53,3 +57,5 @@ answer_test_() ->
 		{21,05,02, q2},
 		actor_contract:get_data(NewProd))
 	].
+
+-endif.

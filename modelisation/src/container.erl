@@ -1,8 +1,9 @@
 -module(container).
--include_lib("eunit/include/eunit.hrl").
+-include("app_configuration.hrl").
 
-% config record
--include("config.hrl").
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -export([wait/3,
 		 idling/1,
@@ -186,3 +187,8 @@ wait(_Pid, Wait_time, {Ans, Dest}) ->
 	actor_contract:work(Wait_time),
 	io:format("Container Sending: ~w to ~w.~n", [Ans, Dest]).
 
+%% Tests
+
+-ifdef(TEST).
+
+-endif.

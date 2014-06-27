@@ -1,8 +1,11 @@
 -module(actor_conveyor).
+-include("app_configuration.hrl").
+
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -behaviour(actor_contract).
--include("config.hrl").
 
 %% Actor Contract Behaviors Callbacks
 
@@ -44,6 +47,7 @@ send_rfid(Conf, ProdConf) ->
 %% ===================================================================
 %% Tests
 %% ===================================================================
+-ifdef(TEST).
 
 answer_test_() ->
 	Conv = create(),
@@ -65,3 +69,5 @@ answer_test_() ->
 	% {config, actor_conveyor, Id, [{out,2},{capacity,1}, {awaiting, 0}, {ets, _}], off, _,[{Prod, _}]},
 	% Conveyor)
 	].
+
+-endif.
