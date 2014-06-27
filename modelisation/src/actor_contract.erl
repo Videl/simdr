@@ -28,6 +28,7 @@
 		 get_option/2,	 
 		 get_work_time/1, 
 		 get_state/1, 
+		 set_id/2,
 		 set_work_time/2,
 		 set_state/2,
 		 set_in/2,
@@ -87,6 +88,9 @@ get_previous_data(Config, N) ->
 
 add_data(Actor, X) -> 
 	Actor#config{list_data = [X] ++ Actor#config.list_data}.
+
+set_id(Actor, Id) ->
+	Actor#config{id= Id}.
 
 get_id(Actor) ->
 	Actor#config.id.
