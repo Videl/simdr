@@ -166,6 +166,8 @@ data_filler_test_() ->
 	LastDataWS = actor_contract:get_data(NewWS),
 	LastDataPO = actor_contract:get_data(NewPO),
 	[
-	?_assertMatch({{{config, actor_product, product_one, [{quality_required, 2}], Quality,0,[]},Quality},_}, LastDataWS),
-	?_assertMatch({{{config, actor_workstation, _, [{capacity, 1}], off,1,[]}},_}, LastDataPO)
+	?_assertMatch({{{config, actor_product, product_one, [{ets, _}, {quality_required, 2}, {awaiting, 0}], Quality,0,[]},Quality},_}, LastDataWS),
+	?_assertMatch(
+		{{{config, actor_workstation, _, [{ets, _}, {capacity, 1}, {awaiting, 0}], off,1,[]}},_}, 
+		LastDataPO)
 	].
