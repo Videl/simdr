@@ -20,7 +20,8 @@ idling(Config) ->
 	receive
 		{start} ->
 			?DLOG(actor_contract:get_module(Config), "Entering processing state."),
-			processing(actor_contract:set_state(Config, on), 0);
+			NewConfig = actor_contract:set_id(Config, self()),
+			processing(actor_contract:set_state(NewConfig, on), 0);
 		{Sender, actor_product, _, _} when is_pid(Sender) ->
 			Sender ! {state, actor_contract:get_state(Config)},
 			idling(Config);
@@ -65,8 +66,7 @@ processing(Config, NbWorkers) ->
 
 
 physical_work(Master, MasterConfig, Request) ->
-	io:format("<?.??.?> ~w work ~w.~n", [actor_contract:get_module(MasterConfig), 
-								{MasterConfig, Request}]),
+	%%io:format("<?.??.?> ~w work ~w.~n", [actor_contract:get_module(MasterConfig),{MasterConfig, Request}]),
 	FullAnswer = (actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
 	Master ! {self(), end_physical_work, FullAnswer}.
 
@@ -85,6 +85,8 @@ logical_work(Master, MasterConfig, Request) ->
 end_of_physical_work({Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}) ->
 	[TablePid] = actor_contract:get_option(Config, ets), 
 	{actor_product, ConfProd, _} = LittleAnswer,
+	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
+	 [actor_contract:get_module(NewConfig), actor_contract:get_id(NewConfig), actor_contract:get_id(ConfProd)]),
 	ets:insert(TablePid, {product, awaiting_sending, ConfProd}),
 	%io:format("await"),
  	send_message(awaiting_product, Destination),
@@ -117,7 +119,7 @@ end_of_logical_work({_Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}
 %%% Returns: {NewConfig, NewNbWorkers}
 %%% @end
 manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
-	io:format("~w Receiving product (~w)..~n", [self(), actor_contract:get_module(Config)]),
+	io:format("~w receive product ~w ~n~n", [self(), actor_contract:get_id(ProdConf)]),
 	[Awaiting] = actor_contract:get_option(Config, awaiting),
 	case Awaiting > 0 of 
 		true ->  NewConfig = actor_contract:set_option(Config, awaiting, Awaiting-1);
@@ -137,7 +139,7 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 	{NewConfig, NewWorker};
 %%% Receiving request of a product from actor in `out'.
 manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
-	io:format("Receiving request of product~n"),
+	io:format("~w receive request of product~n~n", [self()]),
 	[TablePid] = actor_contract:get_option(Config, ets),
 	ListEntry = ets:match_object(
 					TablePid, {product, awaiting_sending, '$1'}
@@ -184,17 +186,19 @@ manage_request({Config, NbWorkers, _Sender}, Request) ->
 	{Config, NbWorkers}.
 
 send_message(Ans, []) ->
-	io:format("~w Container Sending: ~w to ~w.~n", [self(), {self(), Ans}, supervisor]);
+	io:format("~w send ~w to ~w.~n~n", [self(), Ans, supervisor]);
 %%	supervisor ! {self(), Ans};
 send_message(Ans, [Dest]) when is_pid(Dest) -> 
-	io:format("~w Container Sending: ~w to ~w.~n", [self(), {self(), Ans}, Dest]),
+	io:format("~w send ~w to ~w.~n~n", [self(), Ans, Dest]),
 	Dest ! {self(), Ans};
+
 send_message(Ans, Dest) when is_pid(Dest) -> 
-	io:format("~w Container Sending: ~w to ~w.~n", [self(), {self(), Ans}, Dest]),
+	io:format("~w send ~w to ~w.~n~n", [self(), Ans, Dest]),
 	Dest ! {self(), Ans};
+
 send_message(Ans, Dest) ->
 	%% @TODO: choose destination
-	io:format("~w Container Sending: ~w to ~w.~n", [self(), {self(), Ans}, Dest]).
+	io:format("~w send ~w to ~w.~n~n", [self(), Ans, Dest]).
 
 
 wait(Pid, Wait_time, {Ans, [Dest]}) when is_pid(Dest)->
@@ -203,9 +207,9 @@ wait(Pid, Wait_time, {Ans, [Dest]}) when is_pid(Dest)->
 wait(Pid, Wait_time, {Ans, Dest}) when is_pid(Dest)->
 	actor_contract:work(Wait_time),
 	Dest ! {Pid, {Ans}};
-wait(_Pid, Wait_time, {Ans, Dest}) ->
+wait(Pid, Wait_time, {Ans, Dest}) ->
 	actor_contract:work(Wait_time),
-	io:format("Container Sending: ~w to ~w.~n", [Ans, Dest]).
+	io:format(" ~w send ~w to ~w.~n~n", [Pid, Ans, Dest]).
 
 %% Tests
 
