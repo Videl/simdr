@@ -16,13 +16,7 @@
 %% Behavior implementation
 
 create() ->
-	Ac1 = actor_contract:create(?MODULE, off, 0),
-	actor_contract:add_option(
-		Ac1,
-		capacity,
-		infinity
-		).
-
+	Ac1 = actor_contract:create(?MODULE, off, 0).
 %% Possible answer: a new product arriving
 answer(BasicQueueConfig, {actor_product, ProductConfig}) ->
 	%% Add it to ETS
@@ -33,7 +27,7 @@ answer(BasicQueueConfig, {actor_product, ProductConfig}) ->
 	{NewBasicQueueConfig, NewProductConfig} = actor_contract:add_to_list_data(
 		{BasicQueueConfig, ProductConfig}, 
 		{ProductConfig, BasicQueueConfig}),
-	Destination = actor_contract:get_option(BasicQueueConfig, out),
+	Destination = actor_contract:get_out(BasicQueueConfig),
 	% Empty to notify the container there is nothing to send, 
 	% not even to supervisor.
 	{NewBasicQueueConfig, {actor_product, NewProductConfig, buffered}, Destination};

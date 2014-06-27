@@ -5,23 +5,34 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--export([create/6, 
+-export([create/10, 
+		create/8, 
 		 create/3,
 		 create/2, 
 		 get_module/1,
 		 add_data/2, 
+		 add_in/2,
+		 add_out/2,
 		 add_option/3,
 		 add_to_list_data/2,
 		 get_list_data/1,
 		 get_data/1, 
 		 get_previous_data/2, 
-		 get_id/1, 
+		 get_id/1,
+		 get_in/1,
+		 get_out/1,
+		 get_in_out/1,
+		 get_capacity/1, 
 		 get_opt/1, 
-		 get_option/2,
+		 get_option/2,	 
 		 get_work_time/1, 
 		 get_state/1, 
 		 set_work_time/2,
 		 set_state/2,
+		 set_in/2,
+		 set_out/2,
+		 set_in_out/2,
+		 set_capacity/2,
 		 set_option/3, 
 		 work/1,
 		 list_size/1,
@@ -43,13 +54,19 @@
 %% ===================================================================
 
 create(Module, Work_time) ->
-	actor_contract:create(Module, actor_contract:random_id(), [], off, Work_time, []).
+	actor_contract:create(Module, actor_contract:random_id(), [], off, supervisor, supervisor, infinity, Work_time, []).
 
 create(Module, State, Work_time) ->
-	actor_contract:create(Module, actor_contract:random_id(), [], State, Work_time, []).
+	actor_contract:create(Module, actor_contract:random_id(), [], State, supervisor, supervisor, infinity, Work_time, []).
 
 create(Module, Id, Opt, State, Work_time, List_data) ->
-	Actor = #config{module=Module, id=Id, opt=Opt, state=State, work_time=Work_time, list_data=List_data},
+actor_contract:create(Module, Id, Opt, State, supervisor, supervisor, {supervisor,supervisor}, infinity, Work_time, List_data).
+
+create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
+actor_contract:create(Module, Id, Opt, State, In, Out, {In,Out}, infinity, Work_time, List_data).
+
+create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
+	Actor = #config{module=Module, id=Id, opt=Opt, state=State, in=In, out=Out, in_out=InOut, capacity=Capacity, work_time=Work_time, list_data=List_data},
 	Actor2 = actor_contract:set_option(Actor, awaiting, 0),
 	TablePid = ets:new(internal_queue, [duplicate_bag, public]),
 	Actor3 = actor_contract:set_option(Actor2, ets, TablePid),
@@ -91,10 +108,8 @@ set_state(Actor, State) ->
 get_in(Actor) ->
 	Actor#config.in.
 
-
 set_in(Actor, In) ->
 	Actor#config{in = In}.
-
 
 add_in(Actor, In) ->
 	Actor#config{in = [In] ++ Actor#config.in}.
@@ -159,6 +174,10 @@ answer(ActorConfig, {change, state, State}) ->
 	NewConfig = actor_contract:set_state(ActorConfig, State),
 	{NewConfig, {state, State, changed}, supervisor};
 
+answer(ActorConfig, {change, in_out, {In, Out}}) ->
+	NewConfig = actor_contract:set_in_out(ActorConfig, {In, Out}),
+	{NewConfig, {in_out, {In, Out}, changed}, supervisor};
+
 answer(ActorConfig, {add, option, Opt}) ->
 	{Key, Desc}=Opt,
 	NewConfig = actor_contract:add_option(ActorConfig, Key, Desc),
@@ -169,6 +188,18 @@ answer(ActorConfig, {status, work_time}) ->
 
 answer(ActorConfig, {status, state}) ->
 	{ActorConfig, {state, actor_contract:get_state(ActorConfig), status}, supervisor};
+
+answer(ActorConfig, {status, in}) ->
+	{ActorConfig, {state, actor_contract:get_in(ActorConfig), status}, supervisor};
+
+answer(ActorConfig, {status, out}) ->
+	{ActorConfig, {state, actor_contract:get_out(ActorConfig), status}, supervisor};
+
+answer(ActorConfig, {status, in_out}) ->
+	{ActorConfig, {state, actor_contract:get_in_out(ActorConfig), status}, supervisor};
+
+answer(ActorConfig, {status, capacity}) ->
+	{ActorConfig, {state, actor_contract:get_capacity(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, list_data}) ->
 	{ActorConfig, {list_data, actor_contract:get_list_data(ActorConfig), status}, supervisor};

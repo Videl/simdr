@@ -16,7 +16,7 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, actor_contract:random_id(), [{capacity, 4}], undefined, 2, []).
+	actor_contract:create(?MODULE, actor_contract:random_id(), [], undefined, 2, []).
 
 
 answer(RFIDConfig, {actor_product, ProductConfig}) ->

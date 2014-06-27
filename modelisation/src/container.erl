@@ -81,7 +81,7 @@ end_of_physical_work({Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}
 	case Awaiting > 0 of
 		true -> 
 			%io:format("~n~n TRUE == ~w > 0 ~n~n", [Awaiting]),
-			[InActor] = actor_contract:get_option(Config, in),
+			[InActor] = actor_contract:get_in(Config),
 			%io:format("So I send the message to... ~w~n", [InActor]),
 			InActor ! {self(), {control, ok}};
 		false -> 
@@ -147,7 +147,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 %%% Receiving a notification from one of my actor in `in' that
 %%% a product can be sent.
 manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
-	[Capacity]= actor_contract:get_option(Config, capacity),
+	[Capacity]= actor_contract:get_capacity(Config),
 	%io:format("NbWorkers: ~w/Capacity: ~w~n", [NbWorkers, Capacity]),
 	case NbWorkers < Capacity of 
 		true -> 
