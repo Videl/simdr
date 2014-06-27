@@ -1,13 +1,13 @@
 * INTERNSHIP
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
-  ** TODO [3/8]
-   - [ ] Refactor [3/6]
+  ** TODO [3/10]
+   - [ ] Refactor [5/6]
     - [X] Cleaning actor conveyor 2014-06-26 18:00
     - [X] Cleaning actor rfid 2014-06-26 19:15
     - [X] Cleaning actor basic queue 2014-06-26 18:58
-    - [ ] Cleaning actor Railway
-    - [ ] Cleaning actor workstation
+    - [X] Cleaning actor Railway 2014-06-27 14:01
+    - [X] Cleaning actor workstation 2014-06-27 14:01
     - [ ] end_of_physical_work case Awaiting > 0 TRUE : 
       - [ ] What happens if there is no `in'?
       - [ ] What happens if there are more than one `in' field? 2014-06-27 09:43
@@ -37,12 +37,13 @@
     - [ ] Scenario 4
     - [ ] Scenario 5
   
- ** Tests [0/9]
-  - [ ] Fix tests induced by ETS
-    - [ ] Conveyor
-    - [ ] RFID
-    - [ ] Workstation
-    - [ ] Railway
+ ** Tests [1/9]
+  - [X] Fix tests induced by ETS 2014-06-27 13:59
+    - [X] Conveyor
+    - [X] RFID
+    - [X] Workstation
+    - [X] Railway
+    - [X] Contract
   - [ ] Does ETS really returns the last item inputted when sending a product?
   - [ ] Ability to disable tests
   - [ ] Scenario 1
@@ -53,4 +54,3 @@
   - [ ] Container
     - [ ] Physical Work
     - [ ] Logical Work
-    - [ ] Fonction set_option
