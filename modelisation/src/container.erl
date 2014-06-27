@@ -35,6 +35,13 @@ processing(Config, NbWorkers) ->
 			spawn(?MODULE, wait, [self(), Wait_time, {Request, Sender}]),
 			processing(Config, NbWorkers);
 
+		{_Sender, {prob_in, Decision}} ->
+			{_In, Out} = actor_contract:get_in_out(Config),
+			NewIn = Decision,
+			NewConfig = actor_contract:set_in_out(Config, {NewIn, Out}),
+			NewIn ! {self(), {control, ok}},
+			processing(NewConfig, NbWorkers);
+
 		{Sender, Request} ->
 			io:format("~w Received >>> ~w~n", [self(), Request]),
 			{NewConfig, NewWorkers} = manage_request({Config, NbWorkers, Sender}, Request),
@@ -53,7 +60,7 @@ processing(Config, NbWorkers) ->
 			processing(NewConfig, NewNbWorkers);
 
 		V ->
-			io:format(">>>UNKNOW REQUEST<<< (~w)~n", [V]),
+			io:format(">>>UNKNOWN REQUEST<<< (~w)~n", [V]),
 			?MODULE:processing(Config, NbWorkers)
 	end.
 
@@ -68,7 +75,13 @@ physical_work(Master, MasterConfig, Request) ->
 logical_work(Master, MasterConfig, Request) ->
 	FullAnswer = (actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
 	Master ! {self(), end_logical_work, FullAnswer}.
-
+%%	MesIn = case actor_contract:list_size(actor_contract:get_in(RailwayConfig)) of 
+%%		1 ->
+%%			{Info, Rec} = MesOut,
+%%			{[no_prob_in] ++ Info, Rec};
+%%		_ -> {Info, _Rec} = MesOut,
+%%			{[prob_in ]++ Info, supervisor}
+%%				end,
 
 end_of_physical_work({Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}) ->
 	[TablePid] = actor_contract:get_option(Config, ets), 
@@ -79,11 +92,15 @@ end_of_physical_work({Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}
 	[Awaiting] = actor_contract:get_option(Config, awaiting),
 	%io:format("~n~n Awaiting (~w): ~w ~n~n", [actor_contract:get_module(Config), Awaiting]),
 	case Awaiting > 0 of
-		true -> 
-			%io:format("~n~n TRUE == ~w > 0 ~n~n", [Awaiting]),
-			[InActor] = actor_contract:get_in(Config),
-			%io:format("So I send the message to... ~w~n", [InActor]),
-			InActor ! {self(), {control, ok}};
+		true -> case actor_contract:list_size(actor_contract:get_in(Config)) of 
+					1 ->
+						[InActor] = actor_contract:get_in(Config),
+						InActor ! {self(), {control, ok}};
+					_ ->
+						%% envoi du message au supervisuer 
+						send_message({Config, prob_in},supervisor)
+				
+				end;
 		false -> 
 			%io:format("~n~n FALSE: ~w > 0 ~n~n", [Awaiting]),
 			%io:format("J'attends.~n"),

@@ -22,28 +22,23 @@ create() ->
 answer(RailwayConfig, {actor_product, ProductConfig}) ->
 	MesOut = case actor_contract:list_size(actor_contract:get_out(RailwayConfig)) of 
 		1 ->
-			{[no_prob_out], actor_contract:get_out(RailwayConfig)}; 
+			{no_prob_out, actor_contract:get_out(RailwayConfig)}; 
 		_ ->
-			{[prob_out], supervisor}
+			{prob_out, supervisor}
 		end,
-	MesIn = case actor_contract:list_size(actor_contract:get_in(RailwayConfig)) of 
-		1 ->
-			{Info, Rec} = MesOut,
-			{[no_prob_in] ++ Info, Rec};
-		_ -> {Info, _Rec} = MesOut,
-			{[prob_in ]++ Info, supervisor}
-				end,
-	{InfoProb, Dest} = MesIn,
+
+	{InfoProb, Dest} = MesOut,
 
 	case Dest =:= supervisor of
 		true ->	
 			{RailwayConfig, {actor_product, ProductConfig, InfoProb}, Dest};
 		false -> 
+			{In, _Out}= actor_contract: get_in_out(RailwayConfig),
 			{RailwayConf, ProductConf} = 
 				actor_contract:add_to_list_data(
 					{RailwayConfig, 
 						{ProductConfig,	
-							{actor_contract:get_in(RailwayConfig),
+							{In,
 							actor_contract:get_out(RailwayConfig)}
 						}
 					}, 
@@ -51,16 +46,17 @@ answer(RailwayConfig, {actor_product, ProductConfig}) ->
 			{RailwayConf, {actor_product, ProductConf, InfoProb}, Dest}
 	end;
 
-answer(RailwayConfig, {supervisor, ProductConfig, Decision}) ->
-	{In, Out} = Decision,
+answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
+	{In, Out} = actor_contract:get_in_out(RailwayConfig),
+	NewOut = Decision,
 	{Conf, Prod} = actor_contract:add_to_list_data(
 		{RailwayConfig, 
 			{ProductConfig, 
-			{[In],[Out]}}}, 
+			{[In],[NewOut]}}}, 
 		{ProductConfig, RailwayConfig}),
 	case Decision =/= actor_contract:get_in_out(Conf) of
 		true ->	
-			RailwayConf = actor_contract:set_in_out(Conf, Decision),
+			RailwayConf = actor_contract:set_in_out(Conf, {In, NewOut}),
 			actor_contract:work(actor_contract:get_work_time(RailwayConf)),
 			{RailwayConf,{actor_product, Prod,switched}, Out};
 		false -> 
