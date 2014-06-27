@@ -10,7 +10,12 @@
     - [ ] Cleaning actor workstation
     - [ ] end_of_physical_work case Awaiting > 0 TRUE : 
       - [ ] What happens if there is no `in'?
-      - [ ] What happens if there are more than one `in' field?
+      - [ ] What happens if there are more than one `in' field? 2014-06-27 09:43
+        - [ ] New variable that state where to go when an item is ready to be
+              sent: {in, out}
+        - [ ] Current in and out stays the same, listing all the in's and out's
+              possivble.
+        - [ ] When sending a project, only the new variable is checked
    - [X] ETS
     - [X] Function set_option 2014-06-25 17:56
     - [X] Sending product side
