@@ -16,6 +16,8 @@
         - [ ] Current in and out stays the same, listing all the in's and out's
               possivble.
         - [ ] When sending a project, only the new variable is checked
+      - [ ] Many out => Need Supervisor
+      - [ ] Many In => untested
    - [X] ETS
     - [X] Function set_option 2014-06-25 17:56
     - [X] Sending product side
