@@ -16,7 +16,7 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, actor_contract:random_id(), [{capacity, 1}], off, 10, []).
+	actor_contract:create(?MODULE, actor_contract:random_id(), [], off, 10, []).
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
@@ -47,7 +47,7 @@ change_product(ProductConfig) ->
 	Result.
 
 get_destination(Config) ->
-	ListOfOuts = actor_contract:get_option(Config, out),
+	ListOfOuts = actor_contract:get_out(Config),
 	Out = case actor_contract:list_size(ListOfOuts) of
 		1 ->
 			ListOfOuts;
