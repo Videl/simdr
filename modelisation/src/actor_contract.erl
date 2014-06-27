@@ -7,6 +7,7 @@
 
 -export([create/10, 
 		create/8, 
+		create/6,
 		 create/3,
 		 create/2, 
 		 get_module/1,
@@ -54,13 +55,13 @@
 %% ===================================================================
 
 create(Module, Work_time) ->
-	actor_contract:create(Module, actor_contract:random_id(), [], off, supervisor, supervisor, infinity, Work_time, []).
+	actor_contract:create(Module, actor_contract:random_id(), [], off, [], [], infinity, Work_time, []).
 
 create(Module, State, Work_time) ->
-	actor_contract:create(Module, actor_contract:random_id(), [], State, supervisor, supervisor, infinity, Work_time, []).
+	actor_contract:create(Module, actor_contract:random_id(), [], State, [], [], Work_time, []).
 
 create(Module, Id, Opt, State, Work_time, List_data) ->
-actor_contract:create(Module, Id, Opt, State, supervisor, supervisor, {supervisor,supervisor}, infinity, Work_time, List_data).
+actor_contract:create(Module, Id, Opt, State, [], [], Work_time, List_data).
 
 create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
 actor_contract:create(Module, Id, Opt, State, In, Out, {In,Out}, infinity, Work_time, List_data).
@@ -177,6 +178,14 @@ answer(ActorConfig, {change, state, State}) ->
 answer(ActorConfig, {change, in_out, {In, Out}}) ->
 	NewConfig = actor_contract:set_in_out(ActorConfig, {In, Out}),
 	{NewConfig, {in_out, {In, Out}, changed}, supervisor};
+
+answer(ActorConfig, {add, in, In}) ->
+	NewConfig = actor_contract:add_in(ActorConfig, In),
+	{NewConfig, {in, In, added}, supervisor};
+
+answer(ActorConfig, {add, out, Out}) ->
+	NewConfig = actor_contract:add_out(ActorConfig, Out),
+	{NewConfig, {out, Out, added}, supervisor};
 
 answer(ActorConfig, {add, option, Opt}) ->
 	{Key, Desc}=Opt,

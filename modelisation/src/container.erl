@@ -43,7 +43,6 @@ processing(Config, NbWorkers) ->
 			processing(NewConfig, NbWorkers);
 
 		{Sender, Request} ->
-			io:format("~w Received >>> ~w~n", [self(), Request]),
 			{NewConfig, NewWorkers} = manage_request({Config, NbWorkers, Sender}, Request),
 			processing(NewConfig, NewWorkers);
 		
@@ -138,7 +137,7 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 	{NewConfig, NewWorker};
 %%% Receiving request of a product from actor in `out'.
 manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
-	%io:format("Receiving request of product~n"),
+	io:format("Receiving request of product~n"),
 	[TablePid] = actor_contract:get_option(Config, ets),
 	ListEntry = ets:match_object(
 					TablePid, {product, awaiting_sending, '$1'}
@@ -164,7 +163,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 %%% Receiving a notification from one of my actor in `in' that
 %%% a product can be sent.
 manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
-	[Capacity]= actor_contract:get_capacity(Config),
+	Capacity= actor_contract:get_capacity(Config),
 	%io:format("NbWorkers: ~w/Capacity: ~w~n", [NbWorkers, Capacity]),
 	case NbWorkers < Capacity of 
 		true -> 
@@ -184,7 +183,9 @@ manage_request({Config, NbWorkers, _Sender}, Request) ->
 	spawn(?MODULE, logical_work, [self(), Config, Request]),
 	{Config, NbWorkers}.
 
-
+send_message(Ans, []) ->
+	io:format("~w Container Sending: ~w to ~w.~n", [self(), {self(), Ans}, supervisor]);
+%%	supervisor ! {self(), Ans};
 send_message(Ans, [Dest]) when is_pid(Dest) -> 
 	io:format("~w Container Sending: ~w to ~w.~n", [self(), {self(), Ans}, Dest]),
 	Dest ! {self(), Ans};
