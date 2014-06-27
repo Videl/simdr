@@ -16,8 +16,10 @@
 %% ===================================================================
 
 idling(Config) ->
+	?CREATE_DEBUG_TABLE,
 	receive
 		{start} ->
+			?DLOG(actor_contract:get_module(Config), "Entering processing state."),
 			processing(actor_contract:set_state(Config, on), 0);
 		{Sender, actor_product, _, _} when is_pid(Sender) ->
 			Sender ! {state, actor_contract:get_state(Config)},

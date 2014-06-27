@@ -6,7 +6,6 @@
 -endif.
 
 -behaviour(actor_contract).
--include("debug.hrl").
 
 %% Actor Contract Behaviors Callbacks
 
