@@ -17,16 +17,16 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, actor_contract:random_id(),[{capacity,1}], undefined, 0, []).
+	actor_contract:create(?MODULE, actor_contract:random_id(),[], undefined, 0, []).
 
 answer(RailwayConfig, {actor_product, ProductConfig}) ->
-	MesOut = case actor_contract:list_size(actor_contract:get_option(RailwayConfig, out)) of 
+	MesOut = case actor_contract:list_size(actor_contract:get_out(RailwayConfig)) of 
 		1 ->
-			{[no_prob_out], actor_contract:get_option(RailwayConfig,out)}; 
+			{[no_prob_out], actor_contract:get_out(RailwayConfig)}; 
 		_ ->
 			{[prob_out], supervisor}
 		end,
-	MesIn = case actor_contract:list_size(actor_contract:get_option(RailwayConfig, in)) of 
+	MesIn = case actor_contract:list_size(actor_contract:get_in(RailwayConfig)) of 
 		1 ->
 			{Info, Rec} = MesOut,
 			{[no_prob_in] ++ Info, Rec};
@@ -43,8 +43,8 @@ answer(RailwayConfig, {actor_product, ProductConfig}) ->
 				actor_contract:add_to_list_data(
 					{RailwayConfig, 
 						{ProductConfig,	
-							{actor_contract:get_option(RailwayConfig, in),
-							actor_contract:get_option(RailwayConfig, out)}
+							{actor_contract:get_in(RailwayConfig),
+							actor_contract:get_out(RailwayConfig)}
 						}
 					}, 
 				{ProductConfig, RailwayConfig}),
@@ -58,9 +58,9 @@ answer(RailwayConfig, {supervisor, ProductConfig, Decision}) ->
 			{ProductConfig, 
 			{[In],[Out]}}}, 
 		{ProductConfig, RailwayConfig}),
-	case Decision =/= actor_contract:get_state(Conf) of
+	case Decision =/= actor_contract:get_in_out(Conf) of
 		true ->	
-			RailwayConf = actor_contract:set_state(Conf, Decision),
+			RailwayConf = actor_contract:set_in_out(Conf, Decision),
 			actor_contract:work(actor_contract:get_work_time(RailwayConf)),
 			{RailwayConf,{actor_product, Prod,switched}, Out};
 		false -> 
