@@ -88,6 +88,42 @@ set_work_time(Actor, Work_time)->
 set_state(Actor, State) ->
 	Actor#config {state = State}.
 
+get_in(Actor) ->
+	Actor#config.in.
+
+
+set_in(Actor, In) ->
+	Actor#config{in = In}.
+
+
+add_in(Actor, In) ->
+	Actor#config{in = [In] ++ Actor#config.in}.
+
+get_out(Actor) ->
+	Actor#config.out.
+
+
+set_out(Actor, Out) ->
+	Actor#config{out = Out}.
+
+
+add_out(Actor, Out) ->
+	Actor#config{out = [Out] ++ Actor#config.out}.
+
+get_in_out(Actor) ->
+	Actor#config.in_out.
+
+
+set_in_out(Actor, {In, Out}) ->
+	Actor#config{in_out = {In, Out}}.
+
+
+get_capacity(Actor) -> 
+	Actor#config.capacity.
+
+set_capacity(Actor, Capacity) ->
+	Actor#config{capacity = Capacity}.
+
 get_option(Actor, Key) ->
 	Opts = Actor#config.opt,
 	get_option_helper(Opts, Key).

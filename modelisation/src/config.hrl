@@ -2,7 +2,11 @@
 	module,
 	id,
 	opt, 
-	state, 
+	state,
+	in,
+	out,
+	in_out, 
+	capacity,
 	work_time, 
 	list_data
 	}).
