@@ -280,22 +280,30 @@ get_id_test() ->
 
 get_opt_1_test() ->
 	Actor = create(mod, test, [{key, value}], on, 0, [1,2]),
-	[{value}]= get_opt(Actor).
+	[value] = actor_contract:get_option(Actor, key).
 
 get_opt_2_test() ->
 	Actor = create(mod, test, 0),
-	[] = get_opt(Actor).
+	[
+	?_assertMatch(
+		[{ets, _}, {awaiting, 0}],
+		get_opt(Actor))
+	].
 
-get_opt_3_test() ->
+get_opt_3_test_() ->
 	Actor = create(mod, test, [{opt1, v2}, {opt2, v1}], on, 0, [1,2]),
-	[{opt1, v2}, {opt2, v1}] = get_opt(Actor).
+	[
+	?_assertMatch(
+		[{ets, _}, {opt1, v2}, {opt2, v1}, {awaiting, 0}],
+		get_opt(Actor))
+	].
 
 get_work_time_test() ->
-	Actor = create(mod, test, [opt1, opt2], on, 42, [1,2]),
+	Actor = create(mod, test, [{key, value}], on, 42, [1,2]),
 	42 = get_work_time(Actor).
 
 get_state_1_test() ->
-	Actor = create(mod, test, [opt1, opt2], on, 42, [1,2]),
+	Actor = create(mod, test, [{key, value}], on, 42, [1,2]),
 	on = get_state(Actor).
 
 get_state_2_test() ->
@@ -303,7 +311,7 @@ get_state_2_test() ->
 	off = get_state(Actor).
 
 set_work_time_test()->
-	Actor = create(mod, test, [opt1, opt2], on, 42, [1,2]),
+	Actor = create(mod, test, [{key, value}], on, 42, [1,2]),
 	NewActor = set_work_time(Actor, 12),
 	12 = NewActor#config.work_time.
 
@@ -356,25 +364,33 @@ list_size_test_() ->
 	].
 
 add_option_list_size_test_() ->
-	Actor = create(mod, test, [], on, 42, [1,2]),
+	Actor = actor_contract:create(mod, test, [], on, 42, [1,2]),
 	ActorB = add_option(Actor, friend, no),
 	ActorA = add_option(ActorB, friend, yes),
 	[
-	?_assertEqual(2, actor_contract:list_size(actor_contract:get_opt(ActorA))),
+	?_assertEqual(4, actor_contract:list_size(actor_contract:get_opt(ActorA))),
 	?_assertEqual(2, list_size(actor_contract:get_option(ActorA, friend)))
 	].
 
+
 set_option_test_() ->
-	Actor = create(mod, test, [{del, 3},{save, 9}], on, 42, [1,2]),
-	ActorD = create(mod, test, [{save, 9}], on, 42, [1,2]),
-	ActorS = create(mod, test, [{save, 50}], on, 42, [1,2]),
+	Actor = actor_contract:create(mod, test, [{del, 3},{save, 9}], on, 42, [1,2]),
+	ActorD = actor_contract:create(mod, test, [{save, 9}], on, 42, [1,2]),
 	[
-	?_assertEqual(ActorD, delete_option(Actor, del)),
-	?_assertEqual(ActorS, set_option(ActorD, save, 50))
+	?_assertMatch({config,mod,test,
+        [{awaiting,0},{save,9},{ets,_}],
+        on,42,
+        [1,2]}, delete_option(Actor, del)),
+	?_assertMatch({config,mod,test,
+        [{save,50},{awaiting,0},{ets,_}],
+        on,42,
+        [1,2]}, set_option(ActorD, save, 50))
 	].
 
+
+
 answer_test_() ->
-	Actor = create(mod, test, [{out,1},{in,2},{out,3}], on, 42, [5,6]),
+	Actor = actor_contract:create(mod, test, [{out,1},{in,2},{out,3}], on, 42, [5,6]),
 	NewState = set_state(Actor,off),
 	NewWTime = set_work_time(Actor,10),
 	NewOpt = add_option(Actor,in,4),
