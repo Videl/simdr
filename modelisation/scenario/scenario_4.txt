@@ -14,7 +14,6 @@ N1 ! N2 ! N3 ! N_RFID ! {start}.
 N1 ! {self(), {add, out, N2}}.
 N1 ! {self(), {add,option, {rfid, N_RFID}}}.
 N2 ! {self(), {add, out, N3}}.
-N2 ! {self(), {add, in, N1}}.
-N3 ! {self(), {add, in, N2}}.
+
 
 N1 ! {self(), {actor_product, actor_product:create()}}.
