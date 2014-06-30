@@ -62,13 +62,22 @@ create(Module, State, Work_time) ->
 	actor_contract:create(Module, actor_contract:random_id(), [], State, [], [], Work_time, []).
 
 create(Module, Id, Opt, State, Work_time, List_data) ->
-actor_contract:create(Module, Id, Opt, State, [], [], Work_time, List_data).
+	actor_contract:create(Module, Id, Opt, State, [], [], Work_time, List_data).
 
 create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
-actor_contract:create(Module, Id, Opt, State, In, Out, {In,Out}, infinity, Work_time, List_data).
+	actor_contract:create(Module, Id, Opt, State, In, Out, {In,Out}, infinity, Work_time, List_data).
 
 create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
-	Actor = #config{module=Module, id=Id, opt=Opt, state=State, in=In, out=Out, in_out=InOut, capacity=Capacity, work_time=Work_time, list_data=List_data},
+	Actor = #config{module=Module, 
+					id=Id, 
+					opt=Opt, 
+					state=State, 
+					in=In, 
+					out=Out, 
+					in_out=InOut, 
+					capacity=Capacity, 
+					work_time=Work_time, 
+					list_data=List_data},
 	Actor2 = actor_contract:set_option(Actor, awaiting, 0),
 	TablePid = ets:new(internal_queue, [duplicate_bag, public]),
 	Actor3 = actor_contract:set_option(Actor2, ets, TablePid),
@@ -126,7 +135,6 @@ get_out(Actor) ->
 set_out(Actor, Out) ->
 	Actor#config{out = Out}.
 
-
 add_out(Actor, Out) ->
 	Actor#config{out = [Out] ++ Actor#config.out}.
 
@@ -136,7 +144,6 @@ get_in_out(Actor) ->
 
 set_in_out(Actor, {In, Out}) ->
 	Actor#config{in_out = {In, Out}}.
-
 
 get_capacity(Actor) -> 
 	Actor#config.capacity.

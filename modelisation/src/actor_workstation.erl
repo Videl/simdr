@@ -16,7 +16,9 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, actor_contract:random_id(), [], off, 10, []).
+	Ac1 = actor_contract:create(?MODULE, actor_contract:random_id(), [], off, 10, []),
+	Ac2 = actor_contract:set_capacity(Ac1, 1),
+	Ac2.
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
