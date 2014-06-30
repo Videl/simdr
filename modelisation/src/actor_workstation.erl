@@ -17,7 +17,7 @@
 
 create() ->
 	Ac1 = actor_contract:create(?MODULE, actor_contract:random_id(), [], off, 10, []),
-	Ac2 = actor_contract:set_capacity(Ac1, 1),
+	Ac2 = actor_contract:set_capacity(Ac1, 2),
 	Ac2.
 
 answer(WSConfig, {actor_product, ProductConfig}) ->

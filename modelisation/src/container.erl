@@ -85,8 +85,9 @@ logical_work(Master, MasterConfig, Request) ->
 end_of_physical_work({Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}) ->
 	[TablePid] = actor_contract:get_option(Config, ets), 
 	{actor_product, ConfProd, _} = LittleAnswer,
+	?DLOG(actor_contract:get_module(Config), {work,done,on,product,ConfProd}),
 	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
-	 [actor_contract:get_module(NewConfig), actor_contract:get_id(NewConfig), actor_contract:get_id(ConfProd)]),
+		[actor_contract:get_module(NewConfig), actor_contract:get_id(NewConfig), actor_contract:get_id(ConfProd)]),
 	ets:insert(TablePid, {product, awaiting_sending, ConfProd}),
 	%io:format("await"),
  	send_message(awaiting_product, Destination),
@@ -120,6 +121,7 @@ end_of_logical_work({_Config, NbWorkers}, {NewConfig, LittleAnswer, Destination}
 %%% @end
 manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 	io:format("~w receive product ~w ~n~n", [self(), actor_contract:get_id(ProdConf)]),
+	?DLOG(actor_contract:get_module(Config), {starting,to,work,on,product,ProdConf}),
 	[Awaiting] = actor_contract:get_option(Config, awaiting),
 	case Awaiting > 0 of 
 		true ->  NewConfig = actor_contract:set_option(Config, awaiting, Awaiting-1);

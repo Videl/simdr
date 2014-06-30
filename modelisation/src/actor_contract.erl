@@ -447,6 +447,25 @@ add_option_test_() ->
 		)
 	].
 
+set_option_test_() ->
+	Actor = actor_contract:create(mod, test, [{del, 3}, {save, 9}], on, 42, [1,2]),
+	ActorD = actor_contract:create(mod, test, [{save, 9}, {save, 4578247}], on, 42, [1,2]),
+	NewResult = actor_contract:get_option(
+		actor_contract:set_option(Actor, del, 9),
+		del),
+	NewResult2 = actor_contract:get_option(
+		actor_contract:set_option(ActorD, save, 42),
+		save),
+	[
+	?_assertMatch(
+		[9],
+		NewResult),
+	?_assertMatch(
+		[42],
+		NewResult2)
+	].
+
+
 list_size_test_() ->
 	A = [1,2,3],
 	B = [],
@@ -458,22 +477,6 @@ list_size_test_() ->
 	?_assertEqual(2, list_size(C)),
 	?_assertEqual(0, list_size(D))
 	].
-
-set_option_test_() ->
-	% Actor = actor_contract:create(mod, test, [{del, 3},{save, 9}], on, 42, [1,2]),
-	% ActorD = actor_contract:create(mod, test, [{save, 9}], on, 42, [1,2]),
-	[
-	% ?_assertMatch({config,mod,test,
- %        [{awaiting,0},{save,9},{ets,_}],
- %        on,42,
- %        [1,2]}, delete_option(Actor, del)),
-	% ?_assertMatch({config,mod,test,
- %        [{save,50},{awaiting,0},{ets,_}],
- %        on,42,
- %        [1,2]}, set_option(ActorD, save, 50))
-	].
-
-
 
 answer_test_() ->
 	Actor = actor_contract:create(mod, test, [{out,1},{in,2},{out,3}], on, 42, [5,6]),
