@@ -6,8 +6,8 @@
 -endif.
 
 -export([create/10, 
-		create/8, 
-		create/6,
+		 create/8, 
+		 create/6,
 		 create/3,
 		 create/2, 
 		 get_module/1,
@@ -15,10 +15,7 @@
 		 add_in/2,
 		 add_out/2,
 		 add_option/3,
-		 add_to_list_data/2,
-		 get_list_data/1,
-		 get_data/1, 
-		 get_previous_data/2, 
+		 add_to_list_data/4,
 		 get_id/1,
 		 get_in/1,
 		 get_out/1,
@@ -38,7 +35,6 @@
 		 set_option/3, 
 		 work/1,
 		 list_size/1,
-		 first/1,
 		 answer/2,
 		 random_id/0]).
 
@@ -56,7 +52,16 @@
 %% ===================================================================
 
 create(Module, Work_time) ->
-	actor_contract:create(Module, actor_contract:random_id(), [], off, [], [], infinity, Work_time, []).
+	actor_contract:create(
+		Module, 
+		actor_contract:random_id(), 
+		[], 
+		off, 
+		[], 
+		[], 
+		infinity, 
+		Work_time, 
+		[]).
 
 create(Module, State, Work_time) ->
 	actor_contract:create(Module, actor_contract:random_id(), [], State, [], [], Work_time, []).
@@ -78,27 +83,25 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 		in_out    = InOut, 
 		capacity  = Capacity, 
 		work_time = Work_time, 
-		list_data = List_data},
-	Actor1 = add_options_helper(Actor, Opt),
+		list_data = ets:new(list_data_table, [duplicate_bag, public])},
+	Actor1     = add_options_helper(Actor, Opt),
 	Actor2     = actor_contract:set_option(Actor1, awaiting, 0),
 	TableQueue = ets:new(internal_queue, [duplicate_bag, public]),
 	Actor3     = actor_contract:set_option(Actor2, ets, TableQueue),
-	Actor3.
+	Actor4     = add_datas_helper(Actor3, List_data),
+	Actor4.
 
 get_module(Actor) ->
 	Actor#config.module.
 
-get_list_data(Actor) ->
-	Actor#config.list_data.
-	
-get_data(Actor) ->
-	get_head_data(Actor#config.list_data).
+% get_previous_data(Config, N) ->
+% 	get_previous_data_helper(Config#config.list_data, N).
 
-get_previous_data(Config, N) ->
-	get_previous_data_helper(Config#config.list_data, N).
-
-add_data(Actor, X) -> 
-	Actor#config{list_data = [X] ++ Actor#config.list_data}.
+add_data(Actor, X) ->
+	Data = {erlang:localtime(), X},
+	ETSData = Actor#config.list_data,
+	ets:insert(ETSData, Data),
+	Actor.
 
 set_id(Actor, Id) ->
 	Actor#config{id= Id}.
@@ -177,8 +180,8 @@ work(N) ->
 list_size(List) ->
 	list_size_helper(List, 0).
 
-add_to_list_data({FirstActor, FirstData}, {SecondActor, SecondData}) ->
-	{add_data(FirstActor, {FirstData, erlang:localtime()}), add_data(SecondActor, {SecondData, erlang:localtime()})}.
+add_to_list_data(FirstActor, FirstData, SecondActor, SecondData) ->
+	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
 
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
@@ -242,9 +245,6 @@ answer(_, Request) ->
 	io:format(">>>UNKNOWN ANSWER<<< (~w) (~w:~w)~n", [Request, ?MODULE, ?LINE]),
 	exit(unknown_request).
 
-first(List) ->
-	get_head_data(List).
-
 random_id() ->
 	random:uniform(1000).
 	
@@ -252,20 +252,11 @@ random_id() ->
 %% Internal API
 %% ===================================================================
 
-get_head_data([]) ->
-	undefined;
-get_head_data([Head|_Tail]) ->
-	Head.
-
-
-get_previous_data_helper(_List, N) when N < 0 ->
-	out_of_range;
-get_previous_data_helper([Head|_Tail], 1) ->
-	Head;
-get_previous_data_helper([], 1) ->
-	out_of_range;
-get_previous_data_helper([_Head|Tail], N) ->
-	get_previous_data_helper(Tail, N-1).
+add_datas_helper(Actor, []) ->
+	Actor;
+add_datas_helper(Actor, [Data|T]) ->
+	Actor2 = add_data(Actor, Data),
+	add_datas_helper(Actor2, T).
 
 get_option_helper(AllOptions, Key) ->
 	get_option_helper_two(AllOptions, [], Key).
@@ -280,23 +271,6 @@ get_option_helper_two([{Key, Value}|RestOfOptions], Result, Key) ->
 	get_option_helper_two(RestOfOptions, Result ++ [Value], Key);
 get_option_helper_two([_BadHead|RestOfOptions], Result, Key) ->
 	get_option_helper_two(RestOfOptions, Result, Key).
-
-
-% delete_option_helper(Filtre, [Head| Tail], []) ->
-% 	{Key,_ }=Head,
-% 	case Key=:=Filtre of
-% 		true -> delete_option_helper(Filtre, Tail, []);
-% 		false -> delete_option_helper(Filtre, Tail, [Head])
-% 	end;
-% delete_option_helper(Filtre, [Head| Tail], Result) ->
-% 	{Key,_ }=Head,
-% 	case Key=:=Filtre of
-% 		true -> delete_option_helper(Filtre, Tail, Result);
-% 		false -> delete_option_helper(Filtre, Tail, [Head]++Result)
-% 	end;
-% delete_option_helper(_Filtre, [], Result) ->
-% 	Result.
-
 
 add_options_helper(Actor, []) ->
 	Actor;
@@ -318,60 +292,9 @@ list_size_helper([_H|T], Acc) ->
 %% Tests
 %% ===================================================================
 
-mock_actor() ->
-	Actor = create(mod, test, [{opt1, v2}, {opt2, v1}], busy, 3, [1,2,3]),
-	Actor.
-
 get_module_test() ->
 	Actor = create(mod, test, [{opt1, v2}, {opt2, v1}], busy, 3, [1,2,3]),
 	mod = get_module(Actor).
-
-get_list_data_test() ->
-	Actor = create(mod, test, 0),
-	[] = get_list_data(Actor).
-
-get_data_1_test() ->
-	Actor = mock_actor(),
-	1 = get_data(Actor).
-
-get_previous_data_1_test() ->
-	Actor = mock_actor(),
-	2 = get_previous_data(Actor, 2).
-
-get_previous_data_2_test() ->
-	Actor = mock_actor(),
-	1 = get_previous_data(Actor, 1).
-
-get_previous_data_3_test() ->
-	Actor = mock_actor(),
-	3 = get_previous_data(Actor, 3).
-
-get_head_1_test() ->
-	3 = get_head_data([3,2,1]).
-
-get_head_2_test() ->
-	undefined = get_head_data([]).
-
-get_head_3_test() ->
-	1 = get_head_data([1]).
-
-get_previous_data_helper_1_test() ->
-	2 = get_previous_data_helper([1,2,3], 2).
-
-get_previous_data_helper_2_test() ->
-	1 = get_previous_data_helper([1,2,3], 1).
-
-get_previous_data_helper_3_test() ->
-	3 = get_previous_data_helper([1,2,3], 3).
-
-get_previous_data_helper_4_test() ->
-	out_of_range = get_previous_data_helper([1,2,3], 4).
-
-get_previous_data_helper_5_test() ->
-	out_of_range = get_previous_data_helper([1,2,3], -3).
-
-get_previous_data_helper_6_test() ->
-	4 = get_previous_data_helper([1,2,3, 4], 4).
 
 add_data_test() ->
 	Actor = create(mod, test, [], on, 0, [1,2]),

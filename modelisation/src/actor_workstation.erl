@@ -11,7 +11,8 @@
 
 -export([
 	create/0,
-	answer/2]).
+	answer/2,
+	get_destination/1]).
 
 %% Behavior implementation
 
@@ -25,8 +26,8 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewProductConfig, Quality} = change_product(ProductConfig),
 	% List data fillers
 	{NewWSConfig, NewProductConfigBis} = actor_contract:add_to_list_data(
-		{WSConfig, {NewProductConfig, Quality}}, 
-		{NewProductConfig, {WSConfig}}),
+		WSConfig, aaa,%{NewProductConfig, Quality}, 
+		NewProductConfig, bbb),%{WSConfig}),
 	% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Quality}, 
@@ -49,7 +50,9 @@ change_product(ProductConfig) ->
 	Result.
 
 get_destination(Config) ->
+	io:format("YOOOO! THIS IS MY CONF! ~w~n", [Config]),
 	ListOfOuts = actor_contract:get_out(Config),
+	io:format("OOOOY! THIS IS MY CONF! ~w~n", [Config]),
 	Out = case actor_contract:list_size(ListOfOuts) of
 		1 ->
 			ListOfOuts;
@@ -67,7 +70,7 @@ workstation_answer_test_() ->
 	ActorProductOne = actor_product:create(product_one),
 	{NewActor, {work_time, 20, changed}, supervisor}= answer(ActorWS, {change, work_time, 20}),
 	{_, {actor_product, ActorProductTwo, _Quality}, _Destination} = 
-		answer(ActorWS, {actor_product, ActorProductOne}),
+		actor_workstation:answer(ActorWS, {actor_product, ActorProductOne}),
 	[
 	% ?_assertEqual(
 	% 	{ActorWS, {supervisor, pong}}, 
