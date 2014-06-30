@@ -180,6 +180,13 @@ manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 %%% If the request is not about products, then it's not about a
 %%% physical stream... then we launch a 'logical' work, directed at the 
 %%% supervisor in the end.
+
+manage_request({Config, NbWorkers, _Sender}, {add, out , Out}) ->
+ 	Out ! {self(), {add, in, self()}},
+	%%% Normal request, it does not change NbWorkers value
+	spawn(?MODULE, logical_work, [self(), Config, {add, out , Out}]),
+	{Config, NbWorkers};
+
 manage_request({Config, NbWorkers, _Sender}, Request) ->
 	%%% Normal request, it does not change NbWorkers value
 	spawn(?MODULE, logical_work, [self(), Config, Request]),

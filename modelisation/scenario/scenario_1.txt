@@ -9,6 +9,5 @@ NW = spawn(container, idling, [actor_workstation:create()]).
 NQ ! NW ! {start}.
 
 NQ ! {self(), {add, out, NW}}.
-NW ! {self(), {add, in, NQ}}.
 
 NQ ! {self(), {actor_product, actor_product:create()}}.
