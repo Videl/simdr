@@ -2,7 +2,7 @@
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
   ** TODO [5/10]
-   - [X] Refactor [5/6]
+   - [X] Refactor [5/5]
     - [X] Cleaning actor conveyor 2014-06-26 18:00
     - [X] Cleaning actor rfid 2014-06-26 19:15
     - [X] Cleaning actor basic queue 2014-06-26 18:58
