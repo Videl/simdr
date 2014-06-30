@@ -3,20 +3,12 @@
 %%% A Basic Queue followed by a Workstation.
 %%%
 
-%% V1
-NW = spawn(container, idling, [actor_workstation:create()]).
-NQ = spawn(container, idling, [actor_basic_queue:create(NW)]).
-NQ ! {start}.
-NW ! {start}.
-NQ ! {self(), {actor_product, actor_product:create()}}.
 
-
-%% V2
 NQ = spawn(container, idling, [actor_basic_queue:create()]).
 NW = spawn(container, idling, [actor_workstation:create()]).
 NQ ! NW ! {start}.
 
-NQ ! {self(), {add, option, {out, NW}}}.
-NW ! {self(), {add, option, {in, NQ}}}.
+NQ ! {self(), {add, out, NW}}.
+NW ! {self(), {add, in, NQ}}.
 
 NQ ! {self(), {actor_product, actor_product:create()}}.
