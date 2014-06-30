@@ -26,8 +26,8 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewProductConfig, Quality} = change_product(ProductConfig),
 	% List data fillers
 	{NewWSConfig, NewProductConfigBis} = actor_contract:add_to_list_data(
-		WSConfig, aaa,%{NewProductConfig, Quality}, 
-		NewProductConfig, bbb),%{WSConfig}),
+		{WSConfig, {NewProductConfig, Quality}}, 
+		{NewProductConfig, {WSConfig}}),
 	% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Quality}, 
@@ -50,9 +50,7 @@ change_product(ProductConfig) ->
 	Result.
 
 get_destination(Config) ->
-	io:format("YOOOO! THIS IS MY CONF! ~w~n", [Config]),
 	ListOfOuts = actor_contract:get_out(Config),
-	io:format("OOOOY! THIS IS MY CONF! ~w~n", [Config]),
 	Out = case actor_contract:list_size(ListOfOuts) of
 		1 ->
 			ListOfOuts;
