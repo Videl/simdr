@@ -46,6 +46,7 @@
     - [X] Workstation
     - [X] Railway
     - [X] Contract
+  - [ ] Extensively test Config record
   - [ ] Does ETS really returns the last item inputted when sending a product?
   - [ ] Ability to disable tests
   - [ ] Scenario 1

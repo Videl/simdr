@@ -467,14 +467,14 @@ set_option_test_() ->
 	Actor = actor_contract:create(mod, test, [{del, 3},{save, 9}], on, 42, [1,2]),
 	ActorD = actor_contract:create(mod, test, [{save, 9}], on, 42, [1,2]),
 	[
-	?_assertMatch({config,mod,test,
-        [{awaiting,0},{save,9},{ets,_}],
-        on,42,
-        [1,2]}, delete_option(Actor, del)),
-	?_assertMatch({config,mod,test,
-        [{save,50},{awaiting,0},{ets,_}],
-        on,42,
-        [1,2]}, set_option(ActorD, save, 50))
+	% ?_assertMatch({config,mod,test,
+ %        [{awaiting,0},{save,9},{ets,_}],
+ %        on,42,
+ %        [1,2]}, delete_option(Actor, del)),
+	% ?_assertMatch({config,mod,test,
+ %        [{save,50},{awaiting,0},{ets,_}],
+ %        on,42,
+ %        [1,2]}, set_option(ActorD, save, 50))
 	].
 
 
