@@ -28,10 +28,11 @@ N2 ! {self(), {add,in, N1}}.
 N1 ! {self(), {add,out, N2}}.
 N2 ! {self(), {add,out, N3a}}.
 N2 ! {self(), {add, out, N4}}.
-N4 ! {self(), {add, out, N3b}}.
+N4 ! {self(), {add, in, N2}}.
 N3a ! {self(), {add, out, N3b}}.
+N3b ! {self(), {add, in, N3a}}.
 N3b ! {self(), {add, out, N3c}}.
-
+N3c ! {self(), {add, in, N3b}}.
 
 
 

@@ -9,7 +9,6 @@ N_RFID = spawn(container, idling, [actor_rfid:create()]).
 N1 ! N2 ! N_RFID ! {start}.
 
 N1 ! {self(), {add, out, N2}}.
-N1 ! {self(), {add, in, self()}}.
 N2 ! {self(), {add, in, N1}}.
 N2 ! {self(), {add, out, self()}}.
 N1 ! {self(), {add, option, {rfid, N_RFID}}}.

@@ -1,0 +1,18 @@
+N1 = spawn(container, idling, [actor_conveyor:create()]).
+N_RFID = spawn(container, idling, [actor_rfid:create()]).
+
+N2 = spawn(container, idling, [actor_railway:create()]).
+
+N3 = spawn(container, idling, [actor_conveyor:create()]).
+
+N1 ! N2 ! N3 ! N_RFID ! {start}.
+
+N1 ! {self(), {add, option, {rfid, N_RFID}}}.
+N1 ! {self(), {add,out, N2}}.
+N2 ! {self(), {add,in, N1}}.
+N2 ! {self(), {add,in, N3}}.
+N3 ! {self(), {add, out, N2}}.
+
+N1 ! {self(), {actor_product, actor_product:create()}}.
+
+N2 ! { self(), {prob_in, N1}}.
