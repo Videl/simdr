@@ -11,7 +11,8 @@
 
 -export([
 	create/0,
-	answer/2]).
+	answer/2,
+	get_destination/1]).
 
 %% Behavior implementation
 
@@ -67,7 +68,7 @@ workstation_answer_test_() ->
 	ActorProductOne = actor_product:create(product_one),
 	{NewActor, {work_time, 20, changed}, supervisor}= answer(ActorWS, {change, work_time, 20}),
 	{_, {actor_product, ActorProductTwo, _Quality}, _Destination} = 
-		answer(ActorWS, {actor_product, ActorProductOne}),
+		actor_workstation:answer(ActorWS, {actor_product, ActorProductOne}),
 	[
 	% ?_assertEqual(
 	% 	{ActorWS, {supervisor, pong}}, 
