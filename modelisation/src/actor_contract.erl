@@ -261,6 +261,12 @@ answer(ActorConfig, {status, module}) ->
 answer(ActorConfig, {status, id}) ->
 	{ActorConfig, {id, actor_contract:get_id(ActorConfig), status}, supervisor};
 
+answer(ActorConfig, {io_export, list_data}) ->
+	TablePid = ActorConfig#config.list_data,
+	Fun = fun(X, Y) -> io:format("~w~n", [X]), Y end,
+	ets:foldl(Fun, ok, TablePid),
+	{ActorConfig, {io_export, actor_contract:get_module(ActorConfig), format}, supervisor};
+
 answer(_, Request) ->
 	io:format(">>>UNKNOWN ANSWER<<< (~w) (~w:~w)~n", [Request, ?MODULE, ?LINE]),
 	exit(unknown_request).
