@@ -87,7 +87,7 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 		in_out    = InOut, 
 		capacity  = Capacity, 
 		work_time = Work_time, 
-		list_data = ets:new(list_data_table, [duplicate_bag, public])},
+		list_data = ets:new(list_data_table, [ordered_set, public])},
 	Actor1     = add_options_helper(Actor, Opt),
 	Actor2     = actor_contract:set_option(Actor1, awaiting, 0),
 	TableQueue = ets:new(internal_queue, [duplicate_bag, public]),
