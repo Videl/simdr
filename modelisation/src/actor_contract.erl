@@ -259,13 +259,35 @@ answer(ActorConfig, {status, module}) ->
 	{ActorConfig, {module, actor_contract:get_module(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, id}) ->
-	{ActorConfig, {id, actor_contract:get_id(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{id, actor_contract:get_id(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {io_export, list_data}) ->
 	TablePid = ActorConfig#config.list_data,
 	Fun = fun(X, Y) -> io:format("~w~n", [X]), Y end,
 	ets:foldl(Fun, ok, TablePid),
-	{ActorConfig, {io_export, actor_contract:get_module(ActorConfig), format}, supervisor};
+	{ActorConfig, 
+	{io_export, actor_contract:get_module(ActorConfig), format}, 
+	supervisor};
+
+answer(ActorConfig, {file_export, list_data}) ->
+	TablePid = ActorConfig#config.list_data,
+	%% File creation
+	{ok, F} = file:open("list_data.log", [append, delayed_write, unicode]),
+	Fun = 
+		fun(X, FileDescriptor) -> 
+			R = io_lib:format("~p",[X]),
+
+			ok = file:write(FileDescriptor, lists:flatten(R ++ ["\n"])),
+			FileDescriptor 
+		end,
+	ets:foldl(Fun, F, TablePid),
+	ok = file:close(F),
+	{ActorConfig, 
+	{file_export, actor_contract:get_module(ActorConfig), format}, 
+	supervisor};
+
 
 answer(_, Request) ->
 	io:format(">>>UNKNOWN ANSWER<<< (~w) (~w:~w)~n", [Request, ?MODULE, ?LINE]),
