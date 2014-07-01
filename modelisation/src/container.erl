@@ -175,7 +175,7 @@ manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 			%io:format("JE SUIS ~w ET JE VEUX UN PRODUIT!~n", [self()]),
 			NewConfig = Config;
 		false -> 
-			io:format(" a product is waiting ~n", [NbWorkers, Capacity]),
+			io:format(" a product is waiting ~n"),
 			[Awaiting] = actor_contract:get_option(Config, awaiting),
 			NewConfig = actor_contract:set_option(Config, awaiting, Awaiting+1)
 	end,
