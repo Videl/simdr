@@ -76,9 +76,9 @@ create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
 
 create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
 	?CREATE_DEBUG_TABLE,
-	?DLOG("Initialising option_table manager."),
-	?DLOG("Initialising list_data_table manager."),
-	?DLOG("Initialising internal_queue manager."),
+	?DLOG(Id,"Initialising option_table manager."),
+	?DLOG(Id,"Initialising list_data_table manager."),
+	?DLOG(Id,"Initialising internal_queue manager."),
 	Actor = #config{
 		module    = Module, 
 		id        = Id, 
@@ -95,9 +95,10 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 	TableQueue = ets:new(internal_queue, [duplicate_bag, public]),
 	Actor3     = actor_contract:set_option(Actor2, ets, TableQueue),
 	Actor4     = add_datas_helper(Actor3, List_data),
-	?DLOG("Initialised option_table manager."),
-	?DLOG("Initialised list_data_table manager."),
-	?DLOG("Initialised internal_queue manager."),
+	io:format("je suis cree~n"),
+	?DLOG(Id,"Initialised option_table manager."),
+	?DLOG(Id,"Initialised list_data_table manager."),
+	?DLOG(Id,"Initialised internal_queue manager."),
 	Actor4.
 
 get_module(Actor) ->
@@ -109,7 +110,7 @@ get_module(Actor) ->
 add_data(Actor, X) ->
 	Data = {erlang:localtime(), X},
 	ETSData = Actor#config.list_data,
-	?DLOG({lists:concat(["Inserting data to", ETSData]), Data}),
+	?DLOG(actor_contract:get_id(Actor),{lists:concat(["Inserting data to", ETSData]), Data}),
 	ets:insert(ETSData, Data),
 %%	(ets:insert(ETSData, Data)=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
@@ -169,7 +170,7 @@ get_option(Actor, Key) ->
 	Opts = Actor#config.opt,
 	Var = ets:lookup(Opts, Key),
 	Option = get_option_helper(Var, Key), 
-	?DLOG({lists:concat(["Elements from ", Opts]), Option}),
+	?DLOG(actor_contract:get_id(Actor),{lists:concat(["Elements value ", Key]), Option}),
 	Option.
 
 set_option(Actor, Key, Value) ->
@@ -185,7 +186,7 @@ delete_option(Actor, Key) ->
 
 add_option(Actor, Key, Value) ->
 	Opts = Actor#config.opt,
-	?DLOG({lists:concat(["Inserting option to ", Opts]), {Key, Value}}),
+	?DLOG(actor_contract:get_id(Actor),{lists:concat(["Inserting option to ", Opts]), {Key, Value}}),
 	ets:insert(Opts, {Key, Value}),
 	%%(ets:insert(Opts, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
@@ -214,6 +215,10 @@ answer(ActorConfig, {change, work_time, N}) ->
 answer(ActorConfig, {change, state, State}) ->
 	NewConfig = actor_contract:set_state(ActorConfig, State),
 	{NewConfig, {state, State, changed}, supervisor};
+
+answer(ActorConfig, {change, capacity, Capacity}) ->
+	NewConfig = actor_contract:set_state(ActorConfig, Capacity),
+	{NewConfig, {capacity, Capacity, changed}, supervisor};
 
 answer(ActorConfig, {change, in_out, {In, Out}}) ->
 	NewConfig = actor_contract:set_in_out(ActorConfig, {In, Out}),
