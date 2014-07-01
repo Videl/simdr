@@ -75,6 +75,10 @@ create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
 	actor_contract:create(Module, Id, Opt, State, In, Out, {In,Out}, infinity, Work_time, List_data).
 
 create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
+	?CREATE_DEBUG_TABLE,
+	?DLOG("Initialising option_table manager."),
+	?DLOG("Initialising list_data_table manager."),
+	?DLOG("Initialising internal_queue manager."),
 	Actor = #config{
 		module    = Module, 
 		id        = Id, 
@@ -91,6 +95,9 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 	TableQueue = ets:new(internal_queue, [duplicate_bag, public]),
 	Actor3     = actor_contract:set_option(Actor2, ets, TableQueue),
 	Actor4     = add_datas_helper(Actor3, List_data),
+	?DLOG("Initialised option_table manager."),
+	?DLOG("Initialised list_data_table manager."),
+	?DLOG("Initialised internal_queue manager."),
 	Actor4.
 
 get_module(Actor) ->
@@ -102,7 +109,9 @@ get_module(Actor) ->
 add_data(Actor, X) ->
 	Data = {erlang:localtime(), X},
 	ETSData = Actor#config.list_data,
+	?DLOG({lists:concat(["Inserting data to", ETSData]), Data}),
 	ets:insert(ETSData, Data),
+%%	(ets:insert(ETSData, Data)=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
 set_id(Actor, Id) ->
@@ -159,7 +168,9 @@ set_capacity(Actor, Capacity) ->
 get_option(Actor, Key) ->
 	Opts = Actor#config.opt,
 	Var = ets:lookup(Opts, Key),
-	get_option_helper(Var, Key).
+	Option = get_option_helper(Var, Key), 
+	?DLOG({lists:concat(["Elements from ", Opts]), Option}),
+	Option.
 
 set_option(Actor, Key, Value) ->
 	Actor1 = delete_option(Actor, Key),
@@ -169,11 +180,14 @@ set_option(Actor, Key, Value) ->
 delete_option(Actor, Key) ->
 	Opts = Actor#config.opt,
 	ets:delete(Opts, Key),
+	%%(ets:delete(Opts, Key)=:= true) orelse ?DLOG("Deletion failed"),
 	Actor.
 
 add_option(Actor, Key, Value) ->
 	Opts = Actor#config.opt,
+	?DLOG({lists:concat(["Inserting option to ", Opts]), {Key, Value}}),
 	ets:insert(Opts, {Key, Value}),
+	%%(ets:insert(Opts, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
 work(N) ->
@@ -257,20 +271,16 @@ random_id() ->
 
 get_data(Actor) ->
 	ETS = Actor#config.list_data,
-	get_data_helper(ETS, ets:first(ETS), empty).
+	Key = ets:first(ETS),
+	[HeadData|_Rest] = ets:lookup(ETS, Key),
+	?DLOG(lists:concat(["First element from ", ETS]), HeadData),
+	HeadData.
+	
 	
 %% ===================================================================
 %% Internal API
 %% ===================================================================
 
-get_data_helper(ETS, '$end_of_table', empty) ->
-	no_data;
-get_data_helper(ETS, '$end_of_table', {Key, LastValue}) ->
-	LastValue;
-get_data_helper(ETS, {K, V}, _B) ->
-	Key = ets:next(ETS, K),
-	NewData = {Key, ets:lookup(ETS, Key)},
-	get_data_helper(ETS, NewData, {K, V}).
 
 add_datas_helper(Actor, []) ->
 	Actor;
@@ -313,8 +323,9 @@ list_size_helper([_H|T], Acc) ->
 %% ===================================================================
 
 get_data_1_test() ->
-	Actor = create(mod, test, [{opt1, v2}, {opt2, v1}], busy, 3, [1,2,3]),
-	1 = get_data(Actor).
+	Actor = create(mod, test, [{opt1, v2}], busy, 3, [1, 2, 3]),
+	?_assertMatch(
+		{_Date, _Hour, 1}, get_data(Actor)).
 
 get_module_test() ->
 	Actor = create(mod, test, [{opt1, v2}, {opt2, v1}], busy, 3, [1,2,3]),
