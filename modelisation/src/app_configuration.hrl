@@ -4,7 +4,7 @@
 -endif.
 
 % config record
--include("config.hrl").
+-include("recordconfig.hrl").
 
 
 -define(DEBUG, true).
