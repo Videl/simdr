@@ -24,9 +24,9 @@
   - [X] Ability to disable tests
   - [X] Scenario 1
   - [X] Scenario 2
-  - [ ] Scenario 3
-  - [ ] Scenario 4
-  - [ ] Scenario 5
+  - [X] Scenario 3
+  - [X] Scenario 4
+  - [X] Scenario 5
   - [ ] Scenario 6
   - [ ] Container
     - [ ] Physical Work

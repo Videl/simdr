@@ -31,6 +31,8 @@ N3a ! {self(), {add, out, N3b}}.
 N3b ! {self(), {add, out, N3c}}.
 
 
+Prod= actor_product:create().
 
+N1 ! {self(), {actor_product, Prod}}.
 
-N1 ! {self(), {actor_product, actor_product:create()}}.
+N2 ! {self(), {prob_out, Prod, N3a}}.

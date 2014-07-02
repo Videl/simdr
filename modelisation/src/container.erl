@@ -32,9 +32,9 @@ idling(Config) ->
 
 processing(Config, NbWorkers) ->
 	receive
-		{Sender, {control, full, {Wait_time, Request}}} ->
-			spawn(?MODULE, wait, [self(), Wait_time, {Request, Sender}]),
-			processing(Config, NbWorkers);
+		% {Sender, {control, full, {Wait_time, Request}}} ->
+		% 	spawn(?MODULE, wait, [self(), Wait_time, {Request, Sender}]),
+		% 	processing(Config, NbWorkers);
 
 		{_Sender, {prob_in, Decision}} ->
 			{_In, Out} = actor_contract:get_in_out(Config),
@@ -42,6 +42,14 @@ processing(Config, NbWorkers) ->
 			NewConfig = actor_contract:set_in_out(Config, {NewIn, Out}),
 			NewIn ! {self(), {control, ok}},
 			processing(NewConfig, NbWorkers);
+
+		{_Sender, {prob_out, Prod, Decision}} ->
+			FullAnswer = (actor_contract:get_module(Config)):answer(Config,{prob_out, Prod, Decision}),
+			io:format(" Prob out Answer : ~w ~n", [FullAnswer]),
+			{NewConfig, NewNbWorkers} = end_of_physical_work(
+				{Config, NbWorkers}, 
+				FullAnswer),
+			processing(NewConfig, NewNbWorkers);
 
 		{Sender, Request} ->
 			{NewConfig, NewWorkers} = manage_request({Config, NbWorkers, Sender}, Request),
