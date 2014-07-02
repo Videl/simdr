@@ -343,7 +343,6 @@ get_data(Actor) ->
 %% ===================================================================
 
 export_to(file) ->
-	Fun = 
 	fun(X, FileDescriptor) -> 
 		R = io_lib:format("~w\n",[X]),
 		%RX = erlang:iolist_to_binary(R),
