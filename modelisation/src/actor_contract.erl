@@ -293,26 +293,31 @@ answer(ActorConfig, {csv_export, list_data}) ->
 	{file_export, actor_contract:get_module(ActorConfig), format}, 
 	supervisor};
 
-answer(ActorConfig, {io_export, list_data}) ->
-	TablePid = ActorConfig#config.list_data,
-	Fun = fun(X, Y) -> io:format("~w~n", [X]), Y end,
-	ets:foldl(Fun, ok, TablePid),
+answer(ActorConfig, {io_export, debug}) ->
+	?CREATE_DEBUG_TABLE,
+	Fun = export_to(io),
+	ets:foldl(Fun, ok, ?DEBUG_TABLE),
 	{ActorConfig, 
 	{io_export, actor_contract:get_module(ActorConfig), format}, 
 	supervisor};
 
-answer(ActorConfig, {file_export, list_data}) ->
-	TablePid = ActorConfig#config.list_data,
+answer(ActorConfig, {file_export, debug}) ->
+	?CREATE_DEBUG_TABLE,
 	%% File creation
-	{ok, F} = file:open("list_data.log", [append, delayed_write, unicode]),
-	Fun = 
-		fun(X, FileDescriptor) -> 
-			R = io_lib:format("~p",[X]),
+	{ok, F} = file:open("debug.log", [append, delayed_write, unicode]),
+	Fun = export_to(file),
+	ets:foldl(Fun, F, ?DEBUG_TABLE),
+	ok = file:close(F),
+	{ActorConfig, 
+	{file_export, actor_contract:get_module(ActorConfig), format}, 
+	supervisor};
 
-			ok = file:write(FileDescriptor, lists:flatten(R ++ ["\n"])),
-			FileDescriptor 
-		end,
-	ets:foldl(Fun, F, TablePid),
+answer(ActorConfig, {csv_export, debug}) ->
+	?CREATE_DEBUG_TABLE,
+	%% File creation
+	{ok, F} = file:open("debug.csv", [append, delayed_write, unicode]),
+	Fun = export_to(file),
+	ets:foldl(Fun, F, ?DEBUG_TABLE),
 	ok = file:close(F),
 	{ActorConfig, 
 	{file_export, actor_contract:get_module(ActorConfig), format}, 
@@ -340,13 +345,19 @@ get_data(Actor) ->
 export_to(file) ->
 	Fun = 
 	fun(X, FileDescriptor) -> 
-		R = io_lib:format("~w",[X]),
-
-		ok = file:write(FileDescriptor,  R ++ ["\n"]),
+		R = io_lib:format("~w\n",[X]),
+		%RX = erlang:iolist_to_binary(R),
+		%RXF = lists:flatten(RX),
+		ok = file:write(FileDescriptor,  R),
 		FileDescriptor 
 	end;
 export_to(_) ->
-	fun(X, Y) -> io:format("~w~n", [X]), Y end.
+	fun(X, Y) ->
+		R = io_lib:format("~w\n",[X]),
+		%RX = erlang:iolist_to_binary(R),
+		%RXF = lists:flatten(RX),
+		io:format("~w~n", [R]), Y
+	end.
 
 add_datas_helper(Actor, []) ->
 	Actor;

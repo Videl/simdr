@@ -13,3 +13,11 @@ N2 ! {self(), {add, out, self()}}.
 N1 ! {self(), {add, option, {rfid, N_RFID}}}.
 
 N1 ! {self(), {actor_product, actor_product:create()}}.
+
+%%% Outputs:
+%%% N1 ! {self(), {io_export, list_data}}.
+%%% N1 ! {self(), {file_export, list_data}}.
+%%% N1 ! {self(), {csv_export, list_data}}.
+%%% N1 ! {self(), {io_export, debug}}.
+%%% N1 ! {self(), {file_export, debug}}.
+%%% N1 ! {self(), {csv_export, debug}}.
