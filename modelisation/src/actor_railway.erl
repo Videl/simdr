@@ -33,27 +33,28 @@ answer(RailwayConfig, {actor_product, ProductConfig}) ->
 		true ->	
 			{RailwayConfig, {actor_product, ProductConfig, InfoProb}, Dest};
 		false -> 
-			{In, _Out}= actor_contract: get_in_out(RailwayConfig),
-			{RailwayConf, ProductConf} = 
-				actor_contract:add_to_list_data(
-					{RailwayConfig, 
-						{ProductConfig,	
-							{In,
-							actor_contract:get_out(RailwayConfig)}
-						}
-					}, 
-				{ProductConfig, RailwayConfig}),
+			%{In, _Out}= actor_contract: get_in_out(RailwayConfig),
+			{RailwayConf, ProductConf} = {RailwayConfig, ProductConfig},
+			% 	actor_contract:add_to_list_data(
+			% 		{RailwayConfig, 
+			% 			{ProductConfig,	
+			% 				{In,
+			% 				actor_contract:get_out(RailwayConfig)}
+			% 			}
+			% 		}, 
+			% 	{ProductConfig, RailwayConfig}),
 			{RailwayConf, {actor_product, ProductConf, InfoProb}, Dest}
 	end;
 
 answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 	{In, _Out} = actor_contract:get_in_out(RailwayConfig),
 	NewOut = Decision,
-	{Conf, Prod} = actor_contract:add_to_list_data(
-		{RailwayConfig, 
-			{ProductConfig, 
-			{[In],[NewOut]}}}, 
-		{ProductConfig, RailwayConfig}),
+	{Conf, Prod} = {RailwayConfig, ProductConfig},
+	% actor_contract:add_to_list_data(
+	% 	{RailwayConfig, 
+	% 		{ProductConfig, 
+	% 		{[In],[NewOut]}}}, 
+	% 	{ProductConfig, RailwayConfig}),
 	case Decision =/= actor_contract:get_in_out(Conf) of
 		true ->	
 			RailwayConf = actor_contract:set_in_out(Conf, {In, NewOut}),

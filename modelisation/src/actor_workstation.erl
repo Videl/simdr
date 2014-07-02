@@ -25,9 +25,10 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
 	{NewProductConfig, Quality} = change_product(ProductConfig),
 	% List data fillers
-	{NewWSConfig, NewProductConfigBis} = actor_contract:add_to_list_data(
-		{WSConfig, {NewProductConfig, Quality}}, 
-		{NewProductConfig, {WSConfig}}),
+	{NewWSConfig, NewProductConfigBis} = {WSConfig, NewProductConfig},
+	% actor_contract:add_to_list_data(
+	% 	{WSConfig, {NewProductConfig, Quality}}, 
+	% 	{NewProductConfig, {WSConfig}}),
 	% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Quality}, 

@@ -16,7 +16,7 @@
 %% ===================================================================
 
 idling(Config) ->
-	%%?CREATE_DEBUG_TABLE,
+	?CREATE_DEBUG_TABLE,
 	receive
 		{start} ->
 			?DLOG(
@@ -104,16 +104,25 @@ end_of_physical_work(
 					 {Config, NbWorkers}, 
 					 {NewConfig, LittleAnswer, Destination}) ->
 	[TablePid] = actor_contract:get_option(Config, ets), 
-	{actor_product, ConfProd, _} = LittleAnswer,
-	?DLOG(actor_contract:get_module(Config), {work,done,on,product,ConfProd}),
+	{actor_product, ProductConfig, Detail} = LittleAnswer,
+	?DLOG(
+		actor_contract:get_module(Config), 
+		{work,done,on,product,ProductConfig}),
+	io:format("Container >>> Work is done on product id ~p.\n", [actor_contract:get_id(ProductConfig)]),
+	actor_contract:add_data(
+		NewConfig, 
+		{work,on,product,is,done,{ProductConfig, Detail}}), 
+	actor_contract:add_data(
+		ProductConfig, 
+		{processing,done,by,{NewConfig}}),
 	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
 		[actor_contract:get_module(NewConfig), 
 		 actor_contract:get_id(NewConfig), 
-		 actor_contract:get_id(ConfProd)]),
-	ets:insert(TablePid, {product, awaiting_sending, ConfProd}),
+		 actor_contract:get_id(ProductConfig)]),
+	ets:insert(TablePid, {product, awaiting_sending, ProductConfig}),
 	%io:format("await"),
  	send_message(awaiting_product, Destination),
-	[Awaiting] = actor_contract:get_option(Config, awaiting),
+	[Awaiting] = actor_contract:get_option(NewConfig, awaiting),
 	case Awaiting > 0 of
 		true -> 
 			case actor_contract:list_size(actor_contract:get_in(Config)) of 
@@ -150,6 +159,9 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 	?DLOG(
 		actor_contract:get_module(Config), 
 		{starting,to,work,on,product,ProdConf}),
+	io:format("Container >>> Work is starting on product id ~p.\n", [actor_contract:get_id(ProdConf)]),
+	actor_contract:add_data(Config, {new,product,has,arrived, {ProdConf}}), 
+	actor_contract:add_data(ProdConf, {processing,started,by,Config}),
 	%%% Decrement the number of products waiting for us.
 	[Awaiting] = actor_contract:get_option(Config, awaiting),
 	case Awaiting > 0 of 
@@ -175,6 +187,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			%io:format("Sending product..~n"),
 			FirstEntry = actor_contract:first(ListEntry),
 			{product, awaiting_sending, Prod} = FirstEntry,
+			actor_contract:add_data(Config, {sending, product, {Prod}}), 
 			send_message({actor_product, Prod}, Sender),
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
