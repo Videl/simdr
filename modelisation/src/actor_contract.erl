@@ -277,9 +277,26 @@ answer(ActorConfig, {file_export, list_data}) ->
 	{ok, F} = file:open("list_data.log", [append, delayed_write, unicode]),
 	Fun = 
 		fun(X, FileDescriptor) -> 
-			R = io_lib:format("~p",[X]),
+			R = io_lib:format("~w",[X]),
 
-			ok = file:write(FileDescriptor, lists:flatten(R ++ ["\n"])),
+			ok = file:write(FileDescriptor, R ++ ["\n"]),
+			FileDescriptor 
+		end,
+	ets:foldl(Fun, F, TablePid),
+	ok = file:close(F),
+	{ActorConfig, 
+	{file_export, actor_contract:get_module(ActorConfig), format}, 
+	supervisor};
+
+answer(ActorConfig, {csv_export, list_data}) ->
+	TablePid = ActorConfig#config.list_data,
+	%% File creation
+	{ok, F} = file:open("list_data.csv", [append, delayed_write, unicode]),
+	Fun = 
+		fun(X, FileDescriptor) -> 
+			R = io_lib:format("~w",[X]),
+
+			ok = file:write(FileDescriptor,  R ++ ["\n"]),
 			FileDescriptor 
 		end,
 	ets:foldl(Fun, F, TablePid),

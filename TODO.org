@@ -8,7 +8,7 @@
      - [ ] DLOG in interesting places
      - [ ] Command to dump ETS files to text (or read at least)
        - [X] Export (data) with io:format 2014-07-01 18:20
-       - [ ] Export (data) to CVS
+       - [X] Export (data) to CVS
        - [X] Export (data) to text file (weird output but meh) 2014-07-01 18:20
        - [ ] Export (data) to DETS file
        - [ ] Debug table too (io, text, CVS, DETS)
