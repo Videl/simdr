@@ -265,7 +265,7 @@ answer(ActorConfig, {status, id}) ->
 
 answer(ActorConfig, {io_export, list_data}) ->
 	TablePid = ActorConfig#config.list_data,
-	Fun = fun(X, Y) -> io:format("~w~n", [X]), Y end,
+	Fun = export_to(io),
 	ets:foldl(Fun, ok, TablePid),
 	{ActorConfig, 
 	{io_export, actor_contract:get_module(ActorConfig), format}, 
@@ -275,13 +275,7 @@ answer(ActorConfig, {file_export, list_data}) ->
 	TablePid = ActorConfig#config.list_data,
 	%% File creation
 	{ok, F} = file:open("list_data.log", [append, delayed_write, unicode]),
-	Fun = 
-		fun(X, FileDescriptor) -> 
-			R = io_lib:format("~w",[X]),
-
-			ok = file:write(FileDescriptor, R ++ ["\n"]),
-			FileDescriptor 
-		end,
+	Fun = export_to(file),
 	ets:foldl(Fun, F, TablePid),
 	ok = file:close(F),
 	{ActorConfig, 
@@ -292,13 +286,7 @@ answer(ActorConfig, {csv_export, list_data}) ->
 	TablePid = ActorConfig#config.list_data,
 	%% File creation
 	{ok, F} = file:open("list_data.csv", [append, delayed_write, unicode]),
-	Fun = 
-		fun(X, FileDescriptor) -> 
-			R = io_lib:format("~w",[X]),
-
-			ok = file:write(FileDescriptor,  R ++ ["\n"]),
-			FileDescriptor 
-		end,
+	Fun = export_to(file),
 	ets:foldl(Fun, F, TablePid),
 	ok = file:close(F),
 	{ActorConfig, 
@@ -349,6 +337,16 @@ get_data(Actor) ->
 %% Internal API
 %% ===================================================================
 
+export_to(file) ->
+	Fun = 
+	fun(X, FileDescriptor) -> 
+		R = io_lib:format("~w",[X]),
+
+		ok = file:write(FileDescriptor,  R ++ ["\n"]),
+		FileDescriptor 
+	end;
+export_to(_) ->
+	fun(X, Y) -> io:format("~w~n", [X]), Y end.
 
 add_datas_helper(Actor, []) ->
 	Actor;
