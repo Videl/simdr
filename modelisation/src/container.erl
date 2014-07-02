@@ -105,30 +105,33 @@ end_of_physical_work(
 					 {NewConfig, LittleAnswer, Destination}) ->
 	[TablePid] = actor_contract:get_option(Config, ets), 
 	{actor_product, ConfProd, _} = LittleAnswer,
+	[Awaiting] = actor_contract:get_option(Config, awaiting),
 	?DLOG(actor_contract:get_module(Config), {work,done,on,product,ConfProd}),
-	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
+	io:format(" ~w, ~w finish to work product : ~w , Awaiting ~w ~n ~n",
 		[actor_contract:get_module(NewConfig), 
 		 actor_contract:get_id(NewConfig), 
-		 actor_contract:get_id(ConfProd)]),
+		 actor_contract:get_id(ConfProd), Awaiting]),
 	ets:insert(TablePid, {product, awaiting_sending, ConfProd}),
 	%io:format("await"),
  	send_message(awaiting_product, Destination),
-	[Awaiting] = actor_contract:get_option(Config, awaiting),
 	case Awaiting > 0 of
 		true -> 
 			case actor_contract:list_size(actor_contract:get_in(Config)) of 
 				1 ->
 					[InActor] = actor_contract:get_in(Config),
+					Workers = NbWorkers+1,
 					InActor ! {self(), {control, ok}};
 				_ ->
 					%%% Sending message to supervisor 
+					Workers = NbWorkers,
 					send_message({Config, prob_in}, supervisor)
 			end;
 		false -> 
+			Workers = NbWorkers,
 			%%% No new products incoming.
 			wait
 	end,
-	{actor_contract:set_state(NewConfig, free), NbWorkers-1}.
+	{actor_contract:set_state(NewConfig, free), Workers}.
 
 
 end_of_logical_work(
@@ -160,8 +163,7 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 	end,
 	Request = {actor_product, ProdConf},
 	spawn(?MODULE, physical_work, [self(), NewConfig, Request]),
-	NewWorker = NbWorkers + 1,
-	{NewConfig, NewWorker};
+	{NewConfig, NbWorkers};
 %%% Receiving request of a product from actor in `out'.
 %%% @end
 manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
@@ -193,16 +195,19 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 %%% @end
 manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 	Capacity= actor_contract:get_capacity(Config),
+	io:format(" ~w < ~w ~n", [NbWorkers, Capacity]),
 	case NbWorkers < Capacity of 
 		true -> 
 			Sender ! {self(), {control, ok}},
+			Workers = NbWorkers+1,
 			NewConfig = Config;
 		false -> 
 			io:format(" a product is waiting ~n"),
+			Workers = NbWorkers,
 			[Awaiting] = actor_contract:get_option(Config, awaiting),
 			NewConfig = actor_contract:set_option(Config, awaiting, Awaiting+1)
 	end,
-	{NewConfig, NbWorkers};
+	{NewConfig, Workers};
 
 %%% If the request is not about products, then it's not about a
 %%% physical stream... so we launch a 'logical' work, directed at the 
