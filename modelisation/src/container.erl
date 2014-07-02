@@ -168,7 +168,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 %%% a product can be sent.
 manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 	Capacity= actor_contract:get_capacity(Config),
-
+%	io:format("~w < ~w ~n", [NbWorkers,Capacity]),
 	case NbWorkers < Capacity of 
 		true -> 
 			Sender ! {self(),{control, ok}},

@@ -211,7 +211,7 @@ answer(ActorConfig, {change, state, State}) ->
 	{NewConfig, {state, State, changed}, supervisor};
 
 answer(ActorConfig, {change, capacity, Capacity}) ->
-	NewConfig = actor_contract:set_state(ActorConfig, Capacity),
+	NewConfig = actor_contract:set_capacity(ActorConfig, Capacity),
 	{NewConfig, {capacity, Capacity, changed}, supervisor};
 
 answer(ActorConfig, {change, in_out, {In, Out}}) ->
