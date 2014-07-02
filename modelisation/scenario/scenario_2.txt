@@ -17,4 +17,13 @@ N2 ! {self(), {change, capacity, 1}}.
 N1 ! {self(), {actor_product, actor_product:create()}}.
 N1 ! {self(), {actor_product, actor_product:create()}}.
 N1 ! {self(), {actor_product, actor_product:create()}}.
- 
+
+=======
+
+%%% Outputs:
+%%% N1 ! {self(), {io_export, list_data}}.
+%%% N1 ! {self(), {file_export, list_data}}.
+%%% N1 ! {self(), {csv_export, list_data}}.
+%%% N1 ! {self(), {io_export, debug}}.
+%%% N1 ! {self(), {file_export, debug}}.
+%%% N1 ! {self(), {csv_export, debug}}.

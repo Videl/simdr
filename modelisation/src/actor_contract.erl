@@ -87,7 +87,7 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 		in_out    = InOut, 
 		capacity  = Capacity, 
 		work_time = Work_time, 
-		list_data = ets:new(list_data_table, [duplicate_bag, public])},
+		list_data = ets:new(list_data_table, [ordered_set, public])},
 	Actor1     = add_options_helper(Actor, Opt),
 	Actor2     = actor_contract:set_option(Actor1, awaiting, 0),
 	TableQueue = ets:new(internal_queue, [duplicate_bag, public]),
@@ -259,7 +259,69 @@ answer(ActorConfig, {status, module}) ->
 	{ActorConfig, {module, actor_contract:get_module(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, id}) ->
-	{ActorConfig, {id, actor_contract:get_id(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{id, actor_contract:get_id(ActorConfig), status}, 
+	supervisor};
+
+answer(ActorConfig, {io_export, list_data}) ->
+	TablePid = ActorConfig#config.list_data,
+	Fun = export_to(io),
+	ets:foldl(Fun, ok, TablePid),
+	{ActorConfig, 
+	{io_export, actor_contract:get_module(ActorConfig), format}, 
+	supervisor};
+
+answer(ActorConfig, {file_export, list_data}) ->
+	TablePid = ActorConfig#config.list_data,
+	%% File creation
+	{ok, F} = file:open("list_data.log", [append, delayed_write, unicode]),
+	Fun = export_to(file),
+	ets:foldl(Fun, F, TablePid),
+	ok = file:close(F),
+	{ActorConfig, 
+	{file_export, actor_contract:get_module(ActorConfig), format}, 
+	supervisor};
+
+answer(ActorConfig, {csv_export, list_data}) ->
+	TablePid = ActorConfig#config.list_data,
+	%% File creation
+	{ok, F} = file:open("list_data.csv", [append, delayed_write, unicode]),
+	Fun = export_to(file),
+	ets:foldl(Fun, F, TablePid),
+	ok = file:close(F),
+	{ActorConfig, 
+	{file_export, actor_contract:get_module(ActorConfig), format}, 
+	supervisor};
+
+answer(ActorConfig, {io_export, debug}) ->
+	?CREATE_DEBUG_TABLE,
+	Fun = export_to(io),
+	ets:foldl(Fun, ok, ?DEBUG_TABLE),
+	{ActorConfig, 
+	{io_export, actor_contract:get_module(ActorConfig), format}, 
+	supervisor};
+
+answer(ActorConfig, {file_export, debug}) ->
+	?CREATE_DEBUG_TABLE,
+	%% File creation
+	{ok, F} = file:open("debug.log", [append, delayed_write, unicode]),
+	Fun = export_to(file),
+	ets:foldl(Fun, F, ?DEBUG_TABLE),
+	ok = file:close(F),
+	{ActorConfig, 
+	{file_export, actor_contract:get_module(ActorConfig), format}, 
+	supervisor};
+
+answer(ActorConfig, {csv_export, debug}) ->
+	?CREATE_DEBUG_TABLE,
+	%% File creation
+	{ok, F} = file:open("debug.csv", [append, delayed_write, unicode]),
+	Fun = export_to(file),
+	ets:foldl(Fun, F, ?DEBUG_TABLE),
+	ok = file:close(F),
+	{ActorConfig, 
+	{file_export, actor_contract:get_module(ActorConfig), format}, 
+	supervisor};
 
 answer(_, Request) ->
 	io:format(">>>UNKNOWN ANSWER<<< (~w) (~w:~w)~n", [Request, ?MODULE, ?LINE]),
@@ -280,6 +342,22 @@ get_data(Actor) ->
 %% Internal API
 %% ===================================================================
 
+export_to(file) ->
+	Fun = 
+	fun(X, FileDescriptor) -> 
+		R = io_lib:format("~w\n",[X]),
+		%RX = erlang:iolist_to_binary(R),
+		%RXF = lists:flatten(RX),
+		ok = file:write(FileDescriptor,  R),
+		FileDescriptor 
+	end;
+export_to(_) ->
+	fun(X, Y) ->
+		R = io_lib:format("~w\n",[X]),
+		%RX = erlang:iolist_to_binary(R),
+		%RXF = lists:flatten(RX),
+		io:format("~w~n", [R]), Y
+	end.
 
 add_datas_helper(Actor, []) ->
 	Actor;
