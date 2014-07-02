@@ -16,7 +16,7 @@
 %% ===================================================================
 
 idling(Config) ->
-	?CREATE_DEBUG_TABLE,
+	%%?CREATE_DEBUG_TABLE,
 	receive
 		{start} ->
 			?DLOG(actor_contract:get_module(Config), "Entering processing state."),

@@ -76,9 +76,7 @@ create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
 
 create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
 	?CREATE_DEBUG_TABLE,
-	?DLOG(Id,"Initialising option_table manager."),
-	?DLOG(Id,"Initialising list_data_table manager."),
-	?DLOG(Id,"Initialising internal_queue manager."),
+	?DLOG(lists:concat(["Initialising ets tables of", Id])),
 	Actor = #config{
 		module    = Module, 
 		id        = Id, 
@@ -95,10 +93,6 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 	TableQueue = ets:new(internal_queue, [duplicate_bag, public]),
 	Actor3     = actor_contract:set_option(Actor2, ets, TableQueue),
 	Actor4     = add_datas_helper(Actor3, List_data),
-	io:format("je suis cree~n"),
-	?DLOG(Id,"Initialised option_table manager."),
-	?DLOG(Id,"Initialised list_data_table manager."),
-	?DLOG(Id,"Initialised internal_queue manager."),
 	Actor4.
 
 get_module(Actor) ->
@@ -329,8 +323,9 @@ list_size_helper([_H|T], Acc) ->
 
 get_data_1_test() ->
 	Actor = create(mod, test, [{opt1, v2}], busy, 3, [1, 2, 3]),
+	NewActor = add_data(Actor, 4),
 	?_assertMatch(
-		{_Date, _Hour, 1}, get_data(Actor)).
+		{_Date, _Hour, 4}, get_data(NewActor)).
 
 get_module_test() ->
 	Actor = create(mod, test, [{opt1, v2}, {opt2, v1}], busy, 3, [1,2,3]),
