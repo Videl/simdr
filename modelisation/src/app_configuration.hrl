@@ -22,6 +22,7 @@
 -else.
 -define(CREATE_DEBUG_TABLE, void).
 -define(DLOG(X), void).
+-define(DLOG(X, Y), void).
 -endif.
 
 
