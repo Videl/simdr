@@ -16,9 +16,12 @@ N2 ! {self(), {add, out, N4}}.
 N2 ! {self(), {change, capacity, 1}}.
 N2 ! {self(), {change, work_time, 10}}.
 
-N1 ! {self(), {actor_product, actor_product:create()}}.
+N1 ! {self(),{actor_product, actor_product:create()}}.
+N1 ! {self(),{actor_product, actor_product:create()}}.
+N1 ! {self(),{actor_product, actor_product:create()}}.
 N3 ! {self(),{actor_product, actor_product:create()}}.
 N3 ! {self(),{actor_product, actor_product:create()}}.
+
 N3 ! {self(),{actor_product, actor_product:create()}}.
 N3 ! {self(),{actor_product, actor_product:create()}}.
 

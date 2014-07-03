@@ -36,6 +36,7 @@
 		 set_option/3, 
 		 work/1,
 		 list_size/1,
+		 different_sender/1,
 		 answer/2,
 		 random_id/0,
 		 first/1]).
@@ -89,9 +90,9 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 		work_time = Work_time, 
 		list_data = ets:new(list_data_table, [ordered_set, public])},
 	Actor1     = add_options_helper(Actor, Opt),
-	Actor2     = actor_contract:set_option(Actor1, awaiting, 0),
+	%Actor2     = actor_contract:set_option(Actor1, awaiting, 0),
 	TableQueue = ets:new(internal_queue, [duplicate_bag, public]),
-	Actor3     = actor_contract:set_option(Actor2, ets, TableQueue),
+	Actor3     = actor_contract:set_option(Actor1, ets, TableQueue),
 	Actor4     = add_datas_helper(Actor3, List_data),
 	Actor4.
 
@@ -336,6 +337,10 @@ get_data(Actor) ->
 	[HeadData|_Rest] = ets:lookup(ETS, Key),
 	?DLOG(lists:concat(["First element from ", ETS]), HeadData),
 	HeadData.
+
+different_sender(Awaiting)->
+	[H|T] = Awaiting, 
+	different_sender_helper(H, T).
 	
 	
 %% ===================================================================
@@ -343,7 +348,7 @@ get_data(Actor) ->
 %% ===================================================================
 
 export_to(file) ->
-	Fun = 
+	%Fun = 
 	fun(X, FileDescriptor) -> 
 		R = io_lib:format("~w\n",[X]),
 		%RX = erlang:iolist_to_binary(R),
@@ -385,6 +390,14 @@ add_options_helper(Actor, [{Key, Value}|T]) ->
 	Actor2 = add_option(Actor, Key, Value),
 	add_options_helper(Actor2, T).
 
+different_sender_helper(S, [H|T]) ->
+	case S =:= H of 
+		true -> different_sender_helper(H, T);
+		false -> true
+	end;
+
+different_sender_helper(_S, []) ->
+	false.
 
 list_size_helper([], Acc) ->
 	Acc;
