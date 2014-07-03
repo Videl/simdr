@@ -1,0 +1,47 @@
+%%%
+%%% Scenario:
+%%% Two conveyors connected. The first one has an RFID Actor connected to it.
+%%%
+
+N1 = spawn(container, idling, [actor_conveyor:create()]).
+N2 = spawn(container, idling, [actor_conveyor:create()]).
+N_RFID = spawn(container, idling, [actor_rfid:create()]).
+N1 ! N2 ! N_RFID ! {start}.
+
+N1 ! {self(), {add, out, N2}}.
+N2 ! {self(), {add, out, self()}}.
+N1 ! {self(), {add, option, {rfid, N_RFID}}}.
+
+N2 ! {self(), {change, capacity, 1}}.
+
+P1 = actor_product:create().
+P2 = actor_product:create().
+P3 = actor_product:create().
+P4 = actor_product:create().
+
+N1 ! {self(), {actor_product, P1}}.
+N1 ! {self(), {actor_product, P2}}.
+N1 ! {self(), {actor_product, P3}}.
+N1 ! {self(), {actor_product, P4}}.
+
+=======
+
+%%% Outputs:
+%%% N1 ! {self(), {io_export, list_data}}.
+%%% N1 ! {self(), {file_export, list_data}}.
+%%% N1 ! {self(), {csv_export, list_data}}.
+%%% N1 ! {self(), {io_export, debug}}.
+%%% N1 ! {self(), {file_export, debug}}.
+%%% N1 ! {self(), {csv_export, debug}}.
+%%%
+%%% N2 ! {self(), {io_export, list_data}}.
+%%% N2 ! {self(), {file_export, list_data}}.
+%%% N2 ! {self(), {csv_export, list_data}}.
+%%% N2 ! {self(), {io_export, debug}}.
+%%% N2 ! {self(), {file_export, debug}}.
+%%% N2 ! {self(), {csv_export, debug}}.
+%%%
+%%% actor_contract:answer(P1, {csv_export, list_data}).
+%%% actor_contract:answer(P2, {csv_export, list_data}).
+%%% actor_contract:answer(P3, {csv_export, list_data}).
+%%% actor_contract:answer(P4, {csv_export, list_data}).

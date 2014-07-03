@@ -71,6 +71,7 @@ processing(Config, NbWorkers) ->
 			{NewConfig, NewNbWorkers} = end_of_logical_work(
 				{Config, NbWorkers}, 
 				Request),
+			?DLOG({configuration,has,changed,{NewConfig}}),
 			processing(NewConfig, NewNbWorkers);
 
 		V ->
@@ -114,7 +115,7 @@ end_of_physical_work(
 		{work,on,product,is,done,{ProductConfig, Detail}}), 
 	actor_contract:add_data(
 		ProductConfig, 
-		{processing,done,by,{NewConfig}}),
+		{processing,done,by,NewConfig}),
 	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
 		[actor_contract:get_module(NewConfig), 
 		 actor_contract:get_id(NewConfig), 
@@ -161,7 +162,7 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 		{starting,to,work,on,product,ProdConf}),
 	io:format("Container >>> Work is starting on product id ~p.\n", [actor_contract:get_id(ProdConf)]),
 	actor_contract:add_data(Config, {new,product,has,arrived, {ProdConf}}), 
-	actor_contract:add_data(ProdConf, {processing,started,by,{Config}}),
+	actor_contract:add_data(ProdConf, {processing,started,by,Config}),
 	%%% Decrement the number of products waiting for us.
 	[Awaiting] = actor_contract:get_option(Config, awaiting),
 	case Awaiting > 0 of 
@@ -216,16 +217,18 @@ manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 			NewConfig = actor_contract:set_option(Config, awaiting, Awaiting+1)
 	end,
 	{NewConfig, NbWorkers};
-
-%%% If the request is not about products, then it's not about a
-%%% physical stream... so we launch a 'logical' work, directed at the 
-%%% supervisor in the end.
+%%% Automatic propagation of `in' configuration to next actor
+%%% when suplying the `out' option.
+%%% @end
 manage_request({Config, NbWorkers, _Sender}, {add, out , Out}) ->
  	Out ! {self(), {add, in, self()}},
 	%%% Normal request, it does not change NbWorkers value
 	spawn(?MODULE, logical_work, [self(), Config, {add, out , Out}]),
 	{Config, NbWorkers};
-
+%%% If the request is not about products, then it's not about a
+%%% physical stream... so we launch a 'logical' work, directed at the 
+%%% supervisor in the end.
+%%% @end
 manage_request({Config, NbWorkers, _Sender}, Request) ->
 	%%% Normal request, it does not change NbWorkers value
 	spawn(?MODULE, logical_work, [self(), Config, Request]),
