@@ -97,8 +97,8 @@ logical_work(Master, MasterConfig, Request) ->
 %%%  2) Add it in the list of products waiting to be sent.
 %%%  3) Send message to next actor to notify him.
 %%%  4) Check if I have been notified of new products ready for me
-%%%    If yes, send a message to actor in `in' if there are no problems,
-%%%    or to the supervisor.
+%%%     If yes, send a message to actor in `in' if there are no problems,
+%%%     or to the supervisor.
 %%%  5) Take its new configuration for us. (@TODO: why don't we remove this?)
 %%% @end
 end_of_physical_work(

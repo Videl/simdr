@@ -25,11 +25,10 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
 	{NewProductConfig, Quality} = change_product(ProductConfig),
 	% List data fillers
-	{NewWSConfig, NewProductConfigBis} = {WSConfig, NewProductConfig},
-	% actor_contract:add_to_list_data(
-	% 	{WSConfig, {NewProductConfig, Quality}}, 
-	% 	{NewProductConfig, {WSConfig}}),
-	% Answer
+	{NewWSConfig, NewProductConfigBis} = actor_contract:add_to_list_data(
+		WSConfig, {changed,quality,'of',product, {ProductConfig, for, Quality}}, 
+		NewProductConfig, {quality,became,Quality,because,'of',{WSConfig}}),
+	%%% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Quality}, 
 	get_destination(NewWSConfig)};
@@ -64,24 +63,6 @@ get_destination(Config) ->
 %% Tests
 -ifdef(TEST).
 
-workstation_answer_test_() ->
-	ActorWS = actor_contract:set_work_time(actor_workstation:create(),1),
-	ActorProductOne = actor_product:create(product_one),
-	{NewActor, {work_time, 20, changed}, supervisor}= answer(ActorWS, {change, work_time, 20}),
-	{_, {actor_product, ActorProductTwo, _Quality}, _Destination} = 
-		actor_workstation:answer(ActorWS, {actor_product, ActorProductOne}),
-	[
-	% ?_assertEqual(
-	% 	{ActorWS, {supervisor, pong}}, 
-	% 	answer(ActorWS, {supervisor, ping})),
-	?_assertEqual(
-		20, 
-		actor_contract:get_work_time(NewActor)),
-	?_assert(
-		raw =/= actor_contract:get_state(ActorProductTwo)
-		)
-	].
-
 get_destination_test_() ->
 	WorkerConfFewOut = actor_contract:add_out(
 		create(), 
@@ -93,24 +74,45 @@ get_destination_test_() ->
 		WorkerConfManyOut, 
 		test3),
 	[
-	% ?_assertEqual([test1], get_destination(WorkerConfFewOut)),
-	% ?_assertEqual(supervisor, get_destination(WorkerConfManyOut)),
-	% ?_assertEqual(supervisor, get_destination(WorkerConfManyOutBis)),
-	% ?_assertEqual(supervisor, get_destination(create()))
+		?_assertEqual([test1], get_destination(WorkerConfFewOut)),
+		?_assertEqual(supervisor, get_destination(WorkerConfManyOut)),
+		?_assertEqual(supervisor, get_destination(WorkerConfManyOutBis)),
+		?_assertEqual(supervisor, get_destination(create()))
 	].
 
+
+workstation_answer_test_() ->
+	ActorWS = actor_contract:set_work_time(actor_workstation:create(),1),
+	ActorProductOne = actor_product:create(product_one),
+	{_, {actor_product, ActorProductTwo, Quality}, _Destination} = 
+		actor_workstation:answer(ActorWS, {actor_product, ActorProductOne}),
+	[
+		%%% Test: quality of a product is different
+		?_assert(
+			raw =/= actor_contract:get_state(ActorProductTwo)
+		),
+		%%% Test: quality of product is really the one said it is
+		?_assertMatch(
+			Quality,
+			actor_contract:get_state(ActorProductTwo)
+		)
+	].
 data_filler_test_() ->
-	BaseWS = actor_contract:set_work_time(actor_workstation:create(),1),
-	BasePO = actor_product:create(product_one,2),
-	{NewWS, {_, NewPO, Quality}, _} = 
-		answer(BaseWS, {actor_product, BasePO}),
+	BaseWS = create(),
+	BasePO = actor_product:create(),
+	{NewWS, {actor_product, NewPO, Quality}, _} = 
+	 	answer(BaseWS, {actor_product, BasePO}),
 	LastDataWS = actor_contract:get_data(NewWS),
 	LastDataPO = actor_contract:get_data(NewPO),
 	[
-	% ?_assertMatch({{{config, actor_product, product_one, [{ets, _}, {quality_required, 2}, {awaiting, 0}], Quality,0,[]},Quality},_}, LastDataWS),
-	% ?_assertMatch(
-	% 	{{{config, actor_workstation, _, [{ets, _}, {capacity, 1}, {awaiting, 0}], off,1,[]}},_}, 
-	% 	LastDataPO)
+		%%% Test: last data exists in product
+		?_assertMatch(
+			{_ErlangNow, _Time, {quality,became,Quality,because,'of',{BaseWS}}},
+			LastDataPO),
+		%%% Test: last data exists in workstation
+		?_assertMatch(
+			{_ErlangNow, _Time, {changed,quality,'of',product, {BasePO, for, Quality}}}, 
+			LastDataWS)
 	].
 
 -endif.

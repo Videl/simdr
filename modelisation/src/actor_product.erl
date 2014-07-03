@@ -46,16 +46,5 @@ answer(ProdConfig, Request) ->
 %% ===================================================================
 -ifdef(TEST).
 
-answer_test_() ->	
-	Prod = create(),
-	NewProd = actor_contract:add_data(Prod, {21,05,02, q2}),
-	[
-	?_assertEqual( %% State test
-		raw,
-		actor_contract:get_state(NewProd)),
-	?_assertEqual(
-		{21,05,02, q2},
-		actor_contract:get_data(NewProd))
-	].
 
 -endif.
