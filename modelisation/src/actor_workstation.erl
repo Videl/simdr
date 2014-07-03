@@ -11,8 +11,8 @@
 
 -export([
 	create/0,
-	answer/2,
-	get_destination/1]).
+	answer/2
+	]).
 
 %% Behavior implementation
 
@@ -31,7 +31,7 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	%%% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Quality}, 
-	get_destination(NewWSConfig)};
+	actor_contract:get_out(NewWSConfig)};
 	
 answer(WSConfig, Request) ->
 	actor_contract:answer(WSConfig, Request).
@@ -49,37 +49,8 @@ change_product(ProductConfig) ->
 	end,
 	Result.
 
-get_destination(Config) ->
-	ListOfOuts = actor_contract:get_out(Config),
-	Out = case actor_contract:list_size(ListOfOuts) of
-		1 ->
-			ListOfOuts;
-		_ ->
-			supervisor
-	end,
-	Out.
-
-
 %% Tests
 -ifdef(TEST).
-
-get_destination_test_() ->
-	WorkerConfFewOut = actor_contract:add_out(
-		create(), 
-		test1),
-	WorkerConfManyOut = actor_contract:add_out(
-		WorkerConfFewOut, 
-		test2),
-	WorkerConfManyOutBis = actor_contract:add_out(
-		WorkerConfManyOut, 
-		test3),
-	[
-		?_assertEqual([test1], get_destination(WorkerConfFewOut)),
-		?_assertEqual(supervisor, get_destination(WorkerConfManyOut)),
-		?_assertEqual(supervisor, get_destination(WorkerConfManyOutBis)),
-		?_assertEqual(supervisor, get_destination(create()))
-	].
-
 
 workstation_answer_test_() ->
 	ActorWS = actor_contract:set_work_time(actor_workstation:create(),1),
