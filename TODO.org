@@ -12,11 +12,12 @@
        - [X] Export (data) to text file (weird output but meh) 2014-07-01 18:20
        - [ ] Export (data) to DETS file
        - [X] Debug table too (io, text, CVS)
-   - [ ] Product path tracer
+   - [X] Product path tracer
    - [ ] 70% luck Product creation
   **  IDEAS [0/1]
    - [ ] Tool to make up a scenario
    - [ ] Supervisors
+   - [ ] Discrete time mode
   
  ** Tests [2/11]
   - [ ] Extensively test Config record in Actor Contract
