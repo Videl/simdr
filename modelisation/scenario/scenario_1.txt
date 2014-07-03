@@ -12,7 +12,11 @@ NQ ! {self(), {add, out, NW}}.
 NW ! {self(), {change, capacity, 2}}.
 NW ! {self(), {change, work_time, 10}}.
 
-NQ ! {self(), {actor_product, actor_product:create()}}.
-NQ ! {self(), {actor_product, actor_product:create()}}.
-NQ ! {self(), {actor_product, actor_product:create()}}.
- 
+
+P1 = actor_product:create().
+P2 = actor_product:create().
+P3 = actor_product:create().
+
+NQ ! {self(), {actor_product, P1}}.
+NQ ! {self(), {actor_product, P2}}.
+NQ ! {self(), {actor_product, P3}}.

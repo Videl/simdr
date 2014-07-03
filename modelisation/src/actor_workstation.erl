@@ -17,7 +17,8 @@
 %% Behavior implementation
 
 create() ->
-	Ac1 = actor_contract:create(?MODULE, actor_contract:random_id(), [], off, 10, []),
+	%%% module, state, work_time
+	Ac1 = actor_contract:create(?MODULE, off, 10),
 	Ac2 = actor_contract:set_capacity(Ac1, 1),
 	Ac2.
 
@@ -49,10 +50,12 @@ change_product(ProductConfig) ->
 	end,
 	Result.
 
+%% ===================================================================
 %% Tests
+%% ===================================================================
 -ifdef(TEST).
 
-workstation_answer_test_() ->
+answer_test_() ->
 	ActorWS = actor_contract:set_work_time(actor_workstation:create(),1),
 	ActorProductOne = actor_product:create(product_one),
 	{_, {actor_product, ActorProductTwo, Quality}, _Destination} = 
@@ -68,6 +71,7 @@ workstation_answer_test_() ->
 			actor_contract:get_state(ActorProductTwo)
 		)
 	].
+
 data_filler_test_() ->
 	BaseWS = create(),
 	BasePO = actor_product:create(),
