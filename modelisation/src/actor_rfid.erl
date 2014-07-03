@@ -21,9 +21,10 @@ create() ->
 
 answer(RFIDConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
-	{NewRFIDConfig, NewProductConfig} = actor_contract:add_to_list_data(
-		{RFIDConfig, ProductConfig}, 
-		{ProductConfig, RFIDConfig}),
+	{NewRFIDConfig, NewProductConfig} = {RFIDConfig, ProductConfig},
+	% actor_contract:add_to_list_data(
+	% 	{RFIDConfig, ProductConfig}, 
+	% 	{ProductConfig, RFIDConfig}),
 	% Answer
 	{NewRFIDConfig, 
 	{actor_product, NewProductConfig, actor_contract:get_id(NewProductConfig)}, 

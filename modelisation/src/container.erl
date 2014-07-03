@@ -16,7 +16,7 @@
 %% ===================================================================
 
 idling(Config) ->
-	%%?CREATE_DEBUG_TABLE,
+	?CREATE_DEBUG_TABLE,
 	receive
 		{start} ->
 			?DLOG(
@@ -71,6 +71,7 @@ processing(Config, NbWorkers) ->
 			{NewConfig, NewNbWorkers} = end_of_logical_work(
 				{Config, NbWorkers}, 
 				Request),
+			?DLOG({configuration,has,changed,{NewConfig}}),
 			processing(NewConfig, NewNbWorkers);
 
 		V ->
@@ -104,18 +105,26 @@ end_of_physical_work(
 					 {Config, NbWorkers}, 
 					 {NewConfig, LittleAnswer, Destination}) ->
 	[TablePid] = actor_contract:get_option(Config, ets), 
-	{actor_product, ConfProd, _} = LittleAnswer,
-	Awaiting =  ets:match_object(
-					TablePid, {awaiting, '$1'}),
-	?DLOG(actor_contract:get_module(Config), {work,done,on,product,ConfProd}),
-	io:format(" ~w, ~w finish to work product : ~w , Awaiting ~w ~n ~n",
+	{actor_product, ProductConfig, Detail} = LittleAnswer,
+	?DLOG(
+		actor_contract:get_module(Config), 
+		{work,done,on,product,ProductConfig}),
+	io:format("Container >>> Work is done on product id ~p.\n", [actor_contract:get_id(ProductConfig)]),
+	actor_contract:add_data(
+		NewConfig, 
+		{work,on,product,is,done,{ProductConfig, Detail}}), 
+	actor_contract:add_data(
+		ProductConfig, 
+		{processing,done,by,NewConfig}),
+	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
 		[actor_contract:get_module(NewConfig), 
 		 actor_contract:get_id(NewConfig), 
-		 actor_contract:get_id(ConfProd), actor_contract:list_size(Awaiting)]),
-	ets:insert(TablePid, {product, awaiting_sending, ConfProd}),
+		 actor_contract:get_id(ProductConfig)]),
+	ets:insert(TablePid, {product, awaiting_sending, ProductConfig}),
 	%io:format("await"),
  	send_message(awaiting_product, Destination),
-	case actor_contract:list_size(Awaiting) > 0 of
+	[Awaiting] = actor_contract:get_option(NewConfig, awaiting),
+	case Awaiting > 0 of
 		true -> 
 			case actor_contract:list_size(actor_contract:get_in(Config)) of 
 				1 ->
@@ -160,6 +169,9 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 	?DLOG(
 		actor_contract:get_module(Config), 
 		{starting,to,work,on,product,ProdConf}),
+	io:format("Container >>> Work is starting on product id ~p.\n", [actor_contract:get_id(ProdConf)]),
+	actor_contract:add_data(Config, {new,product,has,arrived, {ProdConf}}), 
+	actor_contract:add_data(ProdConf, {processing,started,by,Config}),
 	%%% Decrement the number of products waiting for us.
 	[TablePid] = actor_contract:get_option(Config, ets),
 	Awaiting = ets:match_object(
@@ -187,6 +199,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			%io:format("Sending product..~n"),
 			FirstEntry = actor_contract:first(ListEntry),
 			{product, awaiting_sending, Prod} = FirstEntry,
+			actor_contract:add_data(Config, {sending, product, {Prod}}), 
 			send_message({actor_product, Prod}, Sender),
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
@@ -212,27 +225,24 @@ manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 	case NbWorkers < Capacity of
 		true -> 
 			Sender ! {self(), {control, ok}},
-			Workers = NbWorkers+1,
-			NewConfig = Config;
+			Workers = NbWorkers+1;
 		false -> 
-			NewConfig = Config,
 			Workers = NbWorkers
-			% [Awaiting] = actor_contract:get_option(Config, awaiting),
-			% NewConfig = actor_contract:set_option(Config, awaiting, Awaiting+1),
-			% io:format("Awaiting ~w ~n", [actor_contract:get_option(Config, awaiting)])
-
 	end,
-	{NewConfig, Workers};
+	{Config, Workers};
 
-%%% If the request is not about products², then it's not about a
-%%% physical stream... so we launch a 'logical' work, directed at the 
-%%% supervisor in the end.
+%%% Automatic propagation of `in' configuration to next actor
+%%% when suplying the `out' option.
+%%% @end
 manage_request({Config, NbWorkers, _Sender}, {add, out , Out}) ->
  	Out ! {self(), {add, in, self()}},
 	%%% Normal request, it does not change NbWorkers value
 	spawn(?MODULE, logical_work, [self(), Config, {add, out , Out}]),
 	{Config, NbWorkers};
-
+%%% If the request is not about products, then it's not about a
+%%% physical stream... so we launch a 'logical' work, directed at the 
+%%% supervisor in the end.
+%%% @end
 manage_request({Config, NbWorkers, _Sender}, Request) ->
 	%%% Normal request, it does not change NbWorkers value
 	spawn(?MODULE, logical_work, [self(), Config, Request]),

@@ -26,11 +26,12 @@ create() ->
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	spawn(?MODULE, send_rfid, [ConveyorConfig, ProductConfig]),
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
-	Destination = actor_contract:get_out(ConveyorConfig),
-	{NewConveyorConfig, NewProductConfig} = actor_contract:add_to_list_data(
-		{ConveyorConfig, ProductConfig}, 
-		{ProductConfig, ConveyorConfig}),
+	{NewConveyorConfig, NewProductConfig} = {ConveyorConfig, ProductConfig},
+	% actor_contract:add_to_list_data(
+	% 	{ConveyorConfig, ProductConfig}, 
+	% 	{ProductConfig, ConveyorConfig}),
 	% Answer
+	Destination = actor_contract:get_out(ConveyorConfig),
 	{NewConveyorConfig, {actor_product, NewProductConfig, Destination}, Destination};
 answer(ConveyorConfig, Request) ->
 	actor_contract:answer(ConveyorConfig, Request).

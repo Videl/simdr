@@ -1,6 +1,6 @@
 
 -ifndef(TEST).
--define(TEST, true).
+%-define(TEST, true).
 -endif.
 
 % config record
