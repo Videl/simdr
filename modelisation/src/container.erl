@@ -195,17 +195,20 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 %%% @end
 manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 	Capacity= actor_contract:get_capacity(Config),
-	io:format(" ~w < ~w ~n", [NbWorkers, Capacity]),
+	%io:format(" ~w < ~w ~n", [NbWorkers, Capacity]),
+	[Awaiting] = actor_contract:get_option(Config, awaiting),
+	NewConfig = actor_contract:set_option(Config, awaiting, Awaiting+1),
 	case NbWorkers < Capacity of 
 		true -> 
 			Sender ! {self(), {control, ok}},
 			Workers = NbWorkers+1,
 			NewConfig = Config;
 		false -> 
-			io:format(" a product is waiting ~n"),
-			Workers = NbWorkers,
-			[Awaiting] = actor_contract:get_option(Config, awaiting),
-			NewConfig = actor_contract:set_option(Config, awaiting, Awaiting+1)
+			Workers = NbWorkers
+			% [Awaiting] = actor_contract:get_option(Config, awaiting),
+			% NewConfig = actor_contract:set_option(Config, awaiting, Awaiting+1),
+			% io:format("Awaiting ~w ~n", [actor_contract:get_option(Config, awaiting)])
+
 	end,
 	{NewConfig, Workers};
 
