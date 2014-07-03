@@ -15,7 +15,7 @@
 		 add_in/2,
 		 add_out/2,
 		 add_option/3,
-		 add_to_list_data/2,
+		 add_to_list_data/4,
 		 get_data/1,
 		 get_id/1,
 		 get_in/1,
@@ -191,7 +191,7 @@ work(N) ->
 list_size(List) ->
 	list_size_helper(List, 0).
 
-add_to_list_data({FirstActor, FirstData}, {SecondActor, SecondData}) ->
+add_to_list_data(FirstActor, FirstData, SecondActor, SecondData) ->
 	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
 
 first([]) ->
