@@ -81,17 +81,17 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 	Actor = #config{
 		module    = Module, 
 		id        = Id, 
-		opt       = ets:new(options_table, [duplicate_bag, {write_concurrency, true}, {read_concurrency, true}, public]), 
+		opt       = ets:new(erlang:list_to_lists:concat([options_table_, Module,Id]), [duplicate_bag, public]), 
 		state     = State, 
 		in        = In, 
 		out       = Out, 
 		in_out    = InOut, 
 		capacity  = Capacity, 
 		work_time = Work_time, 
-		list_data = ets:new(list_data_table, [ordered_set, {write_concurrency, true}, {read_concurrency, true}, public])},
+		list_data = ets:new(lists:concat([list_data_,Module, Id]), [ordered_set, public])},
 	Actor1     = add_options_helper(Actor, Opt),
 	%Actor2     = actor_contract:set_option(Actor1, awaiting, 0),
-	TableQueue = ets:new(internal_queue, [duplicate_bag, public]),
+	TableQueue = ets:new(lists:concat([internal_queue_,Module, Id]), [duplicate_bag, public]),
 	Actor3     = actor_contract:set_option(Actor1, ets, TableQueue),
 	Actor4     = add_datas_helper(Actor3, List_data),
 	Actor4.
@@ -103,10 +103,10 @@ get_module(Actor) ->
 % 	get_previous_data_helper(Config#config.list_data, N).
 
 add_data(Actor, X) ->
-	Data = {erlang:now(), erlang:localtime(), X},
+	Data = {erlang:localtime(), X},
 	ETSData = Actor#config.list_data,
 	?DLOG(actor_contract:get_id(Actor),{lists:concat(["Inserting data to", ETSData]), Data}),
-	true = ets:insert_new(ETSData, Data),
+	ets:insert(ETSData, Data),
 %%	(ets:insert(ETSData, Data)=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
@@ -348,24 +348,20 @@ different_sender(Awaiting)->
 %% ===================================================================
 
 export_to(file) ->
-<<<<<<< HEAD
 	%Fun = 
-=======
->>>>>>> origin/development
 	fun(X, FileDescriptor) -> 
 		R = io_lib:format("~w\n",[X]),
 		%RX = erlang:iolist_to_binary(R),
-		RF = lists:flatten(R),
-		ok = file:write(FileDescriptor,  RF),
+		%RXF = lists:flatten(RX),
+		ok = file:write(FileDescriptor,  R),
 		FileDescriptor 
 	end;
 export_to(_) ->
 	fun(X, Y) ->
 		R = io_lib:format("~w\n",[X]),
 		%RX = erlang:iolist_to_binary(R),
-		RF = lists:flatten(R),
-		io:format("~s~n", [RF]), 
-		Y
+		%RXF = lists:flatten(RX),
+		io:format("~w~n", [R]), Y
 	end.
 
 add_datas_helper(Actor, []) ->
