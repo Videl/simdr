@@ -234,20 +234,28 @@ manage_request({Config, NbWorkers, _Sender}, Request) ->
 	spawn(?MODULE, logical_work, [self(), Config, Request]),
 	{Config, NbWorkers}.
 
-send_message(Ans, []) ->
-	io:format("~w send ~w to ~w.~n~n", [self(), Ans, supervisor]);
-%%	supervisor ! {self(), Ans};
-send_message(Ans, [Dest]) when is_pid(Dest) -> 
-	io:format("~w send ~w to ~w.~n~n", [self(), Ans, Dest]),
-	Dest ! {self(), Ans};
+send_message(Ans, RawDest) ->
+	Destination = get_destination(RawDest),
+	sender(Ans, Destination).
 
-send_message(Ans, Dest) when is_pid(Dest) -> 
-	io:format("~w send ~w to ~w.~n~n", [self(), Ans, Dest]),
-	Dest ! {self(), Ans};
-
-send_message(Ans, Dest) ->
+get_destination(supervisor) ->
+	supervisor;
+get_destination([Dest]) when is_pid(Dest) -> 
+	Dest;
+get_destination(Dest) when is_pid(Dest) ->
+	Dest;
+get_destination(WeirdDestination) ->
 	%% @TODO: choose destination
-	io:format("~w send ~w to ~w.~n~n", [self(), Ans, Dest]).
+	io:format(
+		"~w COULDN'T send  message to ~w because of BAD FORMAT. Using supervisor.~n~n", 
+		[self(), WeirdDestination]),
+	supervisor.
+
+sender(Ans, supervisor) ->
+	io:format("~w send ~w to ~w.~n~n", [self(), Ans, supervisor]);
+sender(Ans, Dest) ->
+	io:format("~w send ~w to ~w.~n~n", [self(), Ans, Dest]),
+	Dest ! {self(), Ans}.
 
 
 wait(Pid, Wait_time, {Ans, [Dest]}) when is_pid(Dest)->
@@ -260,8 +268,27 @@ wait(Pid, Wait_time, {Ans, Dest}) ->
 	actor_contract:work(Wait_time),
 	io:format(" ~w send ~w to ~w.~n~n", [Pid, Ans, Dest]).
 
-%% Tests
 
+%% ===================================================================
+%% Tests
+%% ===================================================================
 -ifdef(TEST).
+
+% mock_actor_create() ->
+% 	actor_contract:create(mocking_actor, 
+% 		777, 
+% 		[], 
+% 		off, 
+% 		1, 
+% 		[]).
+
+get_destination_test_() ->
+	[
+		?_assertEqual(self(), get_destination([self()])),
+		?_assertEqual(self(), get_destination(self())),
+		?_assertEqual(supervisor, get_destination([])),
+		?_assertEqual(supervisor, get_destination([self(), self()]))
+	].
+
 
 -endif.

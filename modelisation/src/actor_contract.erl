@@ -66,13 +66,36 @@ create(Module, Work_time) ->
 		[]).
 
 create(Module, State, Work_time) ->
-	actor_contract:create(Module, actor_contract:random_id(), [], State, [], [], Work_time, []).
+	actor_contract:create(Module, 
+		actor_contract:random_id(), 
+		[], 
+		State, 
+		[], 
+		[], 
+		Work_time, 
+		[]).
 
 create(Module, Id, Opt, State, Work_time, List_data) ->
-	actor_contract:create(Module, Id, Opt, State, [], [], Work_time, List_data).
+	actor_contract:create(Module, 
+		Id, 
+		Opt, 
+		State, 
+		[], 
+		[], 
+		Work_time, 
+		List_data).
 
 create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
-	actor_contract:create(Module, Id, Opt, State, In, Out, {In,Out}, infinity, Work_time, List_data).
+	actor_contract:create(Module, 
+		Id, 
+		Opt, 
+		State, 
+		In, 
+		Out, 
+		{In, Out}, 
+		infinity, 
+		Work_time, 
+		List_data).
 
 create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
 	?CREATE_DEBUG_TABLE,
@@ -80,14 +103,24 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 	Actor = #config{
 		module    = Module, 
 		id        = Id, 
-		opt       = ets:new(options_table, [duplicate_bag, {write_concurrency, true}, {read_concurrency, true}, public]), 
+		opt       = ets:new(
+						options_table, 
+						[duplicate_bag, 
+						{write_concurrency, true}, 
+						{read_concurrency, true}, 
+						public]), 
 		state     = State, 
 		in        = In, 
 		out       = Out, 
 		in_out    = InOut, 
 		capacity  = Capacity, 
 		work_time = Work_time, 
-		list_data = ets:new(list_data_table, [ordered_set, {write_concurrency, true}, {read_concurrency, true}, public])},
+		list_data = ets:new(
+						list_data_table, 
+						[ordered_set, 
+						{write_concurrency, true}, 
+						{read_concurrency, true}, 
+						public])},
 	Actor1     = add_options_helper(Actor, Opt),
 	Actor2     = actor_contract:set_option(Actor1, awaiting, 0),
 	TableQueue = ets:new(internal_queue, [duplicate_bag, public]),
@@ -98,13 +131,12 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 get_module(Actor) ->
 	Actor#config.module.
 
-% get_previous_data(Config, N) ->
-% 	get_previous_data_helper(Config#config.list_data, N).
-
 add_data(Actor, X) ->
 	Data = {erlang:now(), erlang:localtime(), X},
 	ETSData = Actor#config.list_data,
-	?DLOG(actor_contract:get_id(Actor),{lists:concat(["Inserting data to", ETSData]), Data}),
+	?DLOG(
+		actor_contract:get_id(Actor),
+		{lists:concat(["Inserting data to", ETSData]), Data}),
 	true = ets:insert_new(ETSData, Data),
 %%	(ets:insert(ETSData, Data)=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
@@ -394,10 +426,10 @@ list_size_helper([_H|T], Acc) ->
 	list_size_helper(T, Acc+1).
 
 
--ifdef(TEST).
 %% ===================================================================
 %% Tests
 %% ===================================================================
+-ifdef(TEST).
 
 get_data_1_test() ->
 	Actor = create(mod, test, [{opt1, v2}], busy, 3, [1, 2, 3]),
