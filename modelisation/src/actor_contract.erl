@@ -102,10 +102,10 @@ get_module(Actor) ->
 % 	get_previous_data_helper(Config#config.list_data, N).
 
 add_data(Actor, X) ->
-	Data = {erlang:localtime(), X},
+	Data = {erlang:now(), erlang:localtime(), X},
 	ETSData = Actor#config.list_data,
 	?DLOG(actor_contract:get_id(Actor),{lists:concat(["Inserting data to", ETSData]), Data}),
-	ets:insert(ETSData, Data),
+	true = ets:insert_new(ETSData, Data),
 %%	(ets:insert(ETSData, Data)=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 

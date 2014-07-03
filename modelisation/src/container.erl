@@ -161,7 +161,7 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 		{starting,to,work,on,product,ProdConf}),
 	io:format("Container >>> Work is starting on product id ~p.\n", [actor_contract:get_id(ProdConf)]),
 	actor_contract:add_data(Config, {new,product,has,arrived, {ProdConf}}), 
-	actor_contract:add_data(ProdConf, {processing,started,by,Config}),
+	actor_contract:add_data(ProdConf, {processing,started,by,{Config}}),
 	%%% Decrement the number of products waiting for us.
 	[Awaiting] = actor_contract:get_option(Config, awaiting),
 	case Awaiting > 0 of 
