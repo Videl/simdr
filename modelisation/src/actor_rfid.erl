@@ -36,17 +36,20 @@ answer(RFIDConfig, Request) ->
 -ifdef(TEST).
 
 answer_test_() ->
-	% ActorRFID = actor_rfid:create(),
-	% Id= actor_contract:get_id(ActorRFID),
-	% ActorProduct = actor_product:create(product_one, 6),
-	% {RFID, _, supervisor}=answer(ActorRFID, {actor_product, ActorProduct}),
+	ActorRFID = actor_rfid:create(),
+	ActorProduct = actor_product:create(),
+	Id = actor_contract:get_id(ActorProduct),
+	{_, {actor_product, EndProduct, NewId}, _Dest} = 
+		actor_rfid:answer(ActorRFID, {actor_product, ActorProduct}),
 	[
-	% ?_assertEqual(
-	% 	{ActorRFID, {supervisor, pong}}, 
-	% 	answer(ActorRFID, {supervisor, ping})),
-	% ?_assertMatch(
-	% {config, actor_rfid, Id, [{ets, _}, {capacity,4}, {awaiting, 0}], undefined, 2,[{ActorProduct, _}]},
-	% RFID)
+		%%% Test: The product does not change before/after the answer/2.
+		?_assertEqual(
+			ActorProduct,
+			EndProduct),
+		%%% Test: the ID is in the 'special place'.
+		?_assertEqual(
+			Id,
+			NewId)
 	].
 
 -endif.
