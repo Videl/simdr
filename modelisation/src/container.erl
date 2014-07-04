@@ -304,5 +304,5 @@ get_destination_test_() ->
 		?_assertEqual(supervisor, get_destination([self(), self()]))
 	].
 
-
 -endif.
+
