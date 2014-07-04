@@ -106,10 +106,12 @@ end_of_physical_work(
 					 {NewConfig, LittleAnswer, Destination}) ->
 	[TablePid] = actor_contract:get_option(Config, ets), 
 	{actor_product, ProductConfig, Detail} = LittleAnswer,
+	Awaiting = ets:match_object(TablePid, {awaiting, '$1'}),
 	?DLOG(
 		actor_contract:get_module(Config), 
 		{work,done,on,product,ProductConfig}),
-	io:format("Container >>> Work is done on product id ~p.\n", [actor_contract:get_id(ProductConfig)]),
+	io:format("Container >>> Work is done on product id ~p.\n", 
+		[actor_contract:get_id(ProductConfig)]),
 	actor_contract:add_data(
 		NewConfig, 
 		{work,on,product,is,done,{ProductConfig, Detail}}), 
@@ -123,23 +125,26 @@ end_of_physical_work(
 	ets:insert(TablePid, {product, awaiting_sending, ProductConfig}),
 	%io:format("await"),
  	send_message(awaiting_product, Destination),
-	[Awaiting] = actor_contract:get_option(NewConfig, awaiting),
-	case Awaiting > 0 of
+	%[Awaiting] = actor_contract:get_option(NewConfig, awaiting),
+	case actor_contract:list_size(Awaiting) > 0 of
 		true -> 
 			case actor_contract:list_size(actor_contract:get_in(Config)) of 
 				1 ->
 					[InActor] = actor_contract:get_in(Config),
 					Workers = NbWorkers+1,
 					InActor ! {self(), {control, ok}};
-				_ -> case actor_contract:different_sender(Awaiting) of 
-					%%% Sending messageder to supervisor 
-						true ->	Workers = NbWorkers,
-								send_message({Config, prob_in}, supervisor);
-						false -> [H|_Rest] = Awaiting,
-								io:format("same sender~n"),
-								{awaiting, {S, _Date}} = H,
-								Workers = NbWorkers+1,
-								S ! {self(), {control, ok}}
+				_ -> 
+					case actor_contract:different_sender(Awaiting) of 
+						%%% Sending messageder to supervisor 
+						true ->	
+							Workers = NbWorkers,
+							send_message({Config, prob_in}, supervisor);
+						false -> 
+							[H|_Rest] = Awaiting,
+							io:format("same sender~n"),
+							{awaiting, {S, _Date}} = H,
+							Workers = NbWorkers+1,
+							S ! {self(), {control, ok}}
 					end
 			end;
 		false -> 
@@ -260,9 +265,8 @@ get_destination(Dest) when is_pid(Dest) ->
 	Dest;
 get_destination(WeirdDestination) ->
 	%% @TODO: choose destination
-	io:format(
-		"~w COULDN'T send  message to ~w because of BAD FORMAT. Using supervisor.~n~n", 
-		[self(), WeirdDestination]),
+	io:format("~w COULDN'T send  message to ~w because of BAD FORMAT. " ++ 
+		"Using supervisor.~n~n", [self(), WeirdDestination]),
 	supervisor.
 
 sender(Ans, supervisor) ->
