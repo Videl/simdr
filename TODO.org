@@ -1,9 +1,29 @@
 * INTERNSHIP
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
-  ** TODO [0/4]
-   - [ ] ETS
-   - [ ] Need to use the *states*! :tests:
+  ** TODO [0/11]
+   - [ ] Prettier CVS data
+     - [ ] Add data on RFID
+     - [ ] Add data on Queues
+     - [ ] Add data on Railways
+     - [ ] Remove erlang:now() data
+     - [ ] Remove year/month/day
+     - [ ] CVS-like values
+   - [ ] Conveyor (everyone?): work_time in distance/speed or seconds
+   - [ ] Conveyor: products that are waiting have a transportation time before
+                   being available again WHEN the first product leave
+   - [ ] Workstation: % of error
+   - [ ] Railway: time of transportation when in position =/= already in position
+   - [ ] Client's order
+   - [ ] New module for item making
+   - [ ] New module for item erasing?
+   - [ ] Products: initial quality/state, objective quality
+   - [ ] Dumb supervisors
+     - [ ] Mode 1: always giving one direction
+     - [ ] Mode 2: changing directions every time
+     - [ ] Mode 3: random
+     - [ ] Mode 4: round-robin
+     - [ ] Mode 5: manual mode
    - [ ] Easier debug
      - [ ] DLOG in interesting places
      - [ ] Command to dump ETS files to text (or read at least)
@@ -12,27 +32,25 @@
        - [X] Export (data) to text file (weird output but meh) 2014-07-01 18:20
        - [ ] Export (data) to DETS file
        - [X] Debug table too (io, text, CVS)
-   - [X] Product path tracer
-   - [ ] Prettier CVS data
-     - [ ] Remove erlang:now() data
-     - [ ] Remove year/month/day
-     - [ ] CVS-like values ()
-   - [ ] 70% luck Product creation
-  **  IDEAS [0/1]
-   - [ ] Tool to make up a scenario
-   - [ ] Supervisors
+       - [ ] Dump Option table
+       - [ ] Nice command for pretty dump with actor information, option,
+             data
+  **  LATER [0/1]
    - [ ] Discrete time mode
+   - [ ] Add general ETS table for list_data of everyone
+   - [ ] Tool to make up a scenario
+   - [ ] Need to use the *states*!
   
- ** Tests [2/11]
+ ** Tests [3/11]
   - [ ] Extensively test Config record in Actor Contract
   - [ ] Does ETS really returns the last item inputted when sending a product?
   - [ ] Test if concurrent work are really done concurrently
   - [X] Ability to disable tests
   - [X] Scenario 1
   - [X] Scenario 2
-  - [X] Scenario 3
-  - [X] Scenario 4
-  - [X] Scenario 5
+  - [ ] Scenario 3
+  - [ ] Scenario 4
+  - [ ] Scenario 5
   - [ ] Scenario 6
   - [ ] Container
     - [ ] Physical Work
@@ -42,6 +60,8 @@
    - [X] If end of path, send to supervisor 
    - [X] RFID needs to receive messages :done: 2014-06-25 17:24
    - [X] Queue needs to send products.. 
+   - [X] Product path tracer
+   - [X] ETS
     *** ETS [4/4] 2014-07-01 14:44
       - [X] Function set_option 2014-06-25 17:56
       - [X] Sending product side
