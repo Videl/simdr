@@ -41,3 +41,8 @@ N1 ! {self(), {actor_product, P4}}.
 %%% actor_contract:answer(P2, {csv_export, list_data}).
 %%% actor_contract:answer(P3, {csv_export, list_data}).
 %%% actor_contract:answer(P4, {csv_export, list_data}).
+
+
+N1 ! {self(), {file_export, list_data}}.
+N2 ! {self(), {file_export, list_data}}.
+actor_contract:answer(P1, {csv_export, list_data}).

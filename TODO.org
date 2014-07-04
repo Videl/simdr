@@ -13,6 +13,10 @@
        - [ ] Export (data) to DETS file
        - [X] Debug table too (io, text, CVS)
    - [X] Product path tracer
+   - [ ] Prettier CVS data
+     - [ ] Remove erlang:now() data
+     - [ ] Remove year/month/day
+     - [ ] CVS-like values ()
    - [ ] 70% luck Product creation
   **  IDEAS [0/1]
    - [ ] Tool to make up a scenario

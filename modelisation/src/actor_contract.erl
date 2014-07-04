@@ -306,7 +306,10 @@ answer(ActorConfig, {io_export, list_data}) ->
 answer(ActorConfig, {file_export, list_data}) ->
 	TablePid = ActorConfig#config.list_data,
 	%% File creation
-	{ok, F} = file:open("list_data.log", [append, delayed_write, unicode]),
+	{ok, F} = file:open(lists:concat(["data_", 
+					 				 actor_contract:get_module(ActorConfig),
+					 				 % id here if its a number
+					 				 ".log"]), [append, delayed_write, unicode]),
 	Fun = export_to(file),
 	ets:foldl(Fun, F, TablePid),
 	ok = file:close(F),
@@ -317,7 +320,10 @@ answer(ActorConfig, {file_export, list_data}) ->
 answer(ActorConfig, {csv_export, list_data}) ->
 	TablePid = ActorConfig#config.list_data,
 	%% File creation
-	{ok, F} = file:open("list_data.csv", [append, delayed_write, unicode]),
+	{ok, F} = file:open(lists:concat(["data_", 
+					 				 actor_contract:get_module(ActorConfig),
+					 				 % id here if its a number
+					 				 ".csv"]), [append, delayed_write, unicode]),
 	Fun = export_to(file),
 	ets:foldl(Fun, F, TablePid),
 	ok = file:close(F),

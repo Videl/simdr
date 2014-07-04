@@ -20,3 +20,9 @@ P3 = actor_product:create().
 NQ ! {self(), {actor_product, P1}}.
 NQ ! {self(), {actor_product, P2}}.
 NQ ! {self(), {actor_product, P3}}.
+
+
+
+NQ ! {self(), {file_export, list_data}}.
+NW ! {self(), {file_export, list_data}}.
+actor_contract:answer(P1, {csv_export, list_data}).
