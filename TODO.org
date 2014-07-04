@@ -1,6 +1,7 @@
 * INTERNSHIP
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
+  
   ** TODO [0/11]
    - [ ] Prettier CVS data
      - [ ] Add data on RFID
@@ -40,6 +41,7 @@
    - [ ] Add general ETS table for list_data of everyone
    - [ ] Tool to make up a scenario
    - [ ] Need to use the *states*!
+   - [ ] Find a name for the software
   
  ** Tests [3/11]
   - [ ] Extensively test Config record in Actor Contract
