@@ -34,15 +34,11 @@ answer(RailwayConfig, {actor_product, ProductConfig}) ->
 			{RailwayConfig, {actor_product, ProductConfig, InfoProb}, Dest};
 		false -> 
 			%{In, _Out}= actor_contract: get_in_out(RailwayConfig),
-			{RailwayConf, ProductConf} = {RailwayConfig, ProductConfig},
-			% 	actor_contract:add_to_list_data(
-			% 		{RailwayConfig, 
-			% 			{ProductConfig,	
-			% 				{In,
-			% 				actor_contract:get_out(RailwayConfig)}
-			% 			}
-			% 		}, 
-			% 	{ProductConfig, RailwayConfig}),
+			{RailwayConf, ProductConf} = actor_contract:add_to_list_data(
+				RailwayConfig, 
+				{took,a,product, {ProductConfig}},
+				ProductConfig, 
+				{entered,railway, {RailwayConfig}}),
 			{RailwayConf, {actor_product, ProductConf, InfoProb}, Dest}
 	end;
 
