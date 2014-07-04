@@ -57,7 +57,7 @@ change_product(ProductConfig) ->
 
 answer_test_() ->
 	ActorWS = actor_contract:set_work_time(actor_workstation:create(),1),
-	ActorProductOne = actor_product:create(product_one),
+	ActorProductOne = actor_product:create(),
 	{_, {actor_product, ActorProductTwo, Quality}, _Destination} = 
 		actor_workstation:answer(ActorWS, {actor_product, ActorProductOne}),
 	[

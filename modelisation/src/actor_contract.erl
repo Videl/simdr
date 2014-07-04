@@ -132,7 +132,7 @@ get_module(Actor) ->
 	Actor#config.module.
 
 add_data(Actor, X) ->
-	Data = {erlang:localtime(), X},
+	Data = {erlang:now(), erlang:localtime(), X},
 	ETSData = Actor#config.list_data,
 	?DLOG(
 		actor_contract:get_id(Actor),
