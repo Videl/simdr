@@ -3,21 +3,7 @@
   --- 2014-06-25 12:07 ---
   
   ** TODO [0/11]
-   - [ ] Prettier CVS data
-     - [ ] Add data on RFID
-     - [ ] Add data on Queues
-     - [ ] Add data on Railways
-     - [ ] Remove erlang:now() data
-     - [ ] Remove year/month/day
-     - [ ] CVS-like values
-   - [ ] Conveyor (everyone?): work_time in distance/speed or seconds
-   - [ ] Conveyor: products that are waiting have a transportation time before
-                   being available again WHEN the first product leave
    - [ ] Workstation: % of error
-   - [ ] Railway: time of transportation when in position =/= already in position
-   - [ ] Client's order
-   - [ ] New module for item making
-   - [ ] New module for item erasing?
    - [ ] Products: initial quality/state, objective quality
    - [ ] Dumb supervisors
      - [ ] Mode 1: always giving one direction
@@ -25,6 +11,21 @@
      - [ ] Mode 3: random
      - [ ] Mode 4: round-robin
      - [ ] Mode 5: manual mode
+     - [ ] Mode 6: product driven (quality first on first product)
+     - [ ] Mode 7: team-mode
+   - [ ] Prettier CVS data
+     - [ ] Add data on RFID
+     - [ ] Add data on Queues
+     - [ ] Add data on Railways
+     - [ ] Remove erlang:now() data when exporting
+     - [ ] CVS-like values
+   - [ ] Conveyor (everyone?): work_time in distance/speed or seconds
+   - [ ] Conveyor: products that are waiting have a transportation time before
+                   being available again WHEN the first product leave
+   - [ ] Railway: time of transportation when in position =/= already in position
+   - [ ] Client's order
+   - [ ] New actor/supervisor/module for item making
+   - [ ] New actor for item erasing (mostly stats and table-handling)
    - [ ] Easier debug
      - [ ] DLOG in interesting places
      - [ ] Command to dump ETS files to text (or read at least)
