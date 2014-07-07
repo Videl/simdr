@@ -20,17 +20,18 @@ create() ->
 	actor_contract:create(?MODULE, actor_contract:random_id(),[], undefined, 0, []).
 
 answer(RailwayConfig, {actor_product, ProductConfig}) ->
+	Supervisor = actor_contract:get_option(RailwayConfig, supervisor) ,
 %%	io:format (" Nombre de sorties : ~w~n", [actor_contract:list_size(actor_contract:get_out(RailwayConfig))]),
 	MesOut = case actor_contract:list_size(actor_contract:get_out(RailwayConfig)) of 
 		1 ->
 			{no_prob_out, actor_contract:get_out(RailwayConfig)}; 
 		_ ->
-			{prob_out, supervisor}
+			{prob_out, Supervisor}
 		end,
 
 	{InfoProb, Dest} = MesOut,
 
-	case Dest =:= supervisor of
+	case Dest =:= Supervisor of
 		true ->	
 			{RailwayConfig, {actor_product, ProductConfig, InfoProb}, Dest};
 		false -> 
@@ -44,7 +45,7 @@ answer(RailwayConfig, {actor_product, ProductConfig}) ->
 	end;
 
 answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
-	{In, _Out} = actor_contract:get_in_out(RailwayConfig),
+	{In, Out} = actor_contract:get_in_out(RailwayConfig),
 	NewOut = Decision,
 	{Conf, Prod} = {RailwayConfig, ProductConfig},
 	% actor_contract:add_to_list_data(
@@ -52,7 +53,7 @@ answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 	% 		{ProductConfig, 
 	% 		{[In],[NewOut]}}}, 
 	% 	{ProductConfig, RailwayConfig}),
-	case Decision =/= actor_contract:get_in_out(Conf) of
+	case Decision =/= Out of
 		true ->	
 			RailwayConf = actor_contract:set_in_out(Conf, {In, NewOut}),
 			actor_contract:work(actor_contract:get_work_time(RailwayConf)),
