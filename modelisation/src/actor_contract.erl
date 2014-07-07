@@ -684,7 +684,7 @@ answer_test_() ->
 	% 	answer(Actor, {status, list_data}))
 	].
 
-<<<<<<< HEAD
+
 work_time_test_() ->
 	Actor = create(mod, id, [], on, [], [], 5, 10, []),
 	Actor2= set_speed(Actor,2),
@@ -698,7 +698,7 @@ work_time_test_() ->
 		2, get_speed(Actor2)),
 	?_assertEqual(
 		4.0, get_work_time(Actor3))
-=======
+	].
 
 random_list_maker(List, _, 0) ->
     List;
@@ -766,7 +766,7 @@ random_test_() ->
 		?_assert(ResultQ2_25 > (25 - MaxError)),
 		?_assert(ResultQ2_55 < (55 + MaxError)),
 		?_assert(ResultQ2_55 > (55 - MaxError))
->>>>>>> origin/development
+
 	].
 
 -endif.
