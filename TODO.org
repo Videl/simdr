@@ -14,9 +14,9 @@
      - [ ] Mode 6: product driven (quality first on first product)
      - [ ] Mode 7: team-mode
    - [ ] Prettier CVS data
-     - [ ] Add data on RFID
-     - [ ] Add data on Queues
-     - [ ] Add data on Railways
+     - [X] Add data on RFID
+     - [X] Add data on Queues
+     - [X] Add data on Railways
      - [ ] Remove erlang:now() data when exporting
      - [ ] CVS-like values
    - [X] Conveyor (everyone): work_time in distance/speed or seconds
