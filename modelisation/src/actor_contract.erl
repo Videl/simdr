@@ -5,7 +5,8 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--export([create/10, 
+-export([create/12, 
+		create/9, 
 		 create/8, 
 		 create/6,
 		 create/3,
@@ -23,10 +24,14 @@
 		 get_in_out/1,
 		 get_capacity/1, 
 		 get_opt/1, 
-		 get_option/2,	 
+		 get_option/2,	
+		 get_speed/1,
+		 get_distance/1, 
 		 get_work_time/1, 
 		 get_state/1, 
 		 set_id/2,
+		 set_speed/2,
+		 set_distance/2,
 		 set_work_time/2,
 		 set_state/2,
 		 set_in/2,
@@ -95,10 +100,26 @@ create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
 		Out, 
 		{In, Out}, 
 		infinity, 
+		0,
+		0,
 		Work_time, 
 		List_data).
 
-create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
+create(Module, Id, Opt, State, In, Out, Speed, Distance, List_data) ->
+	actor_contract:create(Module, 
+		Id, 
+		Opt, 
+		State, 
+		In, 
+		Out, 
+		{In, Out}, 
+		infinity, 
+		Speed,
+		Distance,
+		Speed*Distance, 
+		List_data).
+
+create(Module, Id, Opt, State, In, Out, InOut, Capacity, Speed, Distance, Work_time, List_data) ->
 	?CREATE_DEBUG_TABLE,
 	?DLOG(lists:concat(["Initialising ets tables of", Id])),
 	Actor = #config{
@@ -115,6 +136,8 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) -
 		out       = Out, 
 		in_out    = InOut, 
 		capacity  = Capacity, 
+		speed = Speed,
+		distance = Distance,
 		work_time = Work_time, 
 		list_data = ets:new(
 						list_to_atom(lists:concat(["Data_",Module, Id])), 
@@ -152,6 +175,18 @@ get_opt(Actor) ->
 
 get_work_time(Actor) ->
 	Actor#config.work_time.
+
+get_speed(Actor) ->
+	Actor#config.speed.
+
+get_distance(Actor) ->
+	Actor#config.distance.
+
+set_speed(Actor, Speed) -> 
+	Actor#config{ speed = Speed, work_time = Speed*get_distance(Actor)}.
+
+set_distance(Actor, Distance) -> 
+	Actor#config{ distance = Distance, work_time = Distance*get_speed(Actor)}.
 
 get_state(Actor) ->
 	Actor#config.state.
@@ -234,10 +269,17 @@ first([H|_T]) ->
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
+answer(ActorConfig, {change, distance, N}) ->
+	NewConfig = actor_contract:set_distance(ActorConfig, N),
+	{NewConfig, {distance, N, changed}, supervisor};
+
+answer(ActorConfig, {change, speed, N}) ->
+	NewConfig = actor_contract:set_speed(ActorConfig, N),
+	{NewConfig, {speed, N, changed}, supervisor};
+
 answer(ActorConfig, {change, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
 	{NewConfig, {work_time, N, changed}, supervisor};
-
 answer(ActorConfig, {change, state, State}) ->
 	NewConfig = actor_contract:set_state(ActorConfig, State),
 	{NewConfig, {state, State, changed}, supervisor};
@@ -265,6 +307,12 @@ answer(ActorConfig, {add, option, Opt}) ->
 
 answer(ActorConfig, {status, work_time}) ->
 	{ActorConfig, {work_time, actor_contract:get_work_time(ActorConfig), status}, supervisor};
+
+answer(ActorConfig, {status, distance}) ->
+	{ActorConfig, {distance, actor_contract:get_distance(ActorConfig), status}, supervisor};
+
+answer(ActorConfig, {status, speed}) ->
+	{ActorConfig, {speed, actor_contract:get_speed(ActorConfig), status}, supervisor};
 
 answer(ActorConfig, {status, state}) ->
 	{ActorConfig, {state, actor_contract:get_state(ActorConfig), status}, supervisor};
