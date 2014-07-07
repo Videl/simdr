@@ -157,7 +157,7 @@ get_module(Actor) ->
 	Actor#config.module.
 
 add_data(Actor, X) ->
-	Data = {erlang:now(), erlang:localtime(), X},
+	Data = {erlang:now(), erlang:localtime(), Actor, X},
 	ETSData = Actor#config.list_data,
 	?DLOG(
 		actor_contract:get_id(Actor),
@@ -312,37 +312,59 @@ answer(ActorConfig, {add, option, Opt}) ->
 	{NewConfig, {option, Opt, added}, supervisor};
 
 answer(ActorConfig, {status, work_time}) ->
-	{ActorConfig, {work_time, actor_contract:get_work_time(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{work_time, actor_contract:get_work_time(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, distance}) ->
-	{ActorConfig, {distance, actor_contract:get_distance(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{distance, actor_contract:get_distance(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, speed}) ->
-	{ActorConfig, {speed, actor_contract:get_speed(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{speed, actor_contract:get_speed(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, state}) ->
-	{ActorConfig, {state, actor_contract:get_state(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{state, actor_contract:get_state(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, in}) ->
-	{ActorConfig, {state, actor_contract:get_in(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{state, actor_contract:get_in(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, out}) ->
-	{ActorConfig, {state, actor_contract:get_out(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{state, actor_contract:get_out(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, in_out}) ->
-	{ActorConfig, {state, actor_contract:get_in_out(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{state, actor_contract:get_in_out(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, capacity}) ->
-	{ActorConfig, {state, actor_contract:get_capacity(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{state, actor_contract:get_capacity(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, list_data}) ->
-	{ActorConfig, {list_data, actor_contract:get_list_data(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{list_data, actor_contract:get_list_data(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, option, Key}) ->
-	{ActorConfig, {option, actor_contract:get_option(ActorConfig, Key), status}, supervisor};
+	{ActorConfig, 
+	{option, actor_contract:get_option(ActorConfig, Key), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, module}) ->
-	{ActorConfig, {module, actor_contract:get_module(ActorConfig), status}, supervisor};
+	{ActorConfig, 
+	{module, actor_contract:get_module(ActorConfig), status}, 
+	supervisor};
 
 answer(ActorConfig, {status, id}) ->
 	{ActorConfig, 
@@ -378,7 +400,14 @@ answer(ActorConfig, {csv_export, list_data}) ->
 					 				 actor_contract:get_module(ActorConfig),
 					 				 % id here if its a number
 					 				 ".csv"]), [append, delayed_write, unicode]),
-	Fun = export_to(file),
+	Fun = export_to(csv),
+	R = io_lib:format("~s;~s;~s;~s\n",["Year,Month,Day", 
+									   "Hour,Minutes,Seconds", 
+									   "Source actor", 
+									   "Message"]),
+	%RX = erlang:iolist_to_binary(R),
+	%RXF = lists:flatten(RX),
+	ok = file:write(F,  R),
 	ets:foldl(Fun, F, TablePid),
 	ok = file:close(F),
 	{ActorConfig, 
@@ -408,7 +437,7 @@ answer(ActorConfig, {csv_export, debug}) ->
 	?CREATE_DEBUG_TABLE,
 	%% File creation
 	{ok, F} = file:open("debug.csv", [append, delayed_write, unicode]),
-	Fun = export_to(file),
+	Fun = export_to(csv),
 	ets:foldl(Fun, F, ?DEBUG_TABLE),
 	ok = file:close(F),
 	{ActorConfig, 
@@ -477,9 +506,21 @@ random('Q3') ->
     Result.
 
 export_to(file) ->
-	%Fun = 
 	fun(X, FileDescriptor) -> 
 		R = io_lib:format("~w\n",[X]),
+		%RX = erlang:iolist_to_binary(R),
+		%RXF = lists:flatten(RX),
+		ok = file:write(FileDescriptor,  R),
+		FileDescriptor 
+	end;
+export_to(csv) ->
+	fun(X, FileDescriptor) ->
+		%%% Value decomposition
+		{_Now, {YearMonthDate, HourMinSecs}, Actor, Message} = X,
+		R = io_lib:format("~w;~w;~w;~w\n",[YearMonthDate, 
+										   HourMinSecs, 
+										   Actor, 
+										   Message]),
 		%RX = erlang:iolist_to_binary(R),
 		%RXF = lists:flatten(RX),
 		ok = file:write(FileDescriptor,  R),
