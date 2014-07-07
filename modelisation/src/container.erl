@@ -156,8 +156,8 @@ end_of_logical_work({_Config, NbWorkers},
 	{NewConfig, NbWorkers}.
 
 %%% Receiving a product
-%%% This function is called when we receive a product, and we ALWAYS receive a
-%%% product when we ask for it first.
+%%% This function is called when we receive a product, and we receive a
+%%% product when WE ask for it first.
 %%% So Awaiting > 0 when we are here, hopefully..
 %%% Returns: {NewConfig, NewNbWorkers}
 %%% @end
@@ -236,19 +236,27 @@ manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 %%% Automatic propagation of `in' configuration to next actor
 %%% when suplying the `out' option.
 %%% @end
-manage_request({Config, NbWorkers, _Sender}, {add, out , Out}) ->
+manage_request({Config, NbWorkers, _Sender}, {add, out, Out}) ->
  	Out ! {self(), {add, in, self()}},
 	%%% Normal request, it does not change NbWorkers value
-	spawn(?MODULE, logical_work, [self(), Config, {add, out , Out}]),
-	{Config, NbWorkers};
+	%spawn(?MODULE, logical_work, [self(), Config, {add, out, Out}]),
+	FullAnswer = 
+		(actor_contract:get_module(Config)):answer(Config, {add, out, Out}),
+	{NewConfig, LittleAnswer, Destination} = FullAnswer,
+	send_message(LittleAnswer, Destination),
+	{NewConfig, NbWorkers};
 %%% If the request is not about products, then it's not about a
 %%% physical stream... so we launch a 'logical' work, directed at the 
 %%% supervisor in the end.
 %%% @end
 manage_request({Config, NbWorkers, _Sender}, Request) ->
 	%%% Normal request, it does not change NbWorkers value
-	spawn(?MODULE, logical_work, [self(), Config, Request]),
-	{Config, NbWorkers}.
+	%spawn(?MODULE, logical_work, [self(), Config, Request]),
+	FullAnswer = 
+		(actor_contract:get_module(Config)):answer(Config, Request),
+	{NewConfig, LittleAnswer, Destination} = FullAnswer,
+	send_message(LittleAnswer, Destination),
+	{NewConfig, NbWorkers}.
 
 send_message(Ans, RawDest) ->
 	Destination = get_destination(RawDest),

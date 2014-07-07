@@ -296,11 +296,15 @@ answer(ActorConfig, {change, in_out, {In, Out}}) ->
 
 answer(ActorConfig, {add, in, In}) ->
 	NewConfig = actor_contract:add_in(ActorConfig, In),
-	{NewConfig, {in, In, added}, supervisor};
+	{_In, Out} = actor_contract:get_in_out(NewConfig),
+	NewConfig2 = actor_contract:set_in_out(NewConfig, {In, Out}),
+	{NewConfig2, {in, In, added}, supervisor};
 
 answer(ActorConfig, {add, out, Out}) ->
 	NewConfig = actor_contract:add_out(ActorConfig, Out),
-	{NewConfig, {out, Out, added}, supervisor};
+	{In, _Out} = actor_contract:get_in_out(NewConfig),
+	NewConfig2 = actor_contract:set_in_out(NewConfig, {In, Out}),
+	{NewConfig2, {out, Out, added}, supervisor};
 
 answer(ActorConfig, {add, option, Opt}) ->
 	{Key, Desc}=Opt,
