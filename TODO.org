@@ -19,7 +19,7 @@
      - [ ] Add data on Railways
      - [ ] Remove erlang:now() data when exporting
      - [ ] CVS-like values
-   - [ ] Conveyor (everyone?): work_time in distance/speed or seconds
+   - [X] Conveyor (everyone): work_time in distance/speed or seconds
    - [ ] Conveyor: products that are waiting have a transportation time before
                    being available again WHEN the first product leave
    - [ ] Railway: time of transportation when in position =/= already in position

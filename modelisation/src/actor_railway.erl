@@ -58,7 +58,7 @@ answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 			actor_contract:work(actor_contract:get_work_time(RailwayConf)),
 			{RailwayConf,{actor_product, Prod,switched}, NewOut};
 		false -> 
-			actor_contract:work(actor_contract:get_work_time(RailwayConfig)/2),
+			actor_contract:work(actor_contract:get_work_time(RailwayConfig)/3),
 			{Conf,{actor_product, Prod,switched}, NewOut}
 	end;
 	
