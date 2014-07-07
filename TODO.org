@@ -2,7 +2,7 @@
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
   
-  ** TODO [2/11]
+  ** TODO [4/11]
    - [X] Workstation: % of error
    - [X] Products: initial quality/state, objective quality
    - [ ] Dumb supervisors
@@ -13,12 +13,12 @@
      - [ ] Mode 5: manual mode
      - [ ] Mode 6: product driven (quality first on first product)
      - [ ] Mode 7: team-mode
-   - [ ] Prettier CVS data
+   - [X] Prettier CVS data
      - [X] Add data on RFID
      - [X] Add data on Queues
      - [X] Add data on Railways
-     - [ ] Remove erlang:now() data when exporting
-     - [ ] CVS-like values
+     - [X] Remove erlang:now() data when exporting
+     - [X] CVS-like values
    - [X] Conveyor (everyone): work_time in distance/speed or seconds
    - [ ] Conveyor: products that are waiting have a transportation time before
                    being available again WHEN the first product leave
