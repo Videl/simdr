@@ -20,6 +20,7 @@ create() ->
 	actor_contract:create(?MODULE, actor_contract:random_id(),[], undefined, 0, []).
 
 answer(RailwayConfig, {actor_product, ProductConfig}) ->
+%%	io:format (" Nombre de sorties : ~w~n", [actor_contract:list_size(actor_contract:get_out(RailwayConfig))]),
 	MesOut = case actor_contract:list_size(actor_contract:get_out(RailwayConfig)) of 
 		1 ->
 			{no_prob_out, actor_contract:get_out(RailwayConfig)}; 

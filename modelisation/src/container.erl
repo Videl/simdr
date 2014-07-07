@@ -101,6 +101,11 @@ logical_work(Master, MasterConfig, Request) ->
 %%%     or to the supervisor.
 %%%  5) Take its new configuration for us. (@TODO: why don't we remove this?)
 %%% @end
+
+end_of_physical_work({Config, NbWorkers},{NewConf, {actor_product, _ProductConf, prob_out}, Dest}) ->
+	send_message({Config,prob_out}, Dest),
+	{NewConf, NbWorkers};
+
 end_of_physical_work(
 					 {Config, NbWorkers}, 
 					 {NewConfig, LittleAnswer, Destination}) ->
