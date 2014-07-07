@@ -100,11 +100,11 @@ change_product_test_() ->
 	 	answer(BaseWS, {actor_product, BasePO}),
 	[
 		?_assertMatch(
-			[[{'Q3', 100}]], 
+			[{'Q3', 100}], 
 			actor_contract:get_option(NewPO, processed)),
 		?_assertMatch(
 			{'Q3', _},
-			{Quality, 100})
+			Quality)
 	].
 
 -endif.
