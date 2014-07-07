@@ -100,8 +100,8 @@ create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
 		Out, 
 		{In, Out}, 
 		infinity, 
-		0,
-		0,
+		1,
+		Work_time,
 		Work_time, 
 		List_data).
 
@@ -116,7 +116,7 @@ create(Module, Id, Opt, State, In, Out, Speed, Distance, List_data) ->
 		infinity, 
 		Speed,
 		Distance,
-		Speed*Distance, 
+		Distance/Speed, 
 		List_data).
 
 create(Module, Id, Opt, State, In, Out, InOut, Capacity, Speed, Distance, Work_time, List_data) ->
@@ -183,10 +183,10 @@ get_distance(Actor) ->
 	Actor#config.distance.
 
 set_speed(Actor, Speed) -> 
-	Actor#config{ speed = Speed, work_time = Speed*get_distance(Actor)}.
+	Actor#config{ speed = Speed, work_time = get_distance(Actor)/Speed}.
 
 set_distance(Actor, Distance) -> 
-	Actor#config{ distance = Distance, work_time = Distance*get_speed(Actor)}.
+	Actor#config{ distance = Distance, work_time = Distance/get_speed(Actor)}.
 
 get_state(Actor) ->
 	Actor#config.state.
@@ -636,15 +636,27 @@ answer_test_() ->
 	?_assertEqual(
 		{NewWTime, {work_time, 10, changed}, supervisor},
 		answer(Actor, {change, work_time, 10})),
-	% ?_assertEqual(
-	% 	{Actor, {option, [1,3], status}, supervisor},
-	% 	answer(Actor, {status, option, out})),
 	?_assertEqual(
 		{NewOpt, {option,{in,4}, added}, supervisor},
 		answer(Actor, {add, option,{in,4}}))%,
 	% ?_assertEqual(
 	% 	{Actor, {list_data, [5,6], status}, supervisor},
 	% 	answer(Actor, {status, list_data}))
+	].
+
+work_time_test_() ->
+	Actor = create(mod, id, [], on, [], [], 5, 10, []),
+	Actor2= set_speed(Actor,2),
+	Actor3= set_distance(Actor2,8),
+
+	[?_assertEqual(
+		2.0, get_work_time(Actor)),
+	?_assertEqual(
+		5.0, get_work_time(Actor2)),
+	?_assertEqual(
+		2, get_speed(Actor2)),
+	?_assertEqual(
+		4.0, get_work_time(Actor3))
 	].
 
 -endif.
