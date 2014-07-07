@@ -2,8 +2,8 @@
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
   
-  ** TODO [0/11]
-   - [ ] Workstation: % of error
+  ** TODO [1/11]
+   - [X] Workstation: % of error
    - [ ] Products: initial quality/state, objective quality
    - [ ] Dumb supervisors
      - [ ] Mode 1: always giving one direction
