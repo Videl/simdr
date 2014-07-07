@@ -54,10 +54,9 @@ answer(WSConfig, Request) ->
 %% Internal API
 
 change_product(WSConfig, ProductConfig) ->
-	Transfo = actor_contract:get_option(WSConfig, workstation_luck),
-	[{Quality, _}] = Transfo,
+	[Transfo] = actor_contract:get_option(WSConfig, workstation_luck),
 	actor_contract:set_option(ProductConfig, processed, Transfo),
-	{actor_contract:set_state(ProductConfig, processed), Quality}.
+	{actor_contract:set_state(ProductConfig, processed), Transfo}.
 
 %% ===================================================================
 %% Tests

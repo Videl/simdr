@@ -34,13 +34,6 @@ idling(Config) ->
 
 processing(Config, NbWorkers) ->
 	receive
-
-		% Dead code, should be removed
-		% {Sender, {control, full, {Wait_time, Request}}} ->
-		% 	spawn(?MODULE, wait, [self(), Wait_time, {Request, Sender}]),
-		% 	processing(Config, NbWorkers);
-		%  @end
-
 		{_Sender, {prob_in, Decision}} ->
 			{_In, Out} = actor_contract:get_in_out(Config),
 			NewIn = Decision,
@@ -87,11 +80,12 @@ logical_work(Master, MasterConfig, Request) ->
 		(actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
 	Master ! {self(), end_logical_work, FullAnswer}.
 
-%% if there is a problem of destinations, a specific messsage is sent to supervisor which take a decision
+
+%%% If there is a problem of destinations, a specific messsage is sent to 
+%%% supervisor which take a decision.
 end_of_physical_work({_Config, NbWorkers},{NewConf, {actor_product, _ProductConf, prob_out}, Dest}) ->
 	send_message({NewConf,{actor_product, _ProductConf, prob_out}}, Dest),
 	{NewConf, NbWorkers};
-
 %%% A worker node has ended.
 %%% Things we have to do:
 %%%  1) Add a debug line
@@ -118,7 +112,7 @@ end_of_physical_work(
 		{work,on,product,is,done,{ProductConfig, Detail}}), 
 	actor_contract:add_data(
 		ProductConfig, 
-		{processing,done,by,NewConfig}),
+		{processing,done,by,{NewConfig}}),
 	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
 		[actor_contract:get_module(NewConfig), 
 		 actor_contract:get_id(NewConfig), 
@@ -156,8 +150,7 @@ end_of_physical_work(
 	{actor_contract:set_state(NewConfig, free), Workers}.
 
 
-end_of_logical_work(
-					{_Config, NbWorkers}, 
+end_of_logical_work({_Config, NbWorkers}, 
 					{NewConfig, LittleAnswer, Destination}) ->
 	send_message(LittleAnswer, Destination),
 	{NewConfig, NbWorkers}.
@@ -193,6 +186,8 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 	spawn(?MODULE, physical_work, [self(), Config, Request]),
 	{Config, NbWorkers};
 %%% Receiving request of a product from actor in `out'.
+%%% Consequence: one of my product in the waiting list
+%%% is sent.
 %%% @end
 manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 	io:format("~w receive request of product~n~n", [self()]),
@@ -206,6 +201,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			FirstEntry = actor_contract:first(ListEntry),
 			{product, awaiting_sending, Prod} = FirstEntry,
 			actor_contract:add_data(Config, {sending, product, {Prod}}), 
+			actor_contract:add_data(Prod, {being,sent,by,{Config}}), 
 			send_message({actor_product, Prod}, Sender),
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),

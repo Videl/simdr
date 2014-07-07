@@ -1,13 +1,13 @@
 %%%
 %%% Scenario:
-%%% One conveyor (N1) (with RFID (N_RFID) attached) 
-%%% is linked to a railway (N2).
+%%% One conveyor (C1) (with RFID (N_RFID) attached) 
+%%% is linked to a railway (R2).
 %%% 
-%%% The railway (N2) has two outputs: 
-%%% 	Output one: A conveyor (N3a), then 
-%%%					Queue (N3b) and its 
-%%%					Workstation (N3c).
-%%% 	Output two: A simple conveyor (N4).
+%%% The railway (R2) has two outputs: 
+%%% 	Output one: A conveyor (C3a), then 
+%%%					Queue (BQ3b) and its 
+%%%					Workstation (WS3c).
+%%% 	Output two: A simple conveyor (C4).
 
 C1 = spawn(container, idling, [actor_conveyor:create()]).
 %RFID = spawn(container, idling, [actor_rfid:create()]).
@@ -35,4 +35,4 @@ Prod= actor_product:create().
 
 C1 ! {self(), {actor_product, Prod}}.
 
-C2 ! {self(), {prob_out, Prod, N3a}}.
+R2 ! {self(), {prob_out, Prod, C3a}}.

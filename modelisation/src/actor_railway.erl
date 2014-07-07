@@ -22,6 +22,11 @@ create() ->
 answer(RailwayConfig, {actor_product, ProductConfig}) ->
 	Supervisor = actor_contract:get_option(RailwayConfig, supervisor) ,
 %%	io:format (" Nombre de sorties : ~w~n", [actor_contract:list_size(actor_contract:get_out(RailwayConfig))]),
+	{RailwayConf, ProductConf} = actor_contract:add_to_list_data(
+		RailwayConfig, 
+		{took,a,product, {ProductConfig}},
+		ProductConfig, 
+		{entered,railway, {RailwayConfig}}),
 	MesOut = case actor_contract:list_size(actor_contract:get_out(RailwayConfig)) of 
 		1 ->
 			{no_prob_out, actor_contract:get_out(RailwayConfig)}; 
@@ -36,31 +41,27 @@ answer(RailwayConfig, {actor_product, ProductConfig}) ->
 			{RailwayConfig, {actor_product, ProductConfig, InfoProb}, Dest};
 		false -> 
 			%{In, _Out}= actor_contract: get_in_out(RailwayConfig),
-			{RailwayConf, ProductConf} = actor_contract:add_to_list_data(
-				RailwayConfig, 
-				{took,a,product, {ProductConfig}},
-				ProductConfig, 
-				{entered,railway, {RailwayConfig}}),
 			{RailwayConf, {actor_product, ProductConf, InfoProb}, Dest}
 	end;
 
 answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 	{In, Out} = actor_contract:get_in_out(RailwayConfig),
 	NewOut = Decision,
-	{Conf, Prod} = {RailwayConfig, ProductConfig},
-	% actor_contract:add_to_list_data(
-	% 	{RailwayConfig, 
-	% 		{ProductConfig, 
-	% 		{[In],[NewOut]}}}, 
-	% 	{ProductConfig, RailwayConfig}),
+	%%% List data fillers
+	{ActorConfig, Prod} = actor_contract:add_to_list_data(
+		RailwayConfig, 
+		{going,into,position,{{In, NewOut},for,ProductConfig}}, 
+		ProductConfig, 
+		{railway,went,into,position,{{In, NewOut},RailwayConfig}}),
+	%%% Answer
 	case Decision =/= Out of
 		true ->	
-			RailwayConf = actor_contract:set_in_out(Conf, {In, NewOut}),
+			RailwayConf = actor_contract:set_in_out(ActorConfig, {In, NewOut}),
 			actor_contract:work(actor_contract:get_work_time(RailwayConf)),
 			{RailwayConf,{actor_product, Prod,switched}, NewOut};
 		false -> 
 			actor_contract:work(actor_contract:get_work_time(RailwayConfig)/3),
-			{Conf,{actor_product, Prod,switched}, NewOut}
+			{ActorConfig,{actor_product, Prod,switched}, NewOut}
 	end;
 	
 answer(RailwayConfig, Request) ->
