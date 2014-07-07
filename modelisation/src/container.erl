@@ -49,12 +49,8 @@ processing(Config, NbWorkers) ->
 			processing(NewConfig, NbWorkers);
 
 		{_Sender, {prob_out, Prod, Decision}} ->
-			FullAnswer = (actor_contract:get_module(Config)):answer(Config,{prob_out, Prod, Decision}),
-			%io:format(" Prob out Answer : ~w ~n", [FullAnswer]),
-			{NewConfig, NewNbWorkers} = end_of_physical_work(
-				{Config, NbWorkers}, 
-				FullAnswer),
-			processing(NewConfig, NewNbWorkers);
+			spawn(?MODULE, physical_work, [self(), Config, {prob_out, Prod, Decision}]),
+			processing(Config, NbWorkers);
 
 		{Sender, Request} ->
 			{NewConfig, NewWorkers} = 
@@ -91,6 +87,11 @@ logical_work(Master, MasterConfig, Request) ->
 		(actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
 	Master ! {self(), end_logical_work, FullAnswer}.
 
+%% if there is a problem of destinations, a specific messsage is sent to supervisor which take a decision
+end_of_physical_work({_Config, NbWorkers},{NewConf, {actor_product, _ProductConf, prob_out}, Dest}) ->
+	send_message({NewConf,{actor_product, _ProductConf, prob_out}}, Dest),
+	{NewConf, NbWorkers};
+
 %%% A worker node has ended.
 %%% Things we have to do:
 %%%  1) Add a debug line
@@ -101,11 +102,6 @@ logical_work(Master, MasterConfig, Request) ->
 %%%     or to the supervisor.
 %%%  5) Take its new configuration for us. (@TODO: why don't we remove this?)
 %%% @end
-
-end_of_physical_work({Config, NbWorkers},{NewConf, {actor_product, _ProductConf, prob_out}, Dest}) ->
-	send_message({Config,prob_out}, Dest),
-	{NewConf, NbWorkers};
-
 end_of_physical_work(
 					 {Config, NbWorkers}, 
 					 {NewConfig, LittleAnswer, Destination}) ->
@@ -115,8 +111,8 @@ end_of_physical_work(
 	?DLOG(
 		actor_contract:get_module(Config), 
 		{work,done,on,product,ProductConfig}),
-	io:format("Container >>> Work is done on product id ~p.\n", 
-		[actor_contract:get_id(ProductConfig)]),
+	% io:format("~w >>> Work is done on product id ~p.\n", 
+	% 	[actor_contract:get_module(NewConfig), actor_contract:get_id(ProductConfig)]),
 	actor_contract:add_data(
 		NewConfig, 
 		{work,on,product,is,done,{ProductConfig, Detail}}), 
@@ -179,7 +175,7 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 	?DLOG(
 		actor_contract:get_module(Config), 
 		{starting,to,work,on,product,ProdConf}),
-	io:format("Container >>> Work is starting on product id ~p.\n", [actor_contract:get_id(ProdConf)]),
+	% io:format("~w >>> Work is starting on product id ~p.\n", [actor_contract:get_module(NewConfig), actor_contract:get_id(ProdConf)]),
 	actor_contract:add_data(Config, {new,product,has,arrived, {ProdConf}}), 
 	actor_contract:add_data(ProdConf, {processing,started,by,Config}),
 	%%% Decrement the number of products waiting for us.
