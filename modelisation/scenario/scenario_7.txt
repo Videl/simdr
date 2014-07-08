@@ -1,9 +1,13 @@
 
 N_SCANNER = spawn(container, idling, [actor_scanner:create()]).
-R2 = spawn(container, idling, [actor_railway:create()]).
-R2 ! {self(), {add, option, {scanner, N_SCANNER}}}.
+WS= spawn(container, idling, [actor_workstation:create()]).
+R = spawn(container, idling, [actor_railway:create()]).
 
-R2! N_SCANNER ! {start}.
+WS! R! N_SCANNER ! {start}.
+
+R ! {self(), {add, option, {scanner, N_SCANNER}}}.
+W ! {self(), {add, out, R}.
+
 
 P1 = actor_product:create().
-R2 ! {self(), {actor_product, P1}}.
+W ! {self(), {actor_product, P1}}.
