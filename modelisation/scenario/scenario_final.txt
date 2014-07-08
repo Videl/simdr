@@ -88,9 +88,15 @@ CD5 ! {self(), {add, out, BQD3}}.
 BQD3 ! {self(), {add, out, WSD3}}.
 WSD3 ! {self(), {add, out, CD6}}.
 
+Prod = actor_product:create().
 
+C1 ! {self(), {actor_product, Prod}}.
 
+R2 ! {self(), {prob_out, Prod, C3}}.
 
+R4 ! {self(), {prob_out, Prod, CB1}}.
+
+RB1 ! {self(), {prob_out, Prod, CD1}}.
 
 
 
