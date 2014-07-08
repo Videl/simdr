@@ -26,6 +26,7 @@
    - [ ] Client's order
    - [ ] New actor/supervisor/module for item making
    - [ ] New actor for item erasing (mostly stats and table-handling)
+   - [X] A scanner actor 
    - [ ] Easier debug
      - [ ] DLOG in interesting places
      - [ ] Command to dump ETS files to text (or read at least)
