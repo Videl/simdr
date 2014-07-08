@@ -38,6 +38,28 @@ CD6 = spawn(container, idling, [actor_conveyor:create()]).
 CD7 = spawn(container, idling, [actor_conveyor:create()]).
 
 C1 ! R1 ! C2 ! R2 ! C3 ! BQ1 ! WS1 ! C4 ! C5 ! R3 ! C6 ! R4 ! C7 ! R5 ! 
-C8 ! BQ2 ! WS2 ! C9 ! C10 ! R6 ! C11 ! CB1 ! R7 ! S ! CB2 ! CD1 ! BQ3 ! WSD1 ! CD2 ! RD1 ! CD3 ! WSD2 ! CD4 ! 
-RD2 ! CD5 ! WSD3 ! CD6 ! CD7 ! {start}.
+C8 ! BQ2 ! WS2 ! C9 ! C10 ! R6 ! C11 ! CB1 ! R7 ! S ! CB2 ! CD1 ! BQ3 !
+ WSD1 ! CD2 ! RD1 ! CD3 ! WSD2 ! CD4 ! RD2 ! CD5 ! WSD3 ! CD6 ! CD7 ! {start}.
 
+
+C1 ! {self(), {add, out, R1}}.
+R1 ! {self(), {add, out, C2}}.
+C2 ! {self(), {add, out, R2}}.
+R2 ! {self(), {add, out, C4}}.
+R2 ! {self(), {add, out, C3}}.
+C4 ! {self(), {add, out, BQ1}}.
+BQ1 ! {self(), {add, out, WS1}}.
+WS1 ! {self(), {add, out, C5}}.
+C5 ! {self(), {add, out, R4}}.
+C3 ! {self(), {add, out, R4}}.
+R4 ! {self(), {add, out, C7}}.
+C7 ! {self(), {add, out, R5}}.
+R5 ! {self(), {add, out, C8}}.
+R5 ! {self(), {add, out, C9}}.
+C8 ! {self(), {add, out, BQ2}}.
+BQ2 ! {self(), {add, out, WS2}}.
+WS2 ! {self(), {add, out, C10}}.
+C10 ! {self(), {add, out, R6}}.
+C9 ! {self(), {add, out, R6}}.
+R6 ! {self(), {add, out, C11}}.
+C11 ! {self(), {add, out, R1}}.
