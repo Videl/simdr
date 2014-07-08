@@ -20,26 +20,30 @@ C10 = spawn(container, idling, [actor_conveyor:create()]).
 R6 = spawn(container, idling, [actor_railway:create()]).
 C11 = spawn(container, idling, [actor_conveyor:create()]).
 CB1 = spawn(container, idling, [actor_conveyor:create()]).
-R7 = spawn(container, idling, [actor_railway:create()]).
+RB1 = spawn(container, idling, [actor_railway:create()]).
 S = spawn(container, idling, [actor_scanner:create()]).
 CB2 = spawn(container, idling, [actor_conveyor:create()]).
 CD1 = spawn(container, idling, [actor_conveyor:create()]).
-BQ3 = spawn(container, idling, [actor_basic_queue:create()]).
+BQD1 = spawn(container, idling, [actor_basic_queue:create()]).
 WSD1 = spawn(container, idling, [actor_workstation:create()]).
 CD2 = spawn(container, idling, [actor_conveyor:create()]).
 RD1 = spawn(container, idling, [actor_railway:create()]).
 CD3 = spawn(container, idling, [actor_conveyor:create()]).
+BQD2 = spawn(container, idling, [actor_basic_queue:create()]).
 WSD2 = spawn(container, idling, [actor_workstation:create()]).
 CD4 = spawn(container, idling, [actor_conveyor:create()]).
 RD2 = spawn(container, idling, [actor_railway:create()]).
 CD5 = spawn(container, idling, [actor_conveyor:create()]).
+BQD3 = spawn(container, idling, [actor_basic_queue:create()]).
 WSD3 = spawn(container, idling, [actor_workstation:create()]).
 CD6 = spawn(container, idling, [actor_conveyor:create()]).
 CD7 = spawn(container, idling, [actor_conveyor:create()]).
+SC = spawn(container, idling, [actor_scanner:create()]).
+
 
 C1 ! R1 ! C2 ! R2 ! C3 ! BQ1 ! WS1 ! C4 ! C5 ! R3 ! C6 ! R4 ! C7 ! R5 ! 
-C8 ! BQ2 ! WS2 ! C9 ! C10 ! R6 ! C11 ! CB1 ! R7 ! S ! CB2 ! CD1 ! BQ3 !
- WSD1 ! CD2 ! RD1 ! CD3 ! WSD2 ! CD4 ! RD2 ! CD5 ! WSD3 ! CD6 ! CD7 ! {start}.
+C8 ! BQ2 ! WS2 ! C9 ! C10 ! R6 ! C11 ! CB1 ! RB1 ! S ! CB2 ! CD1 ! BQD1 !
+ WSD1 ! CD2 ! RD1 ! CD3 ! BQD2 ! WSD2 ! CD4 ! RD2 ! CD5 ! BQD3! WSD3 ! CD6 ! CD7 ! SC !{start}.
 
 
 C1 ! {self(), {add, out, R1}}.
@@ -62,4 +66,37 @@ WS2 ! {self(), {add, out, C10}}.
 C10 ! {self(), {add, out, R6}}.
 C9 ! {self(), {add, out, R6}}.
 R6 ! {self(), {add, out, C11}}.
-C11 ! {self(), {add, out, R1}}.
+
+
+R4 ! {self(), {add, out, CB1}}.
+CB1 ! {self(), {add, out, RB1}}.
+RB1 ! {self(), {add, option, {scanner, SC}}}.
+RB1 ! {self(), {add, out, CB2}}.
+RB1 ! {self(), {add, out, CD1}}.
+CB2 ! {self(), {add, out, R4}}.
+CD1 ! {self(), {add, out, BQD1}}.
+BQD1 ! {self(), {add, out, WSD1}}.
+WSD1 ! {self(), {add, out, CD2}}.
+CD2! {self(), {add, out, RD1}}.
+RD1! {self(), {add, out, CD3}}.
+CD3 ! {self(), {add, out, BQD2}}.
+BQD2 ! {self(), {add, out, WSD2}}.
+WSD2 ! {self(), {add, out, CD4}}.
+CD4 ! {self(), {add, out, RD2}}.
+RD2 ! {self(), {add, out, CD5}}.
+CD5 ! {self(), {add, out, BQD3}}.
+BQD3 ! {self(), {add, out, WSD3}}.
+WSD3 ! {self(), {add, out, CD6}}.
+
+
+
+
+
+
+
+
+
+
+
+
+
