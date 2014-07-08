@@ -85,11 +85,11 @@ data_filler_test_() ->
 	[
 		%%% Test: last data exists in product
 		?_assertMatch(
-			{_ErlangNow, _Time, {quality,became,Quality,because,'of',{BaseWS}}},
+			{_ErlangNow, _Time, _BasePO, {quality,became,Quality,because,'of',{BaseWS}}},
 			LastDataPO),
 		%%% Test: last data exists in workstation
 		?_assertMatch(
-			{_ErlangNow, _Time, {changed,quality,'of',product, {BasePO, for, Quality}}}, 
+			{_ErlangNow, _Time, BaseWS, {changed,quality,'of',product, {BasePO, for, Quality}}}, 
 			LastDataWS)
 	].
 
