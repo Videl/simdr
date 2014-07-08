@@ -6,8 +6,8 @@ R = spawn(container, idling, [actor_railway:create()]).
 WS! R! N_SCANNER ! {start}.
 
 R ! {self(), {add, option, {scanner, N_SCANNER}}}.
-W ! {self(), {add, out, R}.
+WS ! {self(), {add, out, R}}.
 
 
 P1 = actor_product:create().
-W ! {self(), {actor_product, P1}}.
+WS ! {self(), {actor_product, P1}}.

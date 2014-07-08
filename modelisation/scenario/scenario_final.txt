@@ -1,0 +1,43 @@
+C1 = spawn(container, idling, [actor_conveyor:create()]).
+R1 = spawn(container, idling, [actor_railway:create()]).
+C2 = spawn(container, idling, [actor_conveyor:create()]).
+R2 = spawn(container, idling, [actor_railway:create()]).
+C3 = spawn(container, idling, [actor_conveyor:create()]).
+BQ1 = spawn(container, idling, [actor_basic_queue:create()]).
+WS1 = spawn(container, idling, [actor_workstation:create()]).
+C4 = spawn(container, idling, [actor_conveyor:create()]).
+C5 = spawn(container, idling, [actor_conveyor:create()]).
+R3 = spawn(container, idling, [actor_railway:create()]).
+C6 = spawn(container, idling, [actor_conveyor:create()]).
+R4 = spawn(container, idling, [actor_railway:create()]).
+C7 = spawn(container, idling, [actor_conveyor:create()]).
+R5 = spawn(container, idling, [actor_railway:create()]).
+C8 = spawn(container, idling, [actor_conveyor:create()]).
+BQ2 = spawn(container, idling, [actor_basic_queue:create()]).
+WS2 = spawn(container, idling, [actor_workstation:create()]).
+C9 = spawn(container, idling, [actor_conveyor:create()]).
+C10 = spawn(container, idling, [actor_conveyor:create()]).
+R6 = spawn(container, idling, [actor_railway:create()]).
+C11 = spawn(container, idling, [actor_conveyor:create()]).
+CB1 = spawn(container, idling, [actor_conveyor:create()]).
+R7 = spawn(container, idling, [actor_railway:create()]).
+S = spawn(container, idling, [actor_scanner:create()]).
+CB2 = spawn(container, idling, [actor_conveyor:create()]).
+CD1 = spawn(container, idling, [actor_conveyor:create()]).
+BQ3 = spawn(container, idling, [actor_basic_queue:create()]).
+WSD1 = spawn(container, idling, [actor_workstation:create()]).
+CD2 = spawn(container, idling, [actor_conveyor:create()]).
+RD1 = spawn(container, idling, [actor_railway:create()]).
+CD3 = spawn(container, idling, [actor_conveyor:create()]).
+WSD2 = spawn(container, idling, [actor_workstation:create()]).
+CD4 = spawn(container, idling, [actor_conveyor:create()]).
+RD2 = spawn(container, idling, [actor_railway:create()]).
+CD5 = spawn(container, idling, [actor_conveyor:create()]).
+WSD3 = spawn(container, idling, [actor_workstation:create()]).
+CD6 = spawn(container, idling, [actor_conveyor:create()]).
+CD7 = spawn(container, idling, [actor_conveyor:create()]).
+
+C1 ! R1 ! C2 ! R2 ! C3 ! BQ1 ! WS1 ! C4 ! C5 ! R3 ! C6 ! R4 ! C7 ! R5 ! 
+C8 ! BQ2 ! WS2 ! C9 ! C10 ! R6 ! C11 ! CB1 ! R7 ! S ! CB2 ! CD1 ! BQ3 ! WSD1 ! CD2 ! RD1 ! CD3 ! WSD2 ! CD4 ! 
+RD2 ! CD5 ! WSD3 ! CD6 ! CD7 ! {start}.
+
