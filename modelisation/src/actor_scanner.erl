@@ -1,9 +1,9 @@
 -module(actor_scanner).
 -include("app_configuration.hrl").
 
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--endif.
+% -ifdef(TEST).
+% -include_lib("eunit/include/eunit.hrl").
+% -endif.
 
 -behaviour(actor_contract).
 

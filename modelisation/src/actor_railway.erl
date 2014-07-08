@@ -12,7 +12,7 @@
 
 -export([
 	create/0,
-	answer/2]).
+	answer/2, send_scanner/2]).
 
 %% Behavior implementation
 
@@ -21,6 +21,8 @@ create() ->
 
 answer(RailwayConfig, {actor_product, ProductConfig}) ->
 	Supervisor = actor_contract:get_option(RailwayConfig, supervisor) ,
+	spawn(?MODULE, send_scanner, [RailwayConfig, ProductConfig]),
+
 %%	io:format (" Nombre de sorties : ~w~n", [actor_contract:list_size(actor_contract:get_out(RailwayConfig))]),
 	{RailwayConf, ProductConf} = actor_contract:add_to_list_data(
 		RailwayConfig, 
@@ -66,6 +68,13 @@ answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 	
 answer(RailwayConfig, Request) ->
 	actor_contract:answer(RailwayConfig, Request).
+
+send_scanner(Conf, ProdConf) ->
+ io:format(" option : ~w ~n", [actor_contract:get_option(Conf, scanner)]),
+	case actor_contract:get_option(Conf, scanner) of 
+		[SCANNER] -> SCANNER ! {self(), {actor_product, ProdConf}};
+		_ -> {nothing}
+	end.
 
 
 %% ===================================================================
