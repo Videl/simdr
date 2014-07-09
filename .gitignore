@@ -16,3 +16,5 @@ ebin/*
 *.iml
 .idea/*
 .idea/
+*~
+*.csv
