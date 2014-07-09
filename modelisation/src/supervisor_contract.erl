@@ -7,7 +7,8 @@
 
 -export([
 	 create/1,
-	 add_data/3
+	 add_data/3,
+	 action_on_request/3
 	]).
 
 %% ===================================================================
@@ -45,3 +46,11 @@ create(Module) ->
 add_data(_Supervisor, _Message, _Object) ->
 	%%% @TODO
 	ok.
+
+action_on_request(Config, Sender, {add, actor, Actor}) ->
+	CurrentActors = Config#supervisor.actors,
+	NewConfig = Config#supervisor{actors = CurrentActors ++ [Actor]},
+	NewConfig;
+action_on_request(Config, Sender, Request) ->
+	io:format("SUPERVISOR <><> UNKNOWN REQUEST ~w (from ~w).~n", [Request, Sender]),
+	Config.

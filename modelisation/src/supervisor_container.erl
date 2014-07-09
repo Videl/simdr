@@ -28,10 +28,13 @@ processing(Config) ->
 		{stop} ->
 			idling(Config);
 		{Sender, Request} ->
-			(Config#supervisor.module):action_on_request(Config, Sender, Request),
+			NewConfig = (Config#supervisor.module):action_on_request(
+				Config, 
+				Sender, 
+				Request),
 			processing(Config)
 		after (Config#supervisor.module):timer_time(Config)*1000 ->
-			(Config#supervisor.module):timer_action(Config),
-			processing(Config)
+			NewConfig = (Config#supervisor.module):timer_action(Config),
+			processing(NewConfig)
 	end.
 

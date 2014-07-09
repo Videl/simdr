@@ -17,6 +17,7 @@ create(Actor) ->
     Ac2 = Ac1#supervisor{actors = [Actor]},
     Ac2.
 
+%%% Frequence of new product
 timer_time(_Config) ->
     5.
 
@@ -28,10 +29,9 @@ timer_action(Config) ->
     Product = actor_product:create(),
     % Log the product
     supervisor_contract:add_data(Config, {created, product}, Product),
-    H ! {self(), {actor_product, Product}}.
+    H ! {self(), {actor_product, Product}},
+    Config.
 
-action_on_request(_Config, _Sender, _Request) ->
-    nothing_to_do.
-
-
-
+%%% Nothing special to do
+action_on_request(Config, Sender, Request) ->
+	supervisor_contract:action_on_request(Config, Sender, Request).
