@@ -7,8 +7,8 @@
 	out,
 	in_out, 
 	capacity,
-speed,
-distance,
+	speed,
+	distance,
 	work_time, 
 	list_data
 	}).

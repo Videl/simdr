@@ -52,7 +52,7 @@
 %% Contract for Actors
 %% ===================================================================
 
--callback create() -> Actor :: tuple(atom(), term()).
+-callback create() -> Actor :: term().
 
 -callback answer(Config :: term(), Entering :: term()) ->
 	Exiting :: term().
@@ -62,16 +62,7 @@
 %% ===================================================================
 
 create(Module, Work_time) ->
-	actor_contract:create(
-		Module, 
-		actor_contract:random_id(), 
-		[], 
-		off, 
-		[], 
-		[], 
-		infinity, 
-		Work_time, 
-		[]).
+	actor_contract:create(Module, off, Work_time).
 
 create(Module, State, Work_time) ->
 	actor_contract:create(Module, 
@@ -351,11 +342,6 @@ answer(ActorConfig, {status, capacity}) ->
 	{state, actor_contract:get_capacity(ActorConfig), status}, 
 	supervisor};
 
-answer(ActorConfig, {status, list_data}) ->
-	{ActorConfig, 
-	{list_data, actor_contract:get_list_data(ActorConfig), status}, 
-	supervisor};
-
 answer(ActorConfig, {status, option, Key}) ->
 	{ActorConfig, 
 	{option, actor_contract:get_option(ActorConfig, Key), status}, 
@@ -543,8 +529,6 @@ add_datas_helper(Actor, [Data|T]) ->
 get_option_helper(AllOptions, Key) ->
 	get_option_helper_two(AllOptions, [], Key).
 
-get_option_helper_two(undefined, _, _) ->
-	unknown_option;
 get_option_helper_two([], [], _Key) ->
 	unknown_option;
 get_option_helper_two([], Result, _Key) ->
