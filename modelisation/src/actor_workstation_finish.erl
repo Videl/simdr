@@ -23,6 +23,14 @@ create() ->
 	Ac2 = actor_contract:set_capacity(Ac1, 1),
 	Ac2.
 
+create({Stop, Manip, Evac}) ->
+	Ac1 = create(),
+	actor_contract:set_option(Ac1, stop, Stop),
+	actor_contract:set_option(Ac1, manipulation, Manip),
+	actor_contract:set_option(Ac1, evacuation, Evac),
+	Ac2 =actor_contract:set_work_time(Ac1, Stop+Manip+Evac),
+	Ac2.
+
 
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
@@ -88,5 +96,11 @@ data_filler_test_() ->
 			{_ErlangNow, _Time, {finish,'of',product, {BasePO, for, Finish}}}, 
 			LastDataWS)
 	].
-
+create_test_() ->
+	BaseWS = create({3,2,1}),
+	[
+		?_assertEqual(
+			6 , actor_contract: get_work_time(BaseWS)
+			)
+	].
 -endif.
