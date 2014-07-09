@@ -34,7 +34,7 @@ create({Stop, Manip, Evac}) ->
 	actor_contract:set_option(Ac1, stop, Stop),
 	actor_contract:set_option(Ac1, manipulation, Manip),
 	actor_contract:set_option(Ac1, evacuation, Evac),
-	Ac2 =actor_contract:set_work_time(Stop+Manip+Evac),
+	Ac2 =actor_contract:set_work_time(Ac1, Stop+Manip+Evac),
 	Ac3 = actor_contract:add_option(Ac2, order, {1,0,1,0}),
 	Ac3.
 
@@ -91,18 +91,12 @@ data_filler_test_() ->
 			LastDataWS)
 	].
 
-change_product_test_() ->
-	BaseWS = create({'Q3', 100}),
-	BasePO = actor_product:create(),
-	{_NewWS, {actor_product, NewPO, Quality}, _} = 
-	 	answer(BaseWS, {actor_product, BasePO}),
+create_test_() ->
+	BaseWS = create({3,2,1}),
 	[
-		?_assertMatch(
-			[[{'Q3', 100}]], 
-			actor_contract:get_option(NewPO, processed)),
-		?_assertMatch(
-			{'Q3', _},
-			{Quality, 100})
+		?_assertEqual(
+			6 , actor_contract: get_work_time(BaseWS)
+			)
 	].
 
 -endif.
