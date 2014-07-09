@@ -6,7 +6,8 @@
 -endif.
 
 -export([
-	 create/1
+	 create/1,
+	 add_data/3
 	]).
 
 %% ===================================================================
@@ -30,10 +31,17 @@
 
 create(Module) ->
     #supervisor{module = Module,
-		id = sim_dr:random_id(),
+		id = actor_contract:random_id(),
 		master_supervisor = void,
 		supervisors = [],
 	        actors = [],
 		data_pool = [],
-		decisions_history = ets:new(history, [public])
-	       }.
+		decisions_history = ets:new(history, [ordered_set, 
+											  {write_concurrency, true}, 
+											  {read_concurrency, true},
+											  public])
+	    }.
+
+add_data(_Supervisor, _Message, _Object) ->
+	%%% @TODO
+	ok.
