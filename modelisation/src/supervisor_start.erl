@@ -1,19 +1,34 @@
 -module(supervisor_start).
+-include("app_configuration.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 -export([
-	supervisor/2,
-	loop/2]).
+	 create/0,
+	 timer_time/1,
+	 timer_action/1,
+	 action_on_request/3
+	]).
 
-supervisor(N , Actor) -> 
-	 spawn(?MODULE, loop, [N,Actor]).
+create() ->
+    supervisor_contract:create(?MODULE).
 
-loop(0, _Actor) -> 
-	io: format(" end of product sending ~n");
+timer_time(_Config) ->
+    5.
 
-loop(N,Actor) -> 
-	Actor ! {self(), {actor_product, actor_product:create()}},
-	timer:sleep(2*1000),
-	loop(N-1, Actor).
+timer_action(Config) ->
+    List = Config#supervisor.actors,
+    % Fetch head
+    [H|_T] = List,
+    % Create new product
+    Product = actor_product:create(),
+    % Log the product
+    simdr_tool:add_data(Config, {created, product}, Product),
+    H ! {self(), {actor_product, Product}}.
+
+action_on_request(_Config, _Sender, _Request) ->
+    nothing_to_do.
+
+
+

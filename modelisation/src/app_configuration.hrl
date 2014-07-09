@@ -3,8 +3,11 @@
 -define(TEST, true).
 -endif.
 
-% config record
+%%% config record
 -include("recordconfig.hrl").
+
+%%% supervisor record
+-include("recordsupervisor.hrl").
 
 
 -define(DEBUG, true).
