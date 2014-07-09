@@ -30,27 +30,28 @@ CD2 = spawn(container, idling, [actor_conveyor:create()]).
 RD1 = spawn(container, idling, [actor_railway:create()]).
 CD3 = spawn(container, idling, [actor_conveyor:create()]).
 BQD2 = spawn(container, idling, [actor_basic_queue:create()]).
-WSD2 = spawn(container, idling, [actor_workstation:create()]).
+WSD2 = spawn(container, idling, [actor_workstation_finish:create()]).
 CD4 = spawn(container, idling, [actor_conveyor:create()]).
-RD2 = spawn(container, idling, [actor_railway:create()]).
-CD5 = spawn(container, idling, [actor_conveyor:create()]).
-BQD3 = spawn(container, idling, [actor_basic_queue:create()]).
-WSD3 = spawn(container, idling, [actor_workstation:create()]).
-CD6 = spawn(container, idling, [actor_conveyor:create()]).
-CD7 = spawn(container, idling, [actor_conveyor:create()]).
-SC = spawn(container, idling, [actor_scanner:create()]).
+%RD2 = spawn(container, idling, [actor_railway:create()]).
+%CD5 = spawn(container, idling, [actor_conveyor:create()]).
+%BQD3 = spawn(container, idling, [actor_basic_queue:create()]).
+%WSD3 = spawn(container, idling, [actor_workstation:create()]).
+%CD6 = spawn(container, idling, [actor_conveyor:create()]).
+%CD7 = spawn(container, idling, [actor_conveyor:create()]).
+%SC = spawn(container, idling, [actor_scanner:create()]).
 
 
 C1 ! R1 ! C2 ! R2 ! C3 ! BQ1 ! WS1 ! C4 ! C5 ! R3 ! C6 ! R4 ! C7 ! R5 ! 
 C8 ! BQ2 ! WS2 ! C9 ! C10 ! R6 ! C11 ! CB1 ! RB1 ! S ! CB2 ! CD1 ! BQD1 !
- WSD1 ! CD2 ! RD1 ! CD3 ! BQD2 ! WSD2 ! CD4 ! RD2 ! CD5 ! BQD3! WSD3 ! CD6 ! CD7 ! SC !{start}.
-
+ WSD1 ! CD2 ! RD1 ! CD3 ! BQD2 ! WSD2 ! CD4 ! 
+%RD2 ! CD5 ! BQD3! WSD3 ! CD6 ! CD7 ! SC !
+{start}.
 
 C1 ! {self(), {add, out, R1}}.
 R1 ! {self(), {add, out, C2}}.
 C2 ! {self(), {add, out, R2}}.
-R2 ! {self(), {add, out, C4}}.
 R2 ! {self(), {add, out, C3}}.
+R2 ! {self(), {add, out, C4}}.
 C4 ! {self(), {add, out, BQ1}}.
 BQ1 ! {self(), {add, out, WS1}}.
 WS1 ! {self(), {add, out, C5}}.
@@ -82,11 +83,11 @@ RD1! {self(), {add, out, CD3}}.
 CD3 ! {self(), {add, out, BQD2}}.
 BQD2 ! {self(), {add, out, WSD2}}.
 WSD2 ! {self(), {add, out, CD4}}.
-CD4 ! {self(), {add, out, RD2}}.
-RD2 ! {self(), {add, out, CD5}}.
-CD5 ! {self(), {add, out, BQD3}}.
-BQD3 ! {self(), {add, out, WSD3}}.
-WSD3 ! {self(), {add, out, CD6}}.
+%CD4 ! {self(), {add, out, RD2}}.
+%RD2 ! {self(), {add, out, CD5}}.
+%CD5 ! {self(), {add, out, BQD3}}.
+%BQD3 ! {self(), {add, out, WSD3}}.
+%WSD3 ! {self(), {add, out, CD6}}.
 
 Prod = actor_product:create().
 
