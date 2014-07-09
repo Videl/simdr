@@ -1,4 +1,4 @@
--module(actor_workstationD).
+-module(actor_workstation_assembly).
 -include("app_configuration.hrl").
 
 -ifdef(TEST).
@@ -26,38 +26,33 @@ create() ->
 	%%% module, state, work_time
 	Ac1 = actor_contract:create(?MODULE, off, 10),
 	Ac2 = actor_contract:set_capacity(Ac1, 1),
-	Ac3.
+	Ac2.
 
 create({Stop, Manip, Evac}) ->
 	Ac1 = create(),
 	actor_contract:set_option(Ac1, stop, Stop),
 	actor_contract:set_option(Ac1, manipulation, Manip),
 	actor_contract:set_option(Ac1, evacuation, Evac),
-	Ac2 = actor_contract:set_work_time(Stop+Manip+Evac),
+	Ac2 =actor_contract:set_work_time(Stop+Manip+Evac),
 	Ac2.
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
-	
+	[Transfo] = actor_contract:get_option(WSConfig, order),
+	actor_contract:set_option(ProductConfig, assembled, Transfo),
+	NewProductConfig = actor_contract:set_state(ProductConfig, assembled),
 	%%% List data fillers
 	{NewWSConfig, NewProductConfigBis} = actor_contract:add_to_list_data(
-		WSConfig, {changed,quality,'of',product, {ProductConfig, for, Quality}}, 
-		NewProductConfig, {quality,became,Quality,because,'of',{WSConfig}}),
+		WSConfig, {changed,assembly,'of',product, {ProductConfig, for, Transfo}}, 
+		NewProductConfig, {quality,became,Transfo,because,'of',{WSConfig}}),
 	%%% Answer
 	{NewWSConfig, 
-	{actor_product, NewProductConfigBis, Quality}, 
+	{actor_product, NewProductConfigBis, Transfo}, 
 	actor_contract:get_out(NewWSConfig)};
 	
 answer(WSConfig, Request) ->
 	actor_contract:answer(WSConfig, Request).
 
-%% Internal API
-
-change_product(WSConfig, ProductConfig) ->
-	Transfo = actor_contract:get_option(WSConfig, workstation_luck),
-	[{Quality, _}] = Transfo,
-	actor_contract:set_option(ProductConfig, processed, Transfo),
-	{actor_contract:set_state(ProductConfig, processed), Quality}.
 
 %% ===================================================================
 %% Tests
