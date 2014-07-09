@@ -16,6 +16,9 @@
      - [ ] Mode 5: manual mode
      - [ ] Mode 6: product driven (quality first on first product)
      - [ ] Mode 7: team-mode
+    - [ ] Supervisors
+      - [ ] Refactor: add/get/set/remove option of contract (sim_dr)
+      - [ ] 
    - [X] Prettier CVS data
      - [X] Add data on RFID
      - [X] Add data on Queues
