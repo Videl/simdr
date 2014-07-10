@@ -26,7 +26,7 @@ create() ->
 	Ac3 = actor_contract:add_option(Ac2, order, {'Q1',{1,0,1,0}}),
 	Ac3.
 
-create(Name ) ->
+create(Name) ->
 	Ac1= actor_contract:create(?MODULE, Name, [], off, 1, []),
 	Ac2 = actor_contract:add_option(Ac1, order, {'Q1',{1,0,1,0}}),
 	Ac2.
@@ -41,19 +41,22 @@ create(Name, {Stop, Manip, Evac}) ->
 	Ac3.
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
+
 	[Order] = actor_contract:get_option(WSConfig, order),
 	{Quality, _Assembly} = Order,
-	case Quality =:= actor_contract:get_option(ProductConfig, quality) of 
-	 true -> Finish = case actor_contract:get_option(ProductConfig, quality) of 
-				['Q1']-> 'Q1';
-				['Q2']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
-						actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
-						{'Q1', pastille};
-				['Q3']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
-						actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
-						{'Q2', pastille};
-				_ -> {pastille}
-			end;
+	QualityAct = actor_contract:get_option(ProductConfig, quality),
+	 io : format( " ordre ~w, quality ~w ~n", [Quality,QualityAct] ),
+	case improve(Quality, QualityAct) of 
+	 true -> Finish = case QualityAct of 
+							['Q1']-> 'Q1';
+							['Q2']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
+									actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
+									{'Q1', pastille};
+							['Q3']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
+									actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
+									{'Q2', pastille};
+							_ -> {pastille}
+						end;
 	false -> Finish =Quality
 		%%% @TODO: case 'unknown_option'
 	end,
@@ -70,6 +73,26 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 answer(WSConfig, Request) ->
 	actor_contract:answer(WSConfig, Request).
 
+%improve Q2 ? 
+improve (Q1, Q2) ->
+
+case Q1 of 
+	'Q1' -> case Q2 of 
+				['Q1']-> false;
+				['Q2']-> true;
+				['Q3']-> true;
+				_ -> false
+			end;
+	'Q2' -> case Q2 of 
+				['Q1']-> false;
+				['Q2']-> false;
+				['Q3']-> true;
+				_ -> false
+				
+			end;
+	'Q3' -> false;
+	_ -> false
+end.
 
 % ===================================================================
 % Tests

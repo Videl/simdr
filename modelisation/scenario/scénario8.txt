@@ -1,0 +1,12 @@
+C1 = spawn(container, idling, [actor_conveyor:create('C1')]).
+BQ2 = spawn(container, idling, [actor_basic_queue:create('BQ2')]).
+WS3 = spawn(container, idling, [actor_workstation_finish:create('WS3')]).
+
+C1 ! BQ2 ! WS3  ! {start}.
+
+C1 ! {self(), {add, out, BQ2}}.
+BQ2 ! {self(), {add, out, WS3 }}.
+
+Prod= actor_product, actor_product:create('Q2').
+
+C1 ! {self(), {actor_product, Prod}}.
