@@ -24,7 +24,10 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, raw, 0).
+	A1 = actor_contract:create(?MODULE, raw, 0),
+	RandomQuality = actor_contract:random(),
+	A2 = actor_contract:add_option(A1, initial_quality, RandomQuality),
+	A2.
 
 create(Quality) ->
 	actor_contract:create(?MODULE, actor_contract:random_id(), [{quality_required, Quality}], raw, 0, []).
@@ -46,16 +49,5 @@ answer(ProdConfig, Request) ->
 %% ===================================================================
 -ifdef(TEST).
 
-answer_test_() ->	
-	Prod = create(),
-	NewProd = actor_contract:add_data(Prod, {21,05,02, q2}),
-	[
-	?_assertEqual( %% State test
-		raw,
-		actor_contract:get_state(NewProd)),
-	?_assertEqual(
-		{21,05,02, q2},
-		actor_contract:get_data(NewProd))
-	].
 
 -endif.

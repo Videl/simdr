@@ -1,6 +1,7 @@
 %%%
 %%% Scenario:
 %%% Two conveyors connected. (C1 and C2.)
+%%% With product creation supervisor (SO1)
 %%%
 
 C1 = spawn(container, idling, [actor_conveyor:create()]).
@@ -10,16 +11,8 @@ C1 ! C2 ! {start}.
 C1 ! {self(), {add, out, C2}}.
 C2 ! {self(), {add, out, self()}}.
 
-P1 = actor_product:create().
-P2 = actor_product:create().
-P3 = actor_product:create().
-P4 = actor_product:create().
-
-C1 ! {self(), {actor_product, P1}}.
-C1 ! {self(), {actor_product, P2}}.
-C1 ! {self(), {actor_product, P3}}.
-C1 ! {self(), {actor_product, P4}}.
-
+SO1 = spawn(supervisor_container, idling, [supervisor_start:create(C1)]).
+SO1 ! {start}.
 =======
 
 %%% Outputs:

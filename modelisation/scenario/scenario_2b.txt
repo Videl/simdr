@@ -1,14 +1,19 @@
 %%%
 %%% Scenario:
-%%% Two conveyors connected. (C1 and C2.)
+%%% Two conveyors connected (C1 and C2). 
+%%% The first one has an RFID Actor (RF1) connected to it.
 %%%
 
 C1 = spawn(container, idling, [actor_conveyor:create()]).
 C2 = spawn(container, idling, [actor_conveyor:create()]).
-C1 ! C2 ! {start}.
+RF1 = spawn(container, idling, [actor_rfid:create()]).
+C1 ! C2 ! RF1 ! {start}.
 
 C1 ! {self(), {add, out, C2}}.
 C2 ! {self(), {add, out, self()}}.
+C1 ! {self(), {add, option, {rfid, RF1}}}.
+
+C2 ! {self(), {change, capacity, 1}}.
 
 P1 = actor_product:create().
 P2 = actor_product:create().
@@ -41,8 +46,3 @@ C1 ! {self(), {actor_product, P4}}.
 %%% actor_contract:answer(P2, {csv_export, list_data}).
 %%% actor_contract:answer(P3, {csv_export, list_data}).
 %%% actor_contract:answer(P4, {csv_export, list_data}).
-
-
-C1 ! {self(), {file_export, list_data}}.
-C2 ! {self(), {file_export, list_data}}.
-actor_contract:answer(P1, {csv_export, list_data}).

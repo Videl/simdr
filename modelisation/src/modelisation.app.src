@@ -4,6 +4,7 @@
    {vsn, "0.0.1"},
    {modules, [actor_contract, actor_conveyor, actor_product, actor_railway, 
               actor_rfid, actor_workstation, actor_conveyor, actor_basic_queue,
-              container]}
+              container, supervisor_contract, supervisor_start,
+              supervisor_container, supervisor_purposeless]}
   ]
 }.

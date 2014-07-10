@@ -1,36 +1,43 @@
 %%%
 %%% Scenario:
-%%% One conveyor (N1) (with RFID (N_RFID) attached) 
-%%% is linked to a railway (N2).
+%%% One conveyor (C1) (with RFID (RF1) attached) 
+%%% is linked to a railway (R2).
 %%% 
-%%% The railway (N2) has two outputs: 
-%%% 	Output one: A conveyor (N3a), then 
-%%%					Queue (N3b) and its 
-%%%					Workstation (N3c).
-%%% 	Output two: A simple conveyor (N4).
+%%% The railway (R2) has two outputs: 
+%%% 	Output one: A conveyor (C3a), then 
+%%%					Queue (BQ4a) and its 
+%%%					Workstation (WST5a).
+%%% 	Output two: A simple conveyor (C3b).
+%%%
+%%% Then a product is sent to the first conveyor, 
+%%% and the railway is guided manually by giving it a command.
 
-N1 = spawn(container, idling, [actor_conveyor:create()]).
-N_RFID = spawn(container, idling, [actor_rfid:create()]).
+C1 = spawn(container, idling, [actor_conveyor:create()]).
+%RF1 = spawn(container, idling, [actor_rfid:create()]).
 
-N2 = spawn(container, idling, [actor_railway:create()]).
+R2 = spawn(container, idling, [actor_railway:create()]).
 
-N3a = spawn(container, idling, [actor_conveyor:create()]).
+C3a = spawn(container, idling, [actor_conveyor:create()]).
 
-N4 = spawn(container, idling, [actor_conveyor:create()]).
+C3b = spawn(container, idling, [actor_conveyor:create()]).
 
-N3b = spawn(container, idling, [actor_basic_queue:create()]).
-N3c = spawn(container, idling, [actor_workstation:create()]).
+BQ4a = spawn(container, idling, [actor_basic_queue:create()]).
+WST5a = spawn(container, idling, [actor_workstation:create()]).
 
-N1 ! N2 ! N3a ! N3b ! N3c ! N4 ! N_RFID ! {start}.
+C1 ! R2 ! C3a ! BQ4a ! WST5a ! C3b ! {start}.
 
-N1 ! {self(), {add, option, {rfid, N_RFID}}}.
-N1 ! {self(), {add,out, N2}}.
-N2 ! {self(), {add,out, N3a}}.
-N2 ! {self(), {add, out, N4}}.
-N3a ! {self(), {add, out, N3b}}.
-N3b ! {self(), {add, out, N3c}}.
+%C1 ! {self(), {add, option, {rfid, RF1}}}.
+C1 ! {self(), {add,out, R2}}.
+R2 ! {self(), {add,out, C3a}}.
+R2 ! {self(), {add, out, C3b}}.
+C3a ! {self(), {add, out, BQ4a}}.
+BQ4a ! {self(), {add, out, WST5a}}.
+WST5a ! {self(), {add, out, self()}}.
+C3b ! {self(), {add, out, self()}}.
 
 
+P1 = actor_product:create().
 
+C1 ! {self(), {actor_product, P1}}.
 
-N1 ! {self(), {actor_product, actor_product:create()}}.
+R2 ! {self(), {prob_out, P1, C3a}}.

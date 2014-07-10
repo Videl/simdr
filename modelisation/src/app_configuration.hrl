@@ -3,8 +3,11 @@
 -define(TEST, true).
 -endif.
 
-% config record
--include("config.hrl").
+%%% config record
+-include("recordconfig.hrl").
+
+%%% supervisor record
+-include("recordsupervisor.hrl").
 
 
 -define(DEBUG, true).
@@ -22,6 +25,7 @@
 -else.
 -define(CREATE_DEBUG_TABLE, void).
 -define(DLOG(X), void).
+-define(DLOG(X, Y), void).
 -endif.
 
 

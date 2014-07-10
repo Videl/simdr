@@ -1,39 +1,92 @@
 * INTERNSHIP
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
-  ** TODO [0/4]
-   - [ ] ETS
-   - [ ] Need to use the *states*! :tests:
-   - [ ] Easier debug
-   - [ ] Product path tracer
-  **  IDEAS [0/1]
-   - [ ] Tool to make up a scenario
-   - [ ] Supervisors
   
- ** Tests [2/11]
+  ** TODO [4/11]
+   - [X] New workstation actor for zone D
+   - [ ] UML Documents
+     - [ ] Sequence diagram
+     - [ ] Others?
+   - [ ] ID of every actor can be manual
+   - [ ] How are people writing ETS table for easy reading?
+   - [ ] Dumb supervisors
+     - [X] Mode 1: always giving one direction
+     - [ ] Mode 2: changing directions every time
+     - [ ] Mode 3: random
+     - [ ] Mode 4: round-robin
+     - [ ] Mode 5: manual mode
+     - [ ] Mode 6: product driven (quality first on first product)
+     - [ ] Mode 7: team-mode
+    - [ ] Supervisors
+      - [ ] Refactor: add/get/set/remove option of contract (sim_dr)
+      - [ ] 
+   - [X] Prettier CVS data
+     - [X] Add data on RFID
+     - [X] Add data on Queues
+     - [X] Add data on Railways
+     - [X] Remove erlang:now() data when exporting
+     - [X] CVS-like values
+     - [ ] More precise CVS data
+     - [ ] Easy detection of saturation points
+   - [X] Conveyor (everyone): work_time in distance/speed or seconds
+   - [ ] Conveyor: products that are waiting have a transportation time before
+                   being available again WHEN the first product leave
+   - [ ] Railway: time of transportation when in position =/= already in position
+   - [ ] Client's order
+   - [X] New actor/supervisor/module for item making
+   - [ ] New actor for item erasing (mostly stats and table-handling)
+   - [X] A scanner actor 
+   - [ ] Easier debug
+     - [ ] DLOG in interesting places
+     - [ ] Command to dump ETS files to text (or read at least)
+       - [X] Export (data) with io:format 2014-07-01 18:20
+       - [X] Export (data) to CVS
+       - [X] Export (data) to text file (weird output but meh) 2014-07-01 18:20
+       - [ ] Export (data) to DETS file
+       - [X] Debug table too (io, text, CVS)
+       - [ ] Dump Option table
+       - [ ] Nice command for pretty dump with actor information, option,
+             data
+  **  LATER [0/1]
+   - [ ] Discrete time mode
+   - [ ] Add general ETS table for list_data of everyone
+   - [ ] Tool to make up a scenario
+   - [ ] Need to use the *states*!
+   - [ ] Find a name for the software
+  
+ ** Tests [3/11]
   - [ ] Extensively test Config record in Actor Contract
   - [ ] Does ETS really returns the last item inputted when sending a product?
   - [ ] Test if concurrent work are really done concurrently
   - [X] Ability to disable tests
-  - [ ] Scenario 1
-  - [ ] Scenario 2
+  - [X] Scenario 1
+  - [X] Scenario 2
   - [ ] Scenario 3
   - [ ] Scenario 4
-  - [ ] Scenario 5
+  - [X] Scenario 5
+  - [ ] Scenario 6
   - [ ] Container
     - [ ] Physical Work
     - [ ] Logical Work
 
  * Archives
+   2014-07-10 09:50
+   - [X] Workstation: % of error
+   - [X] Products: initial quality/state, objective quality
+   - [X] Final scenario
+   - [X] clean outline (WUALA)
+   2014-07-10 09:50
    - [X] If end of path, send to supervisor 
    - [X] RFID needs to receive messages :done: 2014-06-25 17:24
    - [X] Queue needs to send products.. 
+   - [X] Product path tracer
+   - [X] ETS
     *** ETS [4/4] 2014-07-01 14:44
       - [X] Function set_option 2014-06-25 17:56
       - [X] Sending product side
-       - [X] Send a request of new available product every time
+        - [X] Send a request of new available product every time
       - [X] Receiving product side
-       - [X] Have a marker of when you receive a notice of product
+        - [X] Have a marker of when you receive a notice of product
               add number 2014-06-26 17:35
       - [X] Change list data into ETS tables
 

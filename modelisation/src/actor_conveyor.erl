@@ -11,6 +11,7 @@
 
 -export([
 	create/0,
+	create/1,
 	answer/2]).
 
 %% Export for spawns
@@ -21,16 +22,21 @@
 
 create() ->
 	actor_contract:create(?MODULE, actor_contract:random_id(), [], off, 5, []).
+	
+create(Name) ->
+	actor_contract:create(?MODULE, Name, [], off, 5, []).
 
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	spawn(?MODULE, send_rfid, [ConveyorConfig, ProductConfig]),
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
-	Destination = actor_contract:get_out(ConveyorConfig),
 	{NewConveyorConfig, NewProductConfig} = actor_contract:add_to_list_data(
-		{ConveyorConfig, ProductConfig}, 
-		{ProductConfig, ConveyorConfig}),
-	% Answer
+		ConveyorConfig, 
+		{moved, actor_contract:get_module(ProductConfig), {ProductConfig}}, 
+		ProductConfig, 
+		{was,moved,by,actor_contract:get_module(ConveyorConfig), {ConveyorConfig}}),
+	%%% Answer
+	Destination = actor_contract:get_out(ConveyorConfig),
 	{NewConveyorConfig, {actor_product, NewProductConfig, Destination}, Destination};
 answer(ConveyorConfig, Request) ->
 	actor_contract:answer(ConveyorConfig, Request).
@@ -51,23 +57,13 @@ send_rfid(Conf, ProdConf) ->
 
 answer_test_() ->
 	Conv = create(),
-	Prod = actor_product:create(2),
-	%Id = actor_contract:get_id(Conv),
-	NewConv = actor_contract:add_out(Conv, 2),
-%%	{ConvResult, ProdResult}= actor_contract:add_to_list_data({NewConv, Prod}, 
-%%		{Prod, NewConv}),
-	{_, _, Destination} = answer(Conv, {actor_product, Prod}),
-	{_Conveyor, _, DestinationTwo} = answer(NewConv, {actor_product, Prod}),
-	[?_assertEqual(
-		%{Conv, {actor_product, Prod, unknown_option}, unknown_option}
-		[],
-		Destination),
-	?_assertEqual(
-		[2],
-		DestinationTwo)
-	% ?_assertMatch(
-	% {config, actor_conveyor, Id, [{out,2},{capacity,1}, {awaiting, 0}, {ets, _}], off, _,[{Prod, _}]},
-	% Conveyor)
+	Prod = actor_product:create(),
+	{_, {actor_product, ProdTwo, Destination}, Destination} = answer(Conv, {actor_product, Prod}),
+	[
+		%%% Test: product does not change
+		?_assertEqual(
+			Prod,
+			ProdTwo)
 	].
 
 -endif.

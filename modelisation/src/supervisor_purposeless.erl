@@ -1,4 +1,4 @@
--module(supervisor_start).
+-module(supervisor_purposeless).
 -include("app_configuration.hrl").
 
 -ifdef(TEST).
@@ -17,21 +17,23 @@ create(Actor) ->
     Ac2 = Ac1#supervisor{actors = [Actor]},
     Ac2.
 
-%%% Frequence of new product
+%%% Disable timer.
 timer_time(_Config) ->
-    5.
+    666.
 
 timer_action(Config) ->
-    List = Config#supervisor.actors,
-    % Fetch head
-    [H|_T] = List,
-    % Create new product
-    Product = actor_product:create(),
-    % Log the product
-    supervisor_contract:add_data(Config, {created, product}, Product),
-    H ! {self(), {actor_product, Product}},
-    Config.
+	Config.
 
-%%% Nothing special to do
+
+
+action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_out}}) ->
+	[H|_Rest] = actor_contract:get_out(ActorConfig),
+ 	Sender ! {self(), {prob_out, Product, H}},
+ 	Config;
+ action_on_request(Config, Sender, {ActorConfig, prob_in}) ->
+ 	[Head|_Rest] = actor_contract:get_in(ActorConfig),
+	Sender ! {self(), {prob_in, Head}},
+	Config;
+%%% Default behaviour
 action_on_request(Config, Sender, Request) ->
 	supervisor_contract:action_on_request(Config, Sender, Request).

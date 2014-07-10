@@ -1,0 +1,23 @@
+%%%
+%%% Scenario:
+%%% One conveyor (C1) connected to a railway (R1).
+%%% With 'one way only' supervisor (SO1) for the railway.
+%%%
+
+
+Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+
+
+R1 = spawn(container, idling, [actor_railway:create()]).
+C1 = spawn(container, idling, [actor_conveyor:create()]).
+
+SO1 = spawn(supervisor_container, idling, [supervisor_purposeless:create(R1)]).
+R1 ! C1 ! SO1 ! {start}.
+
+C1 ! {self(), {add, out, self()}}.
+R1 ! {self(), {add, out, self()}}.
+R1 ! {self(), {add, out, C1}}.
+R1 ! {self(), {add, option, {supervisor, SO1}}}.
+
+P = actor_product:create().
+R1 ! {self(), {actor_product, P}}.
