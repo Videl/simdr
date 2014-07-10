@@ -1,36 +1,34 @@
 %%%
 %%% Scenario:
-%%% Two conveyors connected.
-%%% With product creation supervisor.
+%%% Two conveyors connected. (C1 and C2.)
+%%% With product creation supervisor (SO1)
 %%%
 
-N1 = spawn(container, idling, [actor_conveyor:create()]).
-N2 = spawn(container, idling, [actor_conveyor:create()]).
-N1 ! N2 ! {start}.
+C1 = spawn(container, idling, [actor_conveyor:create()]).
+C2 = spawn(container, idling, [actor_conveyor:create()]).
+C1 ! C2 ! {start}.
 
-N1 ! {self(), {add, out, N2}}.
-N2 ! {self(), {add, out, self()}}.
+C1 ! {self(), {add, out, C2}}.
+C2 ! {self(), {add, out, self()}}.
 
-
-So = supervisor_start:create(N1).
-A = spawn(supervisor_container, idling, [So]).
-A ! {start}.
+SO1 = spawn(supervisor_container, idling, [supervisor_start:create(C1)]).
+SO1 ! {start}.
 =======
 
 %%% Outputs:
-%%% N1 ! {self(), {io_export, list_data}}.
-%%% N1 ! {self(), {file_export, list_data}}.
-%%% N1 ! {self(), {csv_export, list_data}}.
-%%% N1 ! {self(), {io_export, debug}}.
-%%% N1 ! {self(), {file_export, debug}}.
-%%% N1 ! {self(), {csv_export, debug}}.
+%%% C1 ! {self(), {io_export, list_data}}.
+%%% C1 ! {self(), {file_export, list_data}}.
+%%% C1 ! {self(), {csv_export, list_data}}.
+%%% C1 ! {self(), {io_export, debug}}.
+%%% C1 ! {self(), {file_export, debug}}.
+%%% C1 ! {self(), {csv_export, debug}}.
 %%%
-%%% N2 ! {self(), {io_export, list_data}}.
-%%% N2 ! {self(), {file_export, list_data}}.
-%%% N2 ! {self(), {csv_export, list_data}}.
-%%% N2 ! {self(), {io_export, debug}}.
-%%% N2 ! {self(), {file_export, debug}}.
-%%% N2 ! {self(), {csv_export, debug}}.
+%%% C2 ! {self(), {io_export, list_data}}.
+%%% C2 ! {self(), {file_export, list_data}}.
+%%% C2 ! {self(), {csv_export, list_data}}.
+%%% C2 ! {self(), {io_export, debug}}.
+%%% C2 ! {self(), {file_export, debug}}.
+%%% C2 ! {self(), {csv_export, debug}}.
 %%%
 %%% actor_contract:answer(P1, {csv_export, list_data}).
 %%% actor_contract:answer(P2, {csv_export, list_data}).
@@ -38,6 +36,6 @@ A ! {start}.
 %%% actor_contract:answer(P4, {csv_export, list_data}).
 
 
-N1 ! {self(), {file_export, list_data}}.
-N2 ! {self(), {file_export, list_data}}.
+C1 ! {self(), {file_export, list_data}}.
+C2 ! {self(), {file_export, list_data}}.
 actor_contract:answer(P1, {csv_export, list_data}).

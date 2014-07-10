@@ -1,31 +1,31 @@
-N1 = spawn(container, idling, [actor_conveyor:create()]).
+C1 = spawn(container, idling, [actor_conveyor:create()]).
 
-N2 = spawn(container, idling, [actor_railway:create()]).
+R1 = spawn(container, idling, [actor_railway:create()]).
 
-N3 = spawn(container, idling, [actor_conveyor:create()]).
+C2 = spawn(container, idling, [actor_conveyor:create()]).
 
-N4 = spawn(container, idling, [actor_conveyor:create()]).
+C3 = spawn(container, idling, [actor_conveyor:create()]).
 
-N1 ! N2 ! N3 ! N4! {start}.
+C1 ! R1 ! C2 ! C3! {start}.
 
-N1 ! {self(), {add,out, N2}}.
+C1 ! {self(), {add,out, R1}}.
 
-N3 ! {self(), {add, out, N2}}.
-N2 ! {self(), {add, out, N4}}.
+C2 ! {self(), {add, out, R1}}.
+R1 ! {self(), {add, out, C3}}.
 
-N2 ! {self(), {change, capacity, 1}}.
-N2 ! {self(), {change, work_time, 10}}.
+R1 ! {self(), {change, capacity, 1}}.
+R1 ! {self(), {change, work_time, 10}}.
 
-N1 ! {self(),{actor_product, actor_product:create()}}.
-N1 ! {self(),{actor_product, actor_product:create()}}.
-N1 ! {self(),{actor_product, actor_product:create()}}.
-N3 ! {self(),{actor_product, actor_product:create()}}.
-N3 ! {self(),{actor_product, actor_product:create()}}.
+C1 ! {self(),{actor_product, actor_product:create()}}.
+C1 ! {self(),{actor_product, actor_product:create()}}.
+C1 ! {self(),{actor_product, actor_product:create()}}.
+C2 ! {self(),{actor_product, actor_product:create()}}.
+C2 ! {self(),{actor_product, actor_product:create()}}.
 
-N3 ! {self(),{actor_product, actor_product:create()}}.
-N3 ! {self(),{actor_product, actor_product:create()}}.
+C2 ! {self(),{actor_product, actor_product:create()}}.
+C2 ! {self(),{actor_product, actor_product:create()}}.
 
-N2 ! {self(), {prob_in, N1}}.
+R1 ! {self(), {prob_in, C1}}.
 
 
 
