@@ -1,6 +1,7 @@
 -record(config, {
 	module,
-	id,
+	name,
+	pid,
 	opt, 
 	state,
 	in,
