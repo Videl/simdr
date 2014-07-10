@@ -11,6 +11,7 @@
 
 -export([
 	create/0,
+	create/1,
 	answer/2]).
 
 %% Export for spawns
@@ -21,6 +22,9 @@
 
 create() ->
 	actor_contract:create(?MODULE, actor_contract:random_id(), [], off, 5, []).
+	
+create(Name) ->
+	actor_contract:create(?MODULE, Name, [], off, 5, []).
 
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->

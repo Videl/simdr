@@ -17,7 +17,8 @@
 %% External interface
 
 -export([
-	create/1
+	create/1,
+	create/2
 	]).
 
 %% Behavior implementation
@@ -29,8 +30,11 @@ create() ->
 	Ac3 = actor_contract:add_option(Ac2, order, {1,0,1,0}),
 	Ac3.
 
-create({Stop, Manip, Evac}) ->
-	Ac1 = create(),
+create(Name ) ->
+	actor_contract:create(?MODULE, Name, [], off, 1, []).
+
+create(Name, {Stop, Manip, Evac}) ->
+	Ac1 = actor_contract:create(?MODULE, Name, [], off, 1, []),
 	actor_contract:set_option(Ac1, stop, Stop),
 	actor_contract:set_option(Ac1, manipulation, Manip),
 	actor_contract:set_option(Ac1, evacuation, Evac),
@@ -83,16 +87,16 @@ data_filler_test_() ->
 	[
 		%%% Test: last data exists in product
 		?_assertMatch(
-			{_ErlangNow, _Time, {assembly,became,Transfo,because,'of',{BaseWS}}},
+			{_ErlangNow, _Time, _Actor, {assembly,became,Transfo,because,'of',{BaseWS}}},
 			LastDataPO),
 		%%% Test: last data exists in workstation
 		?_assertMatch(
-			{_ErlangNow, _Time, {changed,assembly,'of',product, {BasePO, for, Transfo}}}, 
+			{_ErlangNow, _Time, _Actor, {changed,assembly,'of',product, {BasePO, for, Transfo}}}, 
 			LastDataWS)
 	].
 
 create_test_() ->
-	BaseWS = create({3,2,1}),
+	BaseWS = create('WS', {3,2,1}),
 	[
 		?_assertEqual(
 			6 , actor_contract: get_work_time(BaseWS)

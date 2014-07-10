@@ -11,6 +11,7 @@
 %% Actor Contract Behaviors Callbacks
 
 -export([
+	create/1,
 	create/0,
 	answer/2, send_scanner/2]).
 
@@ -18,6 +19,9 @@
 
 create() ->
 	actor_contract:create(?MODULE, actor_contract:random_id(),[], undefined, 5, []).
+
+create(Name) ->
+	actor_contract:create(?MODULE, Name, [], off, 5, []).
 
 answer(RailwayConfig, {actor_product, ProductConfig}) ->
 	Supervisor = actor_contract:get_option(RailwayConfig, supervisor) ,
