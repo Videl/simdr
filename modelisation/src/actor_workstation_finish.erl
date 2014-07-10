@@ -23,10 +23,13 @@ create() ->
 	%%% module, state, work_time
 	Ac1 = actor_contract:create(?MODULE, off, 10),
 	Ac2 = actor_contract:set_capacity(Ac1, 1),
-	Ac2.
+	Ac3 = actor_contract:add_option(Ac2, order, {'Q1',{1,0,1,0}}),
+	Ac3.
 
 create(Name ) ->
-	actor_contract:create(?MODULE, Name, [], off, 1, []).
+	Ac1= actor_contract:create(?MODULE, Name, [], off, 1, []),
+	Ac2 = actor_contract:add_option(Ac1, order, {'Q1',{1,0,1,0}}),
+	Ac2.
 
 create(Name, {Stop, Manip, Evac}) ->
 	Ac1 = actor_contract:create(?MODULE, Name, [], off, 1, []),
@@ -34,18 +37,24 @@ create(Name, {Stop, Manip, Evac}) ->
 	actor_contract:set_option(Ac1, manipulation, Manip),
 	actor_contract:set_option(Ac1, evacuation, Evac),
 	Ac2 =actor_contract:set_work_time(Ac1, Stop+Manip+Evac),
-	Ac2.
+	Ac3 = actor_contract:add_option(Ac2, order, {'Q1',{1,0,1,0}}),
+	Ac3.
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
-	Finish=case actor_contract:get_option(ProductConfig, quality) of 
-		['Q1']-> 'Q1';
-		['Q2']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
-				actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
-				{'Q1', pastille};
-		['Q3']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
-				actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
-				{'Q2', pastille};
-		_ -> {pastille}
+	[Order] = actor_contract:get_option(WSConfig, order),
+	{Quality, _Assembly} = Order,
+	case Quality =:= actor_contract:get_option(ProductConfig, quality) of 
+	 true -> Finish = case actor_contract:get_option(ProductConfig, quality) of 
+				['Q1']-> 'Q1';
+				['Q2']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
+						actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
+						{'Q1', pastille};
+				['Q3']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
+						actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
+						{'Q2', pastille};
+				_ -> {pastille}
+			end;
+	false -> Finish =Quality
 		%%% @TODO: case 'unknown_option'
 	end,
 	NewProductConfig = actor_contract:set_state(ProductConfig, finished),
