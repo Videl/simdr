@@ -17,7 +17,8 @@
 %% External interface
 
 -export([
-	create/1
+	create/1,
+	create/2
 	]).
 
 %% Behavior implementation
@@ -30,10 +31,20 @@ create() ->
 	Ac3 = actor_contract:add_option(Ac2, workstation_luck, {'Q1', 33}),
 	Ac3.
 
+create(Name, {Quality, Luck}) ->
+	Ac1 = 	actor_contract:create(?MODULE, Name, [], off, 1, []),
+	Ac2 = actor_contract:set_option(Ac1, workstation_luck, {Quality, Luck}),
+	Ac2.
+
+
+
 create({Quality, Luck}) ->
 	Ac1 = create(),
 	actor_contract:set_option(Ac1, workstation_luck, {Quality, Luck}),
-	Ac1.
+	Ac1;
+
+create(Name ) ->
+	actor_contract:create(?MODULE, Name, [], off, 1, []).
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(WSConfig)),

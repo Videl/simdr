@@ -10,6 +10,7 @@
 %% Actor Contract Behaviors Callbacks
 
 -export([
+	create/1,
 	create/0,
 	answer/2]).
 
@@ -17,6 +18,9 @@
 
 create() ->
 	actor_contract:create(?MODULE, actor_contract:random_id(), [], undefined, 2, []).
+
+create(Name) ->
+	actor_contract:create(?MODULE, Name, [], undefined, 2, []).
 
 answer(ScannerConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ScannerConfig)),
