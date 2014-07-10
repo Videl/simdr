@@ -3,13 +3,14 @@
   --- 2014-06-25 12:07 ---
   
   ** TODO [4/11]
-   - [X] Workstation: % of error
-   - [X] Products: initial quality/state, objective quality
-   - [X] Final scenario
-   - [X] clean outline (WUALA)
-   - [ ] New workstation actor for zone D
+   - [X] New workstation actor for zone D
+   - [ ] UML Documents
+     - [ ] Sequence diagram
+     - [ ] Others?
+   - [ ] ID of every actor can be manual
+   - [ ] 
    - [ ] Dumb supervisors
-     - [/] Mode 1: always giving one direction
+     - [X] Mode 1: always giving one direction
      - [ ] Mode 2: changing directions every time
      - [ ] Mode 3: random
      - [ ] Mode 4: round-robin
@@ -25,12 +26,14 @@
      - [X] Add data on Railways
      - [X] Remove erlang:now() data when exporting
      - [X] CVS-like values
+     - [ ] More precise CVS data
+     - [ ] Easy detection of saturation points
    - [X] Conveyor (everyone): work_time in distance/speed or seconds
    - [ ] Conveyor: products that are waiting have a transportation time before
                    being available again WHEN the first product leave
-   - [X] Railway: time of transportation when in position =/= already in position
+   - [ ] Railway: time of transportation when in position =/= already in position
    - [ ] Client's order
-   - [ ] New actor/supervisor/module for item making
+   - [X] New actor/supervisor/module for item making
    - [ ] New actor for item erasing (mostly stats and table-handling)
    - [X] A scanner actor 
    - [ ] Easier debug
@@ -67,6 +70,12 @@
     - [ ] Logical Work
 
  * Archives
+   2014-07-10 09:50
+   - [X] Workstation: % of error
+   - [X] Products: initial quality/state, objective quality
+   - [X] Final scenario
+   - [X] clean outline (WUALA)
+   2014-07-10 09:50
    - [X] If end of path, send to supervisor 
    - [X] RFID needs to receive messages :done: 2014-06-25 17:24
    - [X] Queue needs to send products.. 
