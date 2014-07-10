@@ -11,12 +11,17 @@
 
 -export([
 	create/0,
+	create/1,
 	answer/2]).
 
 %% Behavior implementation
 
 create() ->
 	actor_contract:create(?MODULE, off, 0).
+
+create(Name ) ->
+	actor_contract:create(?MODULE, Name, [], off, 1, []).
+
 
 %% Possible answer: a new product arriving
 answer(BasicQueueConfig, {actor_product, ProductConfig}) ->
