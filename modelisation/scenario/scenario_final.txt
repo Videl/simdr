@@ -1,3 +1,8 @@
+%%% Fun that can be used to check that the product
+%%% arrives in the end, to us.
+Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+
+
 C1 = spawn(container, idling, [actor_conveyor:create()]).
 R1 = spawn(container, idling, [actor_railway:create()]).
 C2 = spawn(container, idling, [actor_conveyor:create()]).
@@ -80,7 +85,7 @@ R6 ! {self(), {add, out, C11}}.
 
 R4 ! {self(), {add, out, CB1}}.
 CB1 ! {self(), {add, out, RB1}}.
-RB1 ! {self(), {add, option, {scanner, SC}}}.
+RB1 ! {self(), {add, option, {scanner, S}}}.
 RB1 ! {self(), {add, out, CB2}}.
 RB1 ! {self(), {add, out, CD1}}.
 CB2 ! {self(), {add, out, R4}}.
@@ -113,11 +118,13 @@ Prod = actor_product:create().
 
 C1 ! {self(), {actor_product, Prod}}.
 
-R2 ! {self(), {prob_out, Prod, C3}}.
+actor_contract:answer(Prod, {csv_export, list_data}).
 
-R4 ! {self(), {prob_out, Prod, CB1}}.
+% R2 ! {self(), {prob_out, Prod, C3}}.
 
-RB1 ! {self(), {prob_out, Prod, CD1}}.
+% R4 ! {self(), {prob_out, Prod, CB1}}.
+
+% RB1 ! {self(), {prob_out, Prod, CD1}}.
 
 
 

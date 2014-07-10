@@ -20,16 +20,22 @@ create() ->
 
 answer(ScannerConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ScannerConfig)),
-	case actor_contract:get_option(ProductConfig, quality) =:=[] of 
-	true -> Transfo = actor_contract:get_option(ProductConfig, processed),
-			[{Quality, Luck}] = Transfo,
-			FinalQuality = actor_contract:random_weighted(Luck, Quality),
-			ProductConf =actor_contract:set_option(ProductConfig, quality, FinalQuality);
-	false -> ProductConf =  ProductConfig
+	case actor_contract:get_option(ProductConfig, quality) =:= unknown_option  of 
+	true -> 
+		Transfo = actor_contract:get_option(ProductConfig, processed),
+		[{Quality, Luck}] = Transfo,
+		FinalQuality = actor_contract:random_weighted(Luck, Quality),
+		ProductConf = actor_contract:set_option(
+			ProductConfig, 
+			quality, 
+			FinalQuality);
+	false -> 
+		FinalQuality = actor_contract:get_option(ProductConfig, quality),
+		ProductConf =  ProductConfig
 	end,
 	{NewScannerConfig, NewProductConfig} = actor_contract:add_to_list_data(
-	ScannerConfig, {scanned,product, {ProductConf}},
-	ProductConf, {was,scanned,by,{ScannerConfig}}),
+	ScannerConfig, {scanned,product, {ProductConf, quality, is, FinalQuality}},
+	ProductConf, {was,scanned,by,{ScannerConfig, quality, is, FinalQuality}}),
 	% Answer
 	{NewScannerConfig, 
 	{actor_product, NewProductConfig, actor_contract:get_id(NewProductConfig)}, 

@@ -31,17 +31,16 @@ create({Stop, Manip, Evac}) ->
 	Ac2 =actor_contract:set_work_time(Ac1, Stop+Manip+Evac),
 	Ac2.
 
-
-
 answer(WSConfig, {actor_product, ProductConfig}) ->
-case actor_contract:get_option(ProductConfig, quality) of 
-	['Q1']-> Finish='Q1';
-	['Q2']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
-			actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
-			Finish={'Q1', pastille};
-	['Q3']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
-			actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
-			Finish={'Q2', pastille}
+	case actor_contract:get_option(ProductConfig, quality) of 
+		['Q1']-> Finish='Q1';
+		['Q2']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
+				actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
+				Finish={'Q1', pastille};
+		['Q3']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
+				actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
+				Finish={'Q2', pastille}
+		%%% @TODO: case 'unknown_option'
 	end,
 	NewProductConfig = actor_contract:set_state(ProductConfig, finished),
 	%%% List data fillers
