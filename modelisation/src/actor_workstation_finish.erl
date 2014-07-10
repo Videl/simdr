@@ -11,6 +11,8 @@
 
 -export([
 	create/0,
+	create/1,
+	create/2,
 	answer/2
 	]).
 
@@ -23,8 +25,11 @@ create() ->
 	Ac2 = actor_contract:set_capacity(Ac1, 1),
 	Ac2.
 
-create({Stop, Manip, Evac}) ->
-	Ac1 = create(),
+create(Name ) ->
+	actor_contract:create(?MODULE, Name, [], off, 1, []).
+
+create(Name, {Stop, Manip, Evac}) ->
+	Ac1 = actor_contract:create(?MODULE, Name, [], off, 1, []),
 	actor_contract:set_option(Ac1, stop, Stop),
 	actor_contract:set_option(Ac1, manipulation, Manip),
 	actor_contract:set_option(Ac1, evacuation, Evac),
@@ -32,14 +37,15 @@ create({Stop, Manip, Evac}) ->
 	Ac2.
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
-	case actor_contract:get_option(ProductConfig, quality) of 
-		['Q1']-> Finish='Q1';
+	Finish=case actor_contract:get_option(ProductConfig, quality) of 
+		['Q1']-> 'Q1';
 		['Q2']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
 				actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
-				Finish={'Q1', pastille};
+				{'Q1', pastille};
 		['Q3']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
 				actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
-				Finish={'Q2', pastille}
+				{'Q2', pastille};
+		_ -> {pastille}
 		%%% @TODO: case 'unknown_option'
 	end,
 	NewProductConfig = actor_contract:set_state(ProductConfig, finished),
@@ -88,15 +94,15 @@ data_filler_test_() ->
 	[
 		%%% Test: last data exists in product
 		?_assertMatch(
-			{_ErlangNow, _Time, {quality,became,Finish,because,'of',{BaseWS}}},
+			{_ErlangNow, _Time, _Actor, {quality,became,Finish,because,'of',{BaseWS}}},
 			LastDataPO),
 		%%% Test: last data exists in workstation
 		?_assertMatch(
-			{_ErlangNow, _Time, {finish,'of',product, {BasePO, for, Finish}}}, 
+			{_ErlangNow, _Time, _Actor, {finish,'of',product, {BasePO, for, Finish}}}, 
 			LastDataWS)
 	].
 create_test_() ->
-	BaseWS = create({3,2,1}),
+	BaseWS = create('CA1', {3,2,1}),
 	[
 		?_assertEqual(
 			6 , actor_contract: get_work_time(BaseWS)
