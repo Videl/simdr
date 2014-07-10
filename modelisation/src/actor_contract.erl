@@ -5,7 +5,7 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--export([create/12, 
+-export([create/13, 
 		create/9, 
 		 create/8, 
 		 create/6,
@@ -18,7 +18,8 @@
 		 add_option/3,
 		 add_to_list_data/4,
 		 get_data/1,
-		 get_id/1,
+		 get_pid/1,
+		 get_name/1,
 		 get_in/1,
 		 get_out/1,
 		 get_in_out/1,
@@ -29,10 +30,11 @@
 		 get_distance/1, 
 		 get_work_time/1, 
 		 get_state/1, 
-		 set_id/2,
+		 set_pid/2,
 		 set_speed/2,
 		 set_distance/2,
 		 set_work_time/2,
+		 set_name/2,
 		 set_state/2,
 		 set_in/2,
 		 set_out/2,
@@ -74,9 +76,9 @@ create(Module, State, Work_time) ->
 		Work_time, 
 		[]).
 
-create(Module, Id, Opt, State, Work_time, List_data) ->
-	actor_contract:create(Module, 
-		Id, 
+create(Module, Name, Opt, State, Work_time, List_data) ->
+	actor_contract:create(Module,
+		Name, 
 		Opt, 
 		State, 
 		[], 
@@ -84,9 +86,10 @@ create(Module, Id, Opt, State, Work_time, List_data) ->
 		Work_time, 
 		List_data).
 
-create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
+create(Module, Name, Opt, State, In, Out, Work_time, List_data) ->
 	actor_contract:create(Module, 
-		Id, 
+		Name, 
+		0,
 		Opt, 
 		State, 
 		In, 
@@ -98,9 +101,10 @@ create(Module, Id, Opt, State, In, Out, Work_time, List_data) ->
 		Work_time, 
 		List_data).
 
-create(Module, Id, Opt, State, In, Out, Speed, Distance, List_data) ->
+create(Module, Name, Opt, State, In, Out, Speed, Distance, List_data) ->
 	actor_contract:create(Module, 
-		Id, 
+		Name,
+		0, 
 		Opt, 
 		State, 
 		In, 
@@ -112,14 +116,15 @@ create(Module, Id, Opt, State, In, Out, Speed, Distance, List_data) ->
 		Distance/Speed, 
 		List_data).
 
-create(Module, Id, Opt, State, In, Out, InOut, Capacity, Speed, Distance, Work_time, List_data) ->
+create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Speed, Distance, Work_time, List_data) ->
 	?CREATE_DEBUG_TABLE,
-	?DLOG(lists:concat(["Initialising ets tables of", Id])),
+	?DLOG(lists:concat(["Initialising ets tables of", Name])),
 	Actor = #config{
-		module    = Module, 
-		id        = Id, 
+		module    = Module,
+		name 	= Name, 
+		pid        = Pid, 
 		opt       = ets:new(
-						list_to_atom(lists:concat(["Options_", Module,Id])),
+						list_to_atom(lists:concat(["Options_", Module, Name])),
 						[duplicate_bag,
 						{write_concurrency, true},
 						{read_concurrency, true},
@@ -133,13 +138,13 @@ create(Module, Id, Opt, State, In, Out, InOut, Capacity, Speed, Distance, Work_t
 		distance = Distance,
 		work_time = Work_time, 
 		list_data = ets:new(
-						list_to_atom(lists:concat(["Data_",Module, Id])), 
+						list_to_atom(lists:concat(["Data_",Module, Name])), 
 						[ordered_set, 
 						{write_concurrency, true}, 
 						{read_concurrency, true}, 
 						public])},
 	Actor1     = add_options_helper(Actor, Opt),
-	TableQueue = ets:new(list_to_atom(lists:concat(["Queue_",Module, Id])), [duplicate_bag, public]),
+	TableQueue = ets:new(list_to_atom(lists:concat(["Queue_",Module, Name])), [duplicate_bag, public]),
 	Actor3     = actor_contract:set_option(Actor1, ets, TableQueue),
 	Actor4     = add_datas_helper(Actor3, List_data),
 	Actor4.
@@ -151,17 +156,20 @@ add_data(Actor, X) ->
 	Data = {erlang:now(), erlang:localtime(), Actor, X},
 	ETSData = Actor#config.list_data,
 	?DLOG(
-		actor_contract:get_id(Actor),
+		actor_contract:get_name(Actor),
 		{lists:concat(["Inserting data to", ETSData]), Data}),
 	true = ets:insert_new(ETSData, Data),
 %%	(ets:insert(ETSData, Data)=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
-set_id(Actor, Id) ->
-	Actor#config{id= Id}.
+set_pid(Actor, Pid) ->
+	Actor#config{pid= Pid}.
 
-get_id(Actor) ->
-	Actor#config.id.
+get_pid(Actor) ->
+	Actor#config.pid.
+
+get_name(Actor) ->
+	Actor#config.name.
 
 get_opt(Actor) ->
 	Actor#config.opt.
@@ -189,6 +197,9 @@ set_work_time(Actor, Work_time)->
 
 set_state(Actor, State) ->
 	Actor#config {state = State}.
+
+set_name(Actor, Name) ->
+	Actor#config {name = Name}.
 
 get_in(Actor) ->
 	Actor#config.in.
@@ -224,7 +235,7 @@ get_option(Actor, Key) ->
 	Opts = Actor#config.opt,
 	Var = ets:lookup(Opts, Key),
 	Option = get_option_helper(Var, Key), 
-	?DLOG(actor_contract:get_id(Actor),{lists:concat(["Elements value ", Key]), Option}),
+	?DLOG(actor_contract:get_name(Actor),{lists:concat(["Elements value ", Key]), Option}),
 	Option.
 
 set_option(Actor, Key, Value) ->
@@ -240,7 +251,7 @@ delete_option(Actor, Key) ->
 
 add_option(Actor, Key, Value) ->
 	Opts = Actor#config.opt,
-	?DLOG(actor_contract:get_id(Actor),{lists:concat(["Inserting option to ", Opts]), {Key, Value}}),
+	?DLOG(actor_contract:get_name(Actor),{lists:concat(["Inserting option to ", Opts]), {Key, Value}}),
 	ets:insert(Opts, {Key, Value}),
 	%%(ets:insert(Opts, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
@@ -352,9 +363,9 @@ answer(ActorConfig, {status, module}) ->
 	{module, actor_contract:get_module(ActorConfig), status}, 
 	supervisor};
 
-answer(ActorConfig, {status, id}) ->
+answer(ActorConfig, {status, pid}) ->
 	{ActorConfig, 
-	{id, actor_contract:get_id(ActorConfig), status}, 
+	{pid, actor_contract:get_pid(ActorConfig), status}, 
 	supervisor};
 
 answer(ActorConfig, {io_export, list_data}) ->
@@ -581,9 +592,9 @@ get_module_test() ->
 % 	NewActor = add_data(Actor, 3),
 % 	[3,1,2] = NewActor#config.list_data.
 
-get_id_test() ->
+get_name_test() ->
 	Actor = create(mod, test, [], off, 0, []),
-	test = get_id(Actor).
+	test = get_name(Actor).
 
 get_opt_1_test() ->
 	Actor = create(mod, test, [{key, value}], on, 0, [1,2]),
@@ -697,8 +708,8 @@ answer_test_() ->
 		{Actor, {module, mod, status}, supervisor},
 		answer(Actor,{status, module})),
 	?_assertEqual(
-		{Actor, {id, test, status}, supervisor},
-		answer(Actor,{status, id})),
+		{Actor, {pid, 0, status}, supervisor},
+		answer(Actor,{status, pid})),
 	?_assertEqual(
 		{Actor, {work_time, 42, status}, supervisor},
 		answer(Actor, {status, work_time})),

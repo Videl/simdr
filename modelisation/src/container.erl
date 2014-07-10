@@ -22,7 +22,7 @@ idling(Config) ->
 			?DLOG(
 				actor_contract:get_module(Config), 
 				"Entering processing state."),
-			NewConfig = actor_contract:set_id(Config, self()),
+			NewConfig = actor_contract:set_pid(Config, self()),
 			processing(actor_contract:set_state(NewConfig, on), 0);
 		{Sender, actor_product, _, _} when is_pid(Sender) ->
 			Sender ! {state, actor_contract:get_state(Config)},
@@ -106,7 +106,7 @@ end_of_physical_work(
 		actor_contract:get_module(Config), 
 		{work,done,on,product,ProductConfig}),
 	% io:format("~w >>> Work is done on product id ~p.\n", 
-	% 	[actor_contract:get_module(NewConfig), actor_contract:get_id(ProductConfig)]),
+	% 	[actor_contract:get_module(NewConfig), actor_contract:get_name(ProductConfig)]),
 	actor_contract:add_data(
 		NewConfig, 
 		{work,on,product,is,done,{ProductConfig, Detail}}), 
@@ -115,8 +115,8 @@ end_of_physical_work(
 		{processing,done,by,{NewConfig}}),
 	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
 		[actor_contract:get_module(NewConfig), 
-		 actor_contract:get_id(NewConfig), 
-		 actor_contract:get_id(ProductConfig)]),
+		 actor_contract:get_name(NewConfig), 
+		 actor_contract:get_name(ProductConfig)]),
 	ets:insert(TablePid, {product, awaiting_sending, ProductConfig}),
 	%io:format("await"),
  	send_message(awaiting_product, Destination),
@@ -164,11 +164,11 @@ end_of_logical_work({_Config, NbWorkers},
 manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 	io:format("~w receive product ~w ~n~n", 
 		[self(), 
-		 actor_contract:get_id(ProdConf)]),
+		 actor_contract:get_name(ProdConf)]),
 	?DLOG(
 		actor_contract:get_module(Config), 
 		{starting,to,work,on,product,ProdConf}),
-	% io:format("~w >>> Work is starting on product id ~p.\n", [actor_contract:get_module(NewConfig), actor_contract:get_id(ProdConf)]),
+	% io:format("~w >>> Work is starting on product id ~p.\n", [actor_contract:get_module(NewConfig), actor_contract:get_name(ProdConf)]),
 	actor_contract:add_data(Config, {new,product,has,arrived, {ProdConf}}), 
 	actor_contract:add_data(ProdConf, {processing,started,by,Config}),
 	%%% Decrement the number of products waiting for us.
