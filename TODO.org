@@ -4,6 +4,8 @@
   
   ** TODO [4/11]
    - [X] New workstation actor for zone D
+   - [X] finish Workstation takes care quality product to improve its quality
+   - [X] name actors
    - [ ] UML Documents
      - [ ] Sequence diagram
      - [ ] Others?
