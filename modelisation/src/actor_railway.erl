@@ -30,9 +30,9 @@ answer(RailwayConfig, {actor_product, ProductConfig}) ->
 %%	io:format (" Nombre de sorties : ~w~n", [actor_contract:list_size(actor_contract:get_out(RailwayConfig))]),
 	{RailwayConf, ProductConf} = actor_contract:add_to_list_data(
 		RailwayConfig, 
-		{took,a,product, {ProductConfig}},
+		{{took,a,product}, {ProductConfig}},
 		ProductConfig, 
-		{entered,railway, {RailwayConfig}}),
+		{{entered,railway}, {RailwayConfig}}),
 	MesOut = case actor_contract:list_size(actor_contract:get_out(RailwayConfig)) of 
 		1 ->
 			{no_prob_out, actor_contract:get_out(RailwayConfig)}; 
@@ -56,9 +56,9 @@ answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 	%%% List data fillers
 	{ActorConfig, Prod} = actor_contract:add_to_list_data(
 		RailwayConfig, 
-		{going,into,position,{{In, NewOut},for,ProductConfig}}, 
+		{{going,into,position,{{In, NewOut},for},ProductConfig}}, 
 		ProductConfig, 
-		{railway,went,into,position,{{In, NewOut},RailwayConfig}}),
+		{{railway,went,into,position,{{In, NewOut}},RailwayConfig}}),
 	%%% Answer
 	case Decision =/= Out of
 		true ->	
