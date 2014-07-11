@@ -5,11 +5,10 @@
   ** TODO [4/11]
    - [X] New workstation actor for zone D
    - [X] finish Workstation takes care quality product to improve its quality
-   - [X] name actors
    - [ ] UML Documents
      - [ ] Sequence diagram
      - [ ] Others?
-   - [ ] ID of every actor can be manual
+   - [] ID of every actor can be manual
    - [ ] How are people writing ETS table for easy reading?
    - [ ] Dumb supervisors
      - [X] Mode 1: always giving one direction

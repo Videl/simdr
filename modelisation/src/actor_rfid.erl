@@ -25,8 +25,8 @@ create(Name) ->
 answer(RFIDConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
 	{NewRFIDConfig, NewProductConfig} = actor_contract:add_to_list_data(
-		RFIDConfig, {scanned,product, {ProductConfig}}, 
-		ProductConfig, {was,scanned,by,{RFIDConfig}}),
+		RFIDConfig, {{scanned,product}, {ProductConfig}}, 
+		ProductConfig, {{was,scanned,by},{RFIDConfig}}),
 	%%% Answer
 	{NewRFIDConfig, 
 	{actor_product, NewProductConfig, actor_contract:get_name(NewProductConfig)}, 
@@ -40,7 +40,7 @@ answer(RFIDConfig, Request) ->
 answer_test_() ->
 	ActorRFID = actor_rfid:create(),
 	ActorProduct = actor_product:create(),
-	Id = actor_contract:get_id(ActorProduct),
+	Id = actor_contract:get_name(ActorProduct),
 	{_, {actor_product, EndProduct, NewId}, _Dest} = 
 		actor_rfid:answer(ActorRFID, {actor_product, ActorProduct}),
 	[
