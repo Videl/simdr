@@ -115,8 +115,13 @@ RC1 ! {self(), {add, option, {supervisor, So8}}}.
 
 
 Prod = actor_product:create().
-
 CA1 ! {self(), {actor_product, Prod}}.
+
+Prod2 = actor_product:create().
+CA1 ! {self(), {actor_product, Prod2}}.
+
+Prod3 = actor_product:create().
+CA1 ! {self(), {actor_product, Prod3}}.
 
 actor_contract:answer(Prod, {csv_export, list_data}).
 
