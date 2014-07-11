@@ -32,9 +32,9 @@ answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ConveyorConfig)),
 	{NewConveyorConfig, NewProductConfig} = actor_contract:add_to_list_data(
 		ConveyorConfig, 
-		{moved, actor_contract:get_module(ProductConfig), {ProductConfig}}, 
+		{{moved, actor_contract:get_module(ProductConfig)}, {ProductConfig}}, 
 		ProductConfig, 
-		{was,moved,by,actor_contract:get_module(ConveyorConfig), {ConveyorConfig}}),
+		{{was,moved,by,actor_contract:get_module(ConveyorConfig)}, {ConveyorConfig}}),
 	%%% Answer
 	Destination = actor_contract:get_out(ConveyorConfig),
 	{NewConveyorConfig, {actor_product, NewProductConfig, Destination}, Destination};
