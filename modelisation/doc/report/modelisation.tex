@@ -25,6 +25,10 @@
 
 	\maketitle
 
+	\tableofcontents
+
+	\pagebreak
+
 	\section{Interface pour les acteurs}
 
 	Le module \textbf{actor\_contract} fournit à la fois la spécification d'un 
@@ -36,14 +40,14 @@
 	assurer une compatibilité avec le système de contrôle. 
 
 
-	\subsection*{Fonction create/0}
+	\subsection{Fonction create/0}
 		Cette fonction renvoi un acteur avec des valeurs mises par défaut ou
 		générés aléatoirement, tels que le nom de l'acteur (en général le nom
 		du module), l'identifiant de l'acteur créé (unique).
 
 		Elle ne prend aucun argument.
 
-	\subsection*{Fonction answer/2}
+	\subsection{Fonction answer/2}
 		Cette fonction permet de \textbf{caractériser} le comportement du 
 		module en fonction d'une entrée précise (qui peut être un produit, mais
 		pas nécessairement). C'est cette fonction qui doit modifier/lire le 
@@ -63,7 +67,8 @@
 		\end{enumerate}
 
 	 	Cette fonction représente aussi le temps de travail via une pause
-	 	forcée, c'est pourquoi à chaque fois que cette fonction est appelée,
+	 	forcée (en mode temps-réel), c'est pourquoi à chaque fois que cette 
+	 	fonction est appelée,
 	 	elle est encapsulée dans un noeud extérieur qui prévient l'acteur 
 	 	quand le travail est terminé. Cet aspect nous permet de contrôler 
 	 	plusieurs requêtes en parallèle.
@@ -85,33 +90,18 @@
 	 			nom de l'action qui a été exécuté sur l'acteur B.
 	 		\item Enfin vient la destination de la requête, qui est soit dirigée 
 	 			à l'acteur suivant, soit au superviseur. (Cette valeur est 
-	 			beaucoup utilisé par l'aiguilleur.)
+	 			beaucoup utilisée par l'aiguilleur.)
 	 	\end{enumerate}
+
+	 	La dernière tâche de cette fonction est d'inscrire des informations 
+	 	utiles à la fois dans la base de données du produit et de l'acteur
+	 	actuel.
 
 		L'interface \textbf{actor\_contract} comprend également différentes 
 		fonctions implémentées pour accéder et modifier les données des 
 		configurations ainsi que des réponses types pouvant être utilisées 
 		par chaque acteur. Il est cependant toujours possible d'annuler ce 
 		comportement via programmation.
-
-	\subsection*{Fonction end\_physical\_work/3 et end\_logical\_work/3}
-		Les requêtes entrainant des actions physiques tels que les déplacements
-		de produits sont coûteuses en temps et dépendent d'une capacité limité :
-		on a donc le besoin de séparer les requêtes produisant des réponses 
-		physiques ou logiques.
-		La destination peut aussi changer : soit un autre acteur, soit le 
-		superviseur.
-
-		Dans le cas du convoyeur, étant donné la possibilité d'avoir un lecteur
-		RFID attaché, la personnalisation de la réponse à une fin de travail physique 
-		(déplacement du produit) est nécessaire.
-
-	\subsection*{Fonction envoi de produits /?}
-		Utilisation d'une file d'attente pour contrôler la sortie au cas où
-		l'acteur suivant refuse le produit ? 
-		Si oui, l'envoi d'un produit est automatique pour tout le monde, pas
-		besoin de personnalisation.
-		Si non, l'envoi d'un produit se gère au cas par cas selon les acteurs.
 	 
 	\begin{landscape}
 		\begin{center}
@@ -127,7 +117,7 @@
 				\hline
 				Convoyeur & 
 				actor\_conveyor & 
-				Hasard & 
+				Manuel/Hasard & 
 				sortie & 
 				on/off & 
 				Temps de transport & 
@@ -135,7 +125,7 @@
 				\hline
 				Aiguilleur & 
 				actor\_railway & 
-				Hasard & 
+				Manuel/Hasard & 
 				entrée/sortie/règle de priorité & 
 				{in, out} (son état physique) & 
 				Temps d'aiguillage & 
@@ -143,7 +133,7 @@
 				\hline
 				RFID & 
 				actor\_rfid & 
-				Hasard & 
+				Manuel/Hasard & 
 				entrée & 
 				on/off & 
 				Temps de détection & 
@@ -151,7 +141,7 @@
 				\hline
 				Station de travail & 
 				actor\_workstation & 
-				Hasard & 
+				Manuel/Hasard & 
 				entrée/sortie & 
 				on/work/off & 
 				Temps de fabrication & 
@@ -159,7 +149,7 @@
 				\hline
 				Produit & 
 				actor\_product & 
-				Hasard & 
+				Manuel/Hasard & 
 				Qualité demandée & 
 				raw/Q1/Q2/Q3 & 
 				Aucun & 
@@ -167,16 +157,114 @@
 				\hline
 				File d'attente basique & 
 				actor\_basic\_queue & 
-				Hasard & 
+				Manuel/Hasard & 
 				Pas d'options & 
 				on/processing/off & 
 				Temps minimum avant qu'un produit soit disponible & 
 				Liste de produits avec temps d'entrée et temps de sortie \\
 				\hline
+				Scanner &
+				actor\_scanner &
+				Manuel/Hasard &
+				Pas d'options &
+				on/off &
+				Temps de détection de 2 secondes &
+				Liste de produits détectés, avec la qualité \\
+				\hline
+				Station de travail d'assemblage & 
+				actor\_workstation \_assembly & 
+				Manuel/Hasard &
+				Configuration à insérer dans le produit suivant &
+				on/processing/off &
+				Temps d'assemblage de 12 secondes &
+				Liste de produits transformés \\
+				\hline
+				Station de travail finition &
+				actor\_workstation \_finish &
+				Manuel/Hasard &
+				Pas d'options &
+				on/processing/off &
+				5 secondes &
+				Liste des produits avec la qualité \\
+				\hline
 			\end{tabularx}
 		\end{center}
 	
 	\end{landscape}
+
+
+	\section{Objectifs du module container}
+		Le module \textbf{container} permet de créer un noeud Erlang qui 
+		attend les messages des autres acteurs. Les fonctions du container
+		ne dépendent uniquement de la configuration d'un acteur. (C'est pourquoi
+		il est important que les acteurs implémentent l'interface.)
+		Dans toute la suite de cette section, quand on dira `l'acteur', 
+		il faudra en fait comprendre `le module container lancé avec la 
+		configuration de tel acteur'.
+
+		Le container utilise des fonctions pour la gestion de son acteur. Voici 
+		une liste des choses qu'il doit gérer :
+
+		\begin{enumerate}
+			\item Recevoir les messages des autres acteurs
+			\item Recevoir et envoyer les messages au superviseur
+			\item Les noeuds qui représentent le travail sur les produits
+			\item Les envois de produits aux autres acteurs
+		\end{enumerate}
+
+		\subsection{Recevoir les messages des autres acteurs}
+			Les acteurs s'envoient principalement des produits entre eux, le 
+			seul flux physique que nous avons.
+			
+			Les acteurs ayant à chaque instant un comportement asynchrone, 
+			ils peuvent gérer les autres situations qui peuvent arriver.
+
+		\subsection{Recevoir et envoyer les messages au superviseur}
+			L'acteur envoie constamment ses changements de configurations
+			au superviseur. Pour l'acteur aiguilleur, il y a un dialogue
+			qui lui permet d'orienter le produit vers la bonne sortie.
+
+		\subsection{Les noeuds qui représentent le travail sur les produits}
+			Dès qu'un acteur reçoit un produit, le travail supposé être fait
+			par l'acteur est effectué par la fonction \textit{answer/2}. Comme
+			le travail à effectuer est potentiellement long, il est lancé
+			dans un autre noeud en parallèle.
+
+			Une fois que ce noeud a terminé, l'acteur est prévenu via les
+			fonctions \textit{end\_of\_physical\_work/3} (\textbf{flux physique})
+			et \textit{end\_of\_logical\_work/3} (\textbf{flux logiques}) et le produit
+			est rajouté dans la liste des produits à envoyer.
+
+		\subsection{Les envois de produits aux autres acteurs}
+			Cependant, pour conserver une bonne gestion des produits vis-à-vis
+			des blocages du aux capacités maximum des acteurs, on utilise le 
+			protocole suivant quand un acteur souhaite envoyer un produit :
+
+			\begin{enumerate}
+				\item Le \textbf{premier acteur} envoie une notification de produit
+					en attente au \textbf{second acteur}. Le produit est 
+					enregistré dans le premier acteur, et il faut 
+					\textbf{attendre la confirmation} du second acteur avant
+					d'envoyer le produit.
+					\footnote{Format : \{PidPremierActeur, awaiting\_product\}}
+				
+				\item Sur réception de cette notification, le second acteur 
+					examine sa liste de produits qu'il a sous sa garde :
+					les produits en cours de travail \textbf{et} les produits
+					qui sont en attente d'être envoyé à l'acteur suivant.
+					Deux issues possibles :
+					\begin{itemize}
+						\item Si le second acteur a de la place disponible, 
+							il envoie une confirmation au premier acteur en
+							utilisant le `PidPremierActeur' pour le contacter.
+						\item Si il n'a pas de place, il n'envoie rien. Dès 
+							que de la place se libère, il enverra une 
+							confirmation au premier acteur.
+					\end{itemize}
+
+				\item Quand le premier acteur reçoit une confirmation,
+					il envoie le \textbf{premier produit arrivé} (FIFO).
+			\end{enumerate}
 
 	\section{Acteurs actuellement implémentés}
 	
@@ -225,10 +313,22 @@
 
 		\subsection{Station de travail}
 			Les stations de travail peuvent recevoir un seul produit à la fois, 
-			et permettent de modifier l'état du produit. Pour le moment, il y a
-			une chance équiprobable d'avoir un support de qualité Q1, Q2, ou Q3,
-			mais dans le futur, cette `chance' sera exprimable dans les options
-			de la station sous forme d'un pourcentage.
+			et permettent de modifier l'état du produit. On ne peut cependant
+			pas le conna\^itre tant que le produit n'est pas arrivé à un acteur
+			Scanner qui pourra confirmer l'état du produit réel.
+
+			Cette acteur doit \^etre configuré avec l'option `workstation\_luck',
+			correspondant à la qualité voulue des produits arrivant sur la
+			station. Voici des exemples de valeurs :
+
+			\begin{itemize}
+				\item \textbf{\{'Q2', 33\}} : 33\% de chance d'accomplir un 
+					objet de qualité Q2 (ceci est équivalent à une 
+					équiprobabilité entre les trois qualités, Q1, Q2 et Q3).
+				\item \textbf{\{'Q1', 98\}} : 98\% de chance d'accomplir un
+					produit de qualité Q1 (configuration de la station de
+					travail numéro deux dans le scénario final).
+			\end{itemize}
 
 		\subsection{File d'attente basique}
 			Les files d'attentes sont juste avant les stations : elles 
@@ -248,7 +348,47 @@
 			 n'a pas particulièrement besoin d'un protocole. On a donc désactivé
 			 plusieurs type de requêtes qui permettent de le modifier. 
 			 On lui demandera alors juste de répondre par ses données. 
-			 Ce type de réponses pourra aussi être utilisé par les autres acteurs 
+			 Ce type de réponse pourra aussi être utilisé par les autres acteurs 
 			 si on veut récupérer/modifier certaines de leurs données de 
 			 manières simplifié.
+
+			 Le produit est composé de la palette en bois et de la disposition
+			 des tablettes. Il y a quatre emplacements possibles. De plus,
+			 la qualité peut être augmenté une fois à 100\% gr\^ace à un acteur.
+
+			 La qualité initiale du produit (palette en bois) est choisie de
+			 manière équiprobable.
+
+		\subsection{Le scanner}
+			L'acteur Scanner permet de s'assurer de la qualité d'un produit.
+			En effet, les stations de travail ne peuvent que travailler sur un
+			produit et accomplir leur commande avec leur probabilité d'échouer.
+			Le scanner se charge d'analyser la qualité du produit pour aider
+			les superviseurs à diriger les acteurs.
+
+			Note : il sera possible d'ajouter un pourcentage d'erreur à la 
+			détection.
+
+		\subsection{Station de travail d'assemblage}
+			Cette acteur ajoute les tablettes dans le produit. On le configure
+			avec l'option `order'. Voici des exemples :
+
+			\begin{itemize}
+				\item \textbf{\{1, 0, 1, 0\}}
+				\item \textbf{\{1, 1, 1, 1\}}
+				\item \textbf{\{0, 0, 0, 1\}}
+			\end{itemize}
+
+		\subsection{Station de travail pour la finition}
+			Cette acteur se trouve dans la dernière zone du scénario final. Il
+			permet d'augmenter la qualité d'un produit de un si la commande
+			client le demande. De même que pour la station de travail 
+			d'assemblage, la commande est à inscrire dans les options.
+
+	\section{Tests unitaires}
+		Sur demande de Arnould Guidat, nous avons programmé des tests unitaires
+		pour le plus de fonctions possibles. Cela permet d'être sûr du 
+		comportement des fonctions et de remarquer très rapidement les 
+		régressions dans le code.
+
 \end{document}
