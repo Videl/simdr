@@ -1,0 +1,116 @@
+\documentclass{article}
+\usepackage{pgf-umlsd}
+\usepackage{pdflscape}
+%\pdfpagewidth 10in 
+ 
+\usepackage[a4paper, left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+ 
+
+ 
+\begin{document}
+
+\title{Sequence Diagram: Scenario 1}
+\date{}
+
+\maketitle
+\thispagestyle{empty}
+\section*{Hypothesis}
+
+\begin{itemize}
+	\item Worker nodes that represent a task (when calling answer()) are not 
+	represented.
+	\item The lifeline of an actor is the \textit{receive ... end} clause
+	in the processing loop function.
+	\item Message passing between Actors are done as if they are concurrent
+	function calls. When you see a call looking like `\{...\}', they are 
+	just plain messages triggering a \textit{receive} clause on the other end.
+	\item Function calls to module \textbf{container} and 
+	\textbf{actor\_container} are not shown, because multiple nodes of 
+	those modules exists at the same time.
+	\item Actors written here are actually \textbf{containers} with a 
+	configuration of the actor.
+\end{itemize}
+
+\begin{landscape}
+
+\thispagestyle{empty}
+\begin{center}
+	\begin{sequencediagram}
+	\newthread[white]{user}{User}
+	%\tikzstyle {inststyle}+=[bottom color =white, top color=white, rounded corners=3mm]
+	%\newinst[0.1]{mw_consulter}{:PanelConsulter}
+	%\newinst[0.1]{user}{:User}
+	\newinst[7]{actor_bq1}{BQ1:BasicQueue}
+	\newinst[3]{actor_wst1}{WTS1:Workstation}
+	\newinst[3]{supervisor}{SO1:Supervisor}
+	%\newinst[0.1]{mw_planifier}{:PanelPlanifier}
+		 
+		\begin{sdblock}{Standard}{Behaviour of all Actors}
+			\begin{messcall}
+				{user}
+				{\{self(), \{actor\_product, ProductConfiguration\}\}}
+				{actor_bq1}
+
+				\begin{callself}
+					{actor_bq1}
+					{
+						answer(BQConfig, \{actor\_product, ProductConfiguration\})
+						\postlevel
+					}
+					{
+						\shortstack{\{NewBQConfig, \\
+						\{actor\_product, \\NewProductConfiguration, \\ buffered\}, \\
+						Destination\}}
+					}
+				\end{callself}
+				\postlevel
+				\postlevel
+				\begin{messcall}
+					{actor_bq1}
+					{\{self(), awaiting\_product\}}
+					{actor_wst1}
+
+				\end{messcall}
+			\end{messcall}
+		\end{sdblock}
+
+		\begin{messcall}
+		{actor_wst1}
+		{\{self(), \{control, ok\}\}\}}
+		{actor_bq1}
+
+		\end{messcall}
+
+		\begin{messcall}
+			{actor_bq1}
+			{\{self(), \{actor\_product, ProductConfiguration\}\}}
+			{actor_wst1}
+
+			\begin{callself}
+				{actor_wst1}
+				{
+					answer(WSTConfig, \{actor\_product, ProductConfiguration\})
+					\postlevel
+				}
+				{
+					\shortstack{\{NewWSTConfig, \\
+					\{actor\_product, \\NewProductConfiguration, \\ Quality\}, \\
+					Destination\}}
+				}
+			\end{callself}
+
+			\postlevel
+			\postlevel
+			\begin{messcall}
+			{actor_wst1}
+			{\{self(), awaiting\_product\}}
+			{supervisor}
+
+			\end{messcall}
+		\end{messcall}
+
+	\end{sequencediagram}
+\end{center}
+\end{landscape}
+
+\end{document}
