@@ -60,6 +60,7 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewWSConfig, NewProductConfigBis} = actor_contract:add_to_list_data(
 		WSConfig, {finish,'of',product, {ProductConfig, for, Finish}}, 
 		NewProductConfig, {quality,became,Finish,because,'of',{WSConfig}}),
+	 io : format( " nouvelle qualité ~w ~n", [Finish] ),
 	%%% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Finish}, 
