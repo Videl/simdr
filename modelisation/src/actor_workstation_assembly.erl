@@ -11,30 +11,22 @@
 
 -export([
 	create/0,
-	answer/2
-	]).
-
-%% External interface
-
--export([
 	create/1,
-	create/2
+	create/2,
+	answer/2
 	]).
 
 %% Behavior implementation
 
 create() ->
 	%%% module, state, work_time
-	Ac1 = actor_contract:create(?MODULE, off, 10),
-	Ac2 = actor_contract:set_capacity(Ac1, 1),
-	Ac3 = actor_contract:add_option(Ac2, order, { 'Q1',{1,0,1,0}}),
-	Ac3.
+	create(actor_contract:random_id()).
 
-create(Name ) ->
-	actor_contract:create(?MODULE, Name, [], off, 1, []).
+create(Name) ->
+	create(Name, {3,8,1}).
 
 create(Name, {Stop, Manip, Evac}) ->
-	Ac1 = actor_contract:create(?MODULE, Name, [], off, 1, []),
+	Ac1 = actor_contract:create(?MODULE, Name, [], off, 0, []),
 	actor_contract:set_option(Ac1, stop, Stop),
 	actor_contract:set_option(Ac1, manipulation, Manip),
 	actor_contract:set_option(Ac1, evacuation, Evac),
