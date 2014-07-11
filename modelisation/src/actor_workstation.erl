@@ -25,26 +25,17 @@
 
 create() ->
 	%%% module, state, work_time
-	Ac1 = actor_contract:create(?MODULE, off, 10),
-	Ac2 = actor_contract:set_capacity(Ac1, 1),
-	%%% 33% of luck in making the quality
-	Ac3 = actor_contract:add_option(Ac2, workstation_luck, {'Q1', 33}),
-	Ac3.
+	create(actor_contract:random_id(),{'Q1', 33} ).
+create({Quality, Luck}) ->
+	create(actor_contract:random_id(),{Quality, Luck});
+
+create(Name ) ->
+	create(Name,{'Q1', 33}).
 
 create(Name, {Quality, Luck}) ->
 	Ac1 = 	actor_contract:create(?MODULE, Name, [], off, 1, []),
 	Ac2 = actor_contract:set_option(Ac1, workstation_luck, {Quality, Luck}),
 	Ac2.
-
-
-
-create({Quality, Luck}) ->
-	Ac1 = create(),
-	actor_contract:set_option(Ac1, workstation_luck, {Quality, Luck}),
-	Ac1;
-
-create(Name ) ->
-	actor_contract:create(?MODULE, Name, [], off, 1, []).
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(WSConfig)),

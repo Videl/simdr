@@ -18,7 +18,7 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, actor_contract:random_id(),[], undefined, 5, []).
+	create( actor_contract:random_id()).
 
 create(Name) ->
 	actor_contract:create(?MODULE, Name, [], off, 5, []).

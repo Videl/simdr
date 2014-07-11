@@ -3,120 +3,125 @@
 Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
 
 
-C1 = spawn(container, idling, [actor_conveyor:create()]).
-R1 = spawn(container, idling, [actor_railway:create()]).
-C2 = spawn(container, idling, [actor_conveyor:create()]).
-R2 = spawn(container, idling, [actor_railway:create()]).
-C3 = spawn(container, idling, [actor_conveyor:create()]).
-BQ1 = spawn(container, idling, [actor_basic_queue:create()]).
-WS1 = spawn(container, idling, [actor_workstation:create()]).
-C4 = spawn(container, idling, [actor_conveyor:create()]).
-C5 = spawn(container, idling, [actor_conveyor:create()]).
-R3 = spawn(container, idling, [actor_railway:create()]).
-C6 = spawn(container, idling, [actor_conveyor:create()]).
-R4 = spawn(container, idling, [actor_railway:create()]).
-C7 = spawn(container, idling, [actor_conveyor:create()]).
-R5 = spawn(container, idling, [actor_railway:create()]).
-C8 = spawn(container, idling, [actor_conveyor:create()]).
-BQ2 = spawn(container, idling, [actor_basic_queue:create()]).
-WS2 = spawn(container, idling, [actor_workstation:create()]).
-C9 = spawn(container, idling, [actor_conveyor:create()]).
-C10 = spawn(container, idling, [actor_conveyor:create()]).
-R6 = spawn(container, idling, [actor_railway:create()]).
-C11 = spawn(container, idling, [actor_conveyor:create()]).
-CB1 = spawn(container, idling, [actor_conveyor:create()]).
-RB1 = spawn(container, idling, [actor_railway:create()]).
-S = spawn(container, idling, [actor_scanner:create()]).
-CB2 = spawn(container, idling, [actor_conveyor:create()]).
-CD1 = spawn(container, idling, [actor_conveyor:create()]).
-BQD1 = spawn(container, idling, [actor_basic_queue:create()]).
-WSD1 = spawn(container, idling, [actor_workstation_assembly:create()]).
-CD2 = spawn(container, idling, [actor_conveyor:create()]).
-RD1 = spawn(container, idling, [actor_railway:create()]).
-CD3 = spawn(container, idling, [actor_conveyor:create()]).
-BQD2 = spawn(container, idling, [actor_basic_queue:create()]).
-WSD2 = spawn(container, idling, [actor_workstation_finish:create()]).
-CD4 = spawn(container, idling, [actor_conveyor:create()]).
-%RD2 = spawn(container, idling, [actor_railway:create()]).
-%CD5 = spawn(container, idling, [actor_conveyor:create()]).
-%BQD3 = spawn(container, idling, [actor_basic_queue:create()]).
-%WSD3 = spawn(container, idling, [actor_workstation:create()]).
-%CD6 = spawn(container, idling, [actor_conveyor:create()]).
-%CD7 = spawn(container, idling, [actor_conveyor:create()]).
-%SC = spawn(container, idling, [actor_scanner:create()]).
-So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create(R1)]).
-So2 = spawn(supervisor_container, idling, [supervisor_purposeless:create(R2)]).
-So3 = spawn(supervisor_container, idling, [supervisor_purposeless:create(R3)]).
-So4 = spawn(supervisor_container, idling, [supervisor_purposeless:create(R4)]).
-So5 = spawn(supervisor_container, idling, [supervisor_purposeless:create(R5)]).
-So6 = spawn(supervisor_container, idling, [supervisor_purposeless:create(R6)]).
-So7 = spawn(supervisor_container, idling, [supervisor_purposeless:create(RB1)]).
-So8 = spawn(supervisor_container, idling, [supervisor_purposeless:create(RD1)]).
+CA1 = spawn(container, idling, [actor_conveyor:create('CA1')]).
+RA1 = spawn(container, idling, [actor_railway:create('RA1')]).
+CA2 = spawn(container, idling, [actor_conveyor:create('CA2')]).
+RA2 = spawn(container, idling, [actor_railway:create('RA2')]).
+CA3 = spawn(container, idling, [actor_conveyor:create('CA3')]).
+BQA1 = spawn(container, idling, [actor_basic_queue:create('BQA1')]).
+WSA1 = spawn(container, idling, [actor_workstation:create('WSA1')]).
+CA4 = spawn(container, idling, [actor_conveyor:create('CA4')]).
+CA5 = spawn(container, idling, [actor_conveyor:create('CA5')]).
+RA3 = spawn(container, idling, [actor_railway:create('RA3')]).
+CA6 = spawn(container, idling, [actor_conveyor:create('CA6')]).
+RA4 = spawn(container, idling, [actor_railway:create('RA4')]).
+CA7 = spawn(container, idling, [actor_conveyor:create('CA7')]).
+RA5 = spawn(container, idling, [actor_railway:create('RA5')]).
+CA8 = spawn(container, idling, [actor_conveyor:create('CA8')]).
+BQA2 = spawn(container, idling, [actor_basic_queue:create('BQA2')]).
+WSA2 = spawn(container, idling, [actor_workstation:create('WSA2')]).
+CA9 = spawn(container, idling, [actor_conveyor:create('CA9')]).
+CA10 = spawn(container, idling, [actor_conveyor:create('CA10')]).
+RA6 = spawn(container, idling, [actor_railway:create('RA6')]).
+CA11 = spawn(container, idling, [actor_conveyor:create('CA11')]).
+CB1 = spawn(container, idling, [actor_conveyor:create('CB1')]).
+RB1 = spawn(container, idling, [actor_railway:create('RB1')]).
+S = spawn(container, idling, [actor_scanner:create('S')]).
+CB2 = spawn(container, idling, [actor_conveyor:create('CC2')]).
+CC1 = spawn(container, idling, [actor_conveyor:create('CC1')]).
+BQC1 = spawn(container, idling, [actor_basic_queue:create('BQC1')]).
+WSC1 = spawn(container, idling, [actor_workstation_assembly:create('WSC1')]).
+CC2 = spawn(container, idling, [actor_conveyor:create('CC2')]).
+RC1 = spawn(container, idling, [actor_railway:create('RC1')]).
+CC3 = spawn(container, idling, [actor_conveyor:create('CC3')]).
+BQC2 = spawn(container, idling, [actor_basic_queue:create()]).
+WSC2 = spawn(container, idling, [actor_workstation_finish:create('WSC2')]).
+CC4 = spawn(container, idling, [actor_conveyor:create('CC4')]).
+%RC2 = spawn(container, idling, [actor_railway:create('RC2')]).
+%CC5 = spawn(container, idling, [actor_conveyor:create('CC5')]).
+%BQC3 = spawn(container, idling, [actor_basic_queue:create('BQC3')]).
+%WSC3 = spawn(container, idling, [actor_workstation:create('WSC3')]).
+%CC6 = spawn(container, idling, [actor_conveyor:create('CC6')]).
+%CC7 = spawn(container, idling, [actor_conveyor:create('CC7')]).
+%SC = spawn(container, idling, [actor_scanner:create('SC')]).
+So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA1')]).
+So2 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA2')]).
+So3 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA3')]).
+So4 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA4')]).
+So5 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA5')]).
+So6 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA6')]).
+So7 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RB1')]).
+So8 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RC1')]).
 
 
-C1 ! R1 ! C2 ! R2 ! C3 ! BQ1 ! WS1 ! C4 ! C5 ! R3 ! C6 ! R4 ! C7 ! R5 ! 
-C8 ! BQ2 ! WS2 ! C9 ! C10 ! R6 ! C11 ! CB1 ! RB1 ! S ! CB2 ! CD1 ! BQD1 !
- WSD1 ! CD2 ! RD1 ! CD3 ! BQD2 ! WSD2 ! CD4 ! 
-%RD2 ! CD5 ! BQD3! WSD3 ! CD6 ! CD7 ! SC !
+CA1 ! RA1 ! CA2 ! RA2 ! CA3 ! BQA1 ! WSA1 ! CA4 ! CA5 ! RA3 ! CA6 ! RA4 ! CA7 ! RA5 ! 
+CA8 ! BQA2 ! WSA2 ! CA9 ! CA10 ! RA6 ! CA11 ! CB1 ! RB1 ! S ! CB2 ! CC1 ! BQC1 !
+ WSC1 ! CC2 ! RC1 ! CC3 ! BQC2 ! WSC2 ! CC4 ! 
+%RC2 ! CC5 ! BQC3! WSC3 ! CC6 ! CC7 ! SC !
 So1 ! So2 ! So3 ! So4 ! So5 ! So6 ! So7 ! So8 !
 {start}.
 
-C1 ! {self(), {add, out, R1}}.
-R1 ! {self(), {add, out, C2}}.
-C2 ! {self(), {add, out, R2}}.
-R2 ! {self(), {add, out, C3}}.
-R2 ! {self(), {add, out, C4}}.
-C4 ! {self(), {add, out, BQ1}}.
-BQ1 ! {self(), {add, out, WS1}}.
-WS1 ! {self(), {add, out, C5}}.
-C5 ! {self(), {add, out, R4}}.
-C3 ! {self(), {add, out, R4}}.
-R4 ! {self(), {add, out, C7}}.
-C7 ! {self(), {add, out, R5}}.
-R5 ! {self(), {add, out, C8}}.
-R5 ! {self(), {add, out, C9}}.
-C8 ! {self(), {add, out, BQ2}}.
-BQ2 ! {self(), {add, out, WS2}}.
-WS2 ! {self(), {add, out, C10}}.
-C10 ! {self(), {add, out, R6}}.
-C9 ! {self(), {add, out, R6}}.
-R6 ! {self(), {add, out, C11}}.
+CA1 ! {self(), {add, out, RA1}}.
+RA1 ! {self(), {add, out, CA2}}.
+CA2 ! {self(), {add, out, RA2}}.
+RA2 ! {self(), {add, out, CA3}}.
+RA2 ! {self(), {add, out, CA4}}.
+CA4 ! {self(), {add, out, BQA1}}.
+BQA1 ! {self(), {add, out, WSA1}}.
+WSA1 ! {self(), {add, out, CA5}}.
+CA5 ! {self(), {add, out, RA4}}.
+CA3 ! {self(), {add, out, RA4}}.
+RA4 ! {self(), {add, out, CA7}}.
+CA7 ! {self(), {add, out, RA5}}.
+RA5 ! {self(), {add, out, CA8}}.
+RA5 ! {self(), {add, out, CA9}}.
+CA8 ! {self(), {add, out, BQA2}}.
+BQA2 ! {self(), {add, out, WSA2}}.
+WSA2 ! {self(), {add, out, CA10}}.
+CA10 ! {self(), {add, out, RA6}}.
+CA9 ! {self(), {add, out, RA6}}.
+RA6 ! {self(), {add, out, CA11}}.
 
 
-R4 ! {self(), {add, out, CB1}}.
+RA4 ! {self(), {add, out, CB1}}.
 CB1 ! {self(), {add, out, RB1}}.
 RB1 ! {self(), {add, option, {scanner, S}}}.
 RB1 ! {self(), {add, out, CB2}}.
-RB1 ! {self(), {add, out, CD1}}.
-CB2 ! {self(), {add, out, R4}}.
-CD1 ! {self(), {add, out, BQD1}}.
-BQD1 ! {self(), {add, out, WSD1}}.
-WSD1 ! {self(), {add, out, CD2}}.
-CD2! {self(), {add, out, RD1}}.
-RD1! {self(), {add, out, CD3}}.
-CD3 ! {self(), {add, out, BQD2}}.
-BQD2 ! {self(), {add, out, WSD2}}.
-WSD2 ! {self(), {add, out, CD4}}.
-CD4 ! {self(), {add, out, self()}}.
-%CD4 ! {self(), {add, out, RD2}}.
-%RD2 ! {self(), {add, out, CD5}}.
-%CD5 ! {self(), {add, out, BQD3}}.
-%BQD3 ! {self(), {add, out, WSD3}}.
-%WSD3 ! {self(), {add, out, CD6}}.
+RB1 ! {self(), {add, out, CC1}}.
+CB2 ! {self(), {add, out, RA4}}.
+CC1 ! {self(), {add, out, BQC1}}.
+BQC1 ! {self(), {add, out, WSC1}}.
+WSC1 ! {self(), {add, out, CC2}}.
+CC2! {self(), {add, out, RC1}}.
+RC1! {self(), {add, out, CC3}}.
+CC3 ! {self(), {add, out, BQC2}}.
+BQC2 ! {self(), {add, out, WSC2}}.
+WSC2 ! {self(), {add, out, CC4}}.
+CC4 ! {self(), {add, out, self()}}.
+%CC4 ! {self(), {add, out, RC2}}.
+%RC2 ! {self(), {add, out, CC5}}.
+%CC5 ! {self(), {add, out, BQC3}}.
+%BQC3 ! {self(), {add, out, WSC3}}.
+%WSC3 ! {self(), {add, out, CC6}}.
 
-R1 ! {self(), {add, option, {supervisor, So1}}}.
-R2 ! {self(), {add, option, {supervisor, So2}}}.
-R3 ! {self(), {add, option, {supervisor, So3}}}.
-R4 ! {self(), {add, option, {supervisor, So4}}}.
-R5 ! {self(), {add, option, {supervisor, So5}}}.
-R6 ! {self(), {add, option, {supervisor, So6}}}.
+RA1 ! {self(), {add, option, {supervisor, So1}}}.
+RA2 ! {self(), {add, option, {supervisor, So2}}}.
+RA3 ! {self(), {add, option, {supervisor, So3}}}.
+RA4 ! {self(), {add, option, {supervisor, So4}}}.
+RA5 ! {self(), {add, option, {supervisor, So5}}}.
+RA6 ! {self(), {add, option, {supervisor, So6}}}.
 RB1 ! {self(), {add, option, {supervisor, So7}}}.
-RD1 ! {self(), {add, option, {supervisor, So8}}}.
+RC1 ! {self(), {add, option, {supervisor, So8}}}.
 
 
 Prod = actor_product:create().
+CA1 ! {self(), {actor_product, Prod}}.
 
-C1 ! {self(), {actor_product, Prod}}.
+Prod2 = actor_product:create().
+CA1 ! {self(), {actor_product, Prod2}}.
+
+Prod3 = actor_product:create().
+CA1 ! {self(), {actor_product, Prod3}}.
 
 actor_contract:answer(Prod, {csv_export, list_data}).
 

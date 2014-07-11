@@ -11,12 +11,15 @@
 
 -export([
 	create/0,
+	create/1,
 	answer/2]).
 
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, actor_contract:random_id(), [{capacity, 4}], undefined, 2, []).
+	create(actor_contract:random_id()).
+create(Name) ->
+	actor_contract:create(?MODULE, Name, [], off, 2, []).
 
 
 answer(RFIDConfig, {actor_product, ProductConfig}) ->
@@ -26,7 +29,7 @@ answer(RFIDConfig, {actor_product, ProductConfig}) ->
 		ProductConfig, {was,scanned,by,{RFIDConfig}}),
 	%%% Answer
 	{NewRFIDConfig, 
-	{actor_product, NewProductConfig, actor_contract:get_id(NewProductConfig)}, 
+	{actor_product, NewProductConfig, actor_contract:get_name(NewProductConfig)}, 
 	supervisor};
 answer(RFIDConfig, Request) ->
 	actor_contract:answer(RFIDConfig, Request).

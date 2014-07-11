@@ -24,13 +24,11 @@
 %% Behavior implementation
 
 create() ->
-	A1 = actor_contract:create(?MODULE, raw, 0),
 	RandomQuality = actor_contract:random(),
-	A2 = actor_contract:add_option(A1, initial_quality, RandomQuality),
-	A2.
+	create(RandomQuality).
 
 create(Quality) ->
-	actor_contract:create(?MODULE, actor_contract:random_id(), [{quality_required, Quality}], raw, 0, []).
+	create(actor_contract:random_id(),Quality).
 
 create(Id, Quality) ->
 	actor_contract:create(?MODULE, Id, [{quality_required, Quality}], raw, 0, []).

@@ -17,10 +17,10 @@
 %% Behavior implementation
 
 create() ->
-	actor_contract:create(?MODULE, actor_contract:random_id(), [], undefined, 2, []).
+	create(actor_contract:random_id()).
 
 create(Name) ->
-	actor_contract:create(?MODULE, Name, [], undefined, 2, []).
+	actor_contract:create(?MODULE, Name, [], off, 2, []).
 
 answer(ScannerConfig, {actor_product, ProductConfig}) ->
 	actor_contract:work(actor_contract:get_work_time(ScannerConfig)),
@@ -42,7 +42,7 @@ answer(ScannerConfig, {actor_product, ProductConfig}) ->
 	ProductConf, {was,scanned,by,{ScannerConfig, quality, is, FinalQuality}}),
 	% Answer
 	{NewScannerConfig, 
-	{actor_product, NewProductConfig, actor_contract:get_id(NewProductConfig)}, 
+	{actor_product, NewProductConfig, actor_contract:get_name(NewProductConfig)}, 
 	supervisor};
 
 answer(RFIDConfig, Request) ->

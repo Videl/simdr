@@ -21,12 +21,10 @@
 
 create() ->
 	%%% module, state, work_time
-	Ac1 = actor_contract:create(?MODULE, off, 10),
-	Ac2 = actor_contract:set_capacity(Ac1, 1),
-	Ac2.
+	create(actor_contract:random_id()).
 
-create(Name ) ->
-	actor_contract:create(?MODULE, Name, [], off, 1, []).
+create(Name) ->
+	create(Name, {3,8,1}).
 
 create(Name, {Stop, Manip, Evac}) ->
 	Ac1 = actor_contract:create(?MODULE, Name, [], off, 1, []),
@@ -34,18 +32,27 @@ create(Name, {Stop, Manip, Evac}) ->
 	actor_contract:set_option(Ac1, manipulation, Manip),
 	actor_contract:set_option(Ac1, evacuation, Evac),
 	Ac2 =actor_contract:set_work_time(Ac1, Stop+Manip+Evac),
-	Ac2.
+	Ac3 = actor_contract:add_option(Ac2, order, {'Q1',{1,0,1,0}}),
+	Ac3.
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
-	Finish=case actor_contract:get_option(ProductConfig, quality) of 
-		['Q1']-> 'Q1';
-		['Q2']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
-				actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
-				{'Q1', pastille};
-		['Q3']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
-				actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
-				{'Q2', pastille};
-		_ -> {pastille}
+
+	[Order] = actor_contract:get_option(WSConfig, order),
+	{Quality, _Assembly} = Order,
+	QualityAct = actor_contract:get_option(ProductConfig, quality),
+	 io : format( " ordre ~w, quality ~w ~n", [Quality,QualityAct] ),
+	case improve(Quality, QualityAct) of 
+	 true -> Finish = case QualityAct of 
+							['Q1']-> 'Q1';
+							['Q2']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
+									actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
+									{'Q1', pastille};
+							['Q3']-> 	actor_contract:work(actor_contract:get_work_time(WSConfig)),
+									actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
+									{'Q2', pastille};
+							_ -> {pastille}
+						end;
+	false -> Finish =Quality
 		%%% @TODO: case 'unknown_option'
 	end,
 	NewProductConfig = actor_contract:set_state(ProductConfig, finished),
@@ -53,6 +60,7 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewWSConfig, NewProductConfigBis} = actor_contract:add_to_list_data(
 		WSConfig, {finish,'of',product, {ProductConfig, for, Finish}}, 
 		NewProductConfig, {quality,became,Finish,because,'of',{WSConfig}}),
+	 io : format( " nouvelle qualité ~w ~n", [Finish] ),
 	%%% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Finish}, 
@@ -61,6 +69,26 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 answer(WSConfig, Request) ->
 	actor_contract:answer(WSConfig, Request).
 
+%improve Q2 ? 
+improve (Q1, Q2) ->
+
+case Q1 of 
+	'Q1' -> case Q2 of 
+				['Q1']-> false;
+				['Q2']-> true;
+				['Q3']-> true;
+				_ -> false
+			end;
+	'Q2' -> case Q2 of 
+				['Q1']-> false;
+				['Q2']-> false;
+				['Q3']-> true;
+				_ -> false
+				
+			end;
+	'Q3' -> false;
+	_ -> false
+end.
 
 % ===================================================================
 % Tests

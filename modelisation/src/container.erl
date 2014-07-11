@@ -163,7 +163,7 @@ end_of_logical_work({_Config, NbWorkers},
 %%% @end
 manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 	io:format("~w receive product ~w ~n~n", 
-		[self(), 
+		[actor_contract:get_name(Config), 
 		 actor_contract:get_name(ProdConf)]),
 	?DLOG(
 		actor_contract:get_module(Config), 
@@ -190,7 +190,7 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 %%% is sent.
 %%% @end
 manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
-	io:format("~w receive request of product~n~n", [self()]),
+	io:format("~w receive request of product~n~n", [actor_contract:get_name(Config)]),
 	[TablePid] = actor_contract:get_option(Config, ets),
 	ListEntry = ets:match_object(
 					TablePid, {product, awaiting_sending, '$1'}
