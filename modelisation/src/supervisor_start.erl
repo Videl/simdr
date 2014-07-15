@@ -5,12 +5,22 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-behaviour(supervisor_contract).
+
 -export([
-	 create/1,
-	 timer_time/1,
-	 timer_action/1,
-	 action_on_request/3
-	]).
+     create/0,
+     timer_time/1,
+     timer_action/1,
+     action_on_request/3
+    ]).
+
+-export([
+    create/1
+    ]).
+
+create() ->
+    Ac1 = supervisor_contract:create(?MODULE),
+    Ac1.    
 
 create(Actor) ->
     Ac1 = supervisor_contract:create(?MODULE),

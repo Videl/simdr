@@ -24,8 +24,7 @@ add_data_in_ets(Table, Data) ->
 
 set_option_in_ets(Table, Key, Value) ->
 	delete_option_in_ets(Table, Key),
-	true = add_option_in_ets(Table, Key, Value),
-	true.
+	add_option_in_ets(Table, Key, Value).
 
 delete_option_in_ets(Table, Key) ->
 	ets:delete(Table, Key).
