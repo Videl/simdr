@@ -153,7 +153,8 @@ get_module(Actor) ->
 	Actor#config.module.
 
 add_data(Actor, X) ->
-	Data = {erlang:now(), erlang:localtime(), Actor, X},
+	{Info, Destination}=X,
+	Data = {erlang:now(), erlang:localtime(), Actor, Info, Destination},
 	ETSData = Actor#config.list_data,
 	?DLOG(
 		actor_contract:get_name(Actor),

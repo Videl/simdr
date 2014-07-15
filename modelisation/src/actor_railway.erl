@@ -56,9 +56,9 @@ answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 	%%% List data fillers
 	{ActorConfig, Prod} = actor_contract:add_to_list_data(
 		RailwayConfig, 
-		{{going,into,position,{{In, NewOut},for},ProductConfig}}, 
+		{{going,into,position,{In, NewOut},for},ProductConfig}, 
 		ProductConfig, 
-		{{railway,went,into,position,{{In, NewOut}},RailwayConfig}}),
+		{{railway,went,into,position,{In, NewOut}},RailwayConfig}),
 	%%% Answer
 	case Decision =/= Out of
 		true ->	
