@@ -18,3 +18,5 @@ ebin/*
 .idea/
 *~
 *.csv
+*/ebin/*
+*.toc
