@@ -48,7 +48,8 @@
 		 random_id/0,
 		 first/1,
 		 random/0,
-		 random_weighted/2]).
+		 random_weighted/2,
+		 delete_option/2]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -159,7 +160,7 @@ add_data(Actor, X) ->
 	?DLOG(
 		actor_contract:get_name(Actor),
 		{lists:concat(["Inserting data to", ETSData]), Data}),
-	true = ets:insert_new(ETSData, Data),
+	simdr_tools:add_data_in_ets(ETSData, Data),
 %%	(ets:insert(ETSData, Data)=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
@@ -233,28 +234,27 @@ set_capacity(Actor, Capacity) ->
 	Actor#config{capacity = Capacity}.
 
 get_option(Actor, Key) ->
-	Opts = Actor#config.opt,
-	Var = ets:lookup(Opts, Key),
-	Option = get_option_helper(Var, Key), 
-	?DLOG(actor_contract:get_name(Actor),{lists:concat(["Elements value ", Key]), Option}),
-	Option.
+	Table = Actor#config.opt,
+	simdr_tools:get_option_from_ets(Table, Key).
 
 set_option(Actor, Key, Value) ->
-	Actor1 = delete_option(Actor, Key),
-	Actor2 = add_option(Actor1, Key, Value),
-	Actor2.
+	Table = Actor#config.opt,
+	?DLOG(
+		actor_contract:get_name(Actor),
+		{lists:concat(["Inserting option to ", Table]), {Key, Value}}),
+	true = simdr_tools:set_option_in_ets(Table, Key, Value),
+	Actor.
 	
 delete_option(Actor, Key) ->
-	Opts = Actor#config.opt,
-	ets:delete(Opts, Key),
-	%%(ets:delete(Opts, Key)=:= true) orelse ?DLOG("Deletion failed"),
+	Table = Actor#config.opt,
+	simdr_tools:delete_option_in_ets(Table, Key),
+	%%(ets:delete(Table, Key)=:= true) orelse ?DLOG("Deletion failed"),
 	Actor.
 
 add_option(Actor, Key, Value) ->
-	Opts = Actor#config.opt,
-	?DLOG(actor_contract:get_name(Actor),{lists:concat(["Inserting option to ", Opts]), {Key, Value}}),
-	ets:insert(Opts, {Key, Value}),
-	%%(ets:insert(Opts, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
+	Table = Actor#config.opt,
+	simdr_tools:add_option_in_ets(Table, Key, Value),
+	%%(ets:insert(Table, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
 work(N) ->
@@ -541,18 +541,6 @@ add_datas_helper(Actor, []) ->
 add_datas_helper(Actor, [Data|T]) ->
 	Actor2 = add_data(Actor, Data),
 	add_datas_helper(Actor2, T).
-
-get_option_helper(AllOptions, Key) ->
-	get_option_helper_two(AllOptions, [], Key).
-
-get_option_helper_two([], [], _Key) ->
-	unknown_option;
-get_option_helper_two([], Result, _Key) ->
-	Result;
-get_option_helper_two([{Key, Value}|RestOfOptions], Result, Key) ->
-	get_option_helper_two(RestOfOptions, Result ++ [Value], Key);
-get_option_helper_two([_BadHead|RestOfOptions], Result, Key) ->
-	get_option_helper_two(RestOfOptions, Result, Key).
 
 add_options_helper(Actor, []) ->
 	Actor;
