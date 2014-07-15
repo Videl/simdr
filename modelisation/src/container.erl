@@ -109,10 +109,10 @@ end_of_physical_work(
 	% 	[actor_contract:get_module(NewConfig), actor_contract:get_name(ProductConfig)]),
 	actor_contract:add_data(
 		NewConfig, 
-		{work,on,product,is,done,{ProductConfig, Detail}}), 
+		{{work,on,product,is,done},{ProductConfig, Detail}}), 
 	actor_contract:add_data(
 		ProductConfig, 
-		{processing,done,by,{NewConfig}}),
+		{{processing,done,by},{NewConfig}}),
 	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
 		[actor_contract:get_module(NewConfig), 
 		 actor_contract:get_name(NewConfig), 
@@ -169,8 +169,8 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 		actor_contract:get_module(Config), 
 		{starting,to,work,on,product,ProdConf}),
 	% io:format("~w >>> Work is starting on product id ~p.\n", [actor_contract:get_module(NewConfig), actor_contract:get_name(ProdConf)]),
-	actor_contract:add_data(Config, {new,product,has,arrived, {ProdConf}}), 
-	actor_contract:add_data(ProdConf, {processing,started,by,Config}),
+	actor_contract:add_data(Config, {{new,product,has,arrived}, {ProdConf}}), 
+	actor_contract:add_data(ProdConf, {{processing,started,by},Config}),
 	%%% Decrement the number of products waiting for us.
 	[TablePid] = actor_contract:get_option(Config, ets),
 	Awaiting = ets:match_object(
@@ -200,8 +200,8 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			%io:format("Sending product..~n"),
 			FirstEntry = actor_contract:first(ListEntry),
 			{product, awaiting_sending, Prod} = FirstEntry,
-			actor_contract:add_data(Config, {sending, product, {Prod}}), 
-			actor_contract:add_data(Prod, {being,sent,by,{Config}}), 
+			actor_contract:add_data(Config, {{sending, product}, {Prod}}), 
+			actor_contract:add_data(Prod, {{being,sent,by},{Config}}), 
 			send_message({actor_product, Prod}, Sender),
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
