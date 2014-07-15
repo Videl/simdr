@@ -84,7 +84,7 @@ logical_work(Master, MasterConfig, Request) ->
 %%% If there is a problem of destinations, a specific messsage is sent to 
 %%% supervisor which take a decision.
 end_of_physical_work({_Config, NbWorkers},{NewConf, {actor_product, _ProductConf, prob_out}, Dest}) ->
-	send_message({NewConf,{actor_product, _ProductConf, prob_out}}, Dest),
+	send_message(NewConf, {NewConf,{actor_product, _ProductConf, prob_out}}, Dest),
 	{NewConf, NbWorkers};
 %%% A worker node has ended.
 %%% Things we have to do:
@@ -119,7 +119,7 @@ end_of_physical_work(
 		 actor_contract:get_name(ProductConfig)]),
 	ets:insert(TablePid, {product, awaiting_sending, ProductConfig}),
 	%io:format("await"),
- 	send_message(awaiting_product, Destination),
+ 	send_message(Config, awaiting_product, Destination),
 	%[Awaiting] = actor_contract:get_option(NewConfig, awaiting),
 	case actor_contract:list_size(Awaiting) > 0 of
 		true -> 
@@ -133,7 +133,7 @@ end_of_physical_work(
 						%%% Sending messageder to supervisor 
 						true ->	
 							Workers = NbWorkers,
-							send_message({Config, prob_in}, supervisor);
+							send_message(Config, {Config, prob_in}, supervisor);
 						false -> 
 							[H|_Rest] = Awaiting,
 							io:format("same sender~n"),
@@ -152,7 +152,7 @@ end_of_physical_work(
 
 end_of_logical_work({_Config, NbWorkers}, 
 					{NewConfig, LittleAnswer, Destination}) ->
-	send_message(LittleAnswer, Destination),
+	send_message(NewConfig, LittleAnswer, Destination),
 	{NewConfig, NbWorkers}.
 
 %%% Receiving a product
@@ -202,7 +202,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			{product, awaiting_sending, Prod} = FirstEntry,
 			actor_contract:add_data(Config, {{sending, product}, {Prod}}), 
 			actor_contract:add_data(Prod, {{being,sent,by},{Config}}), 
-			send_message({actor_product, Prod}, Sender),
+			send_message(Config, {actor_product, Prod}, Sender),
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
 			%io:format("End of sending product..~n"),
@@ -243,7 +243,7 @@ manage_request({Config, NbWorkers, _Sender}, {add, out, Out}) ->
 	FullAnswer = 
 		(actor_contract:get_module(Config)):answer(Config, {add, out, Out}),
 	{NewConfig, LittleAnswer, Destination} = FullAnswer,
-	send_message(LittleAnswer, Destination),
+	send_message(Config, LittleAnswer, Destination),
 	{NewConfig, NbWorkers};
 %%% If the request is not about products, then it's not about a
 %%% physical stream... so we launch a 'logical' work, directed at the 
@@ -255,20 +255,26 @@ manage_request({Config, NbWorkers, _Sender}, Request) ->
 	FullAnswer = 
 		(actor_contract:get_module(Config)):answer(Config, Request),
 	{NewConfig, LittleAnswer, Destination} = FullAnswer,
-	send_message(LittleAnswer, Destination),
+	send_message(Config, LittleAnswer, Destination),
 	{NewConfig, NbWorkers}.
 
-send_message(Ans, RawDest) ->
-	Destination = get_destination(RawDest),
+send_message(Config, Ans, RawDest) ->
+	Destination = get_destination(Config, RawDest),
 	sender(Ans, Destination).
 
-get_destination(supervisor) ->
-	supervisor;
-get_destination([Dest]) when is_pid(Dest) -> 
+get_destination(Config, supervisor) ->
+	%%% Find supervisor PID in ETS option table.
+	case actor_contract:get_option(Config, supervisor) of
+		[SuperPid] when is_pid(SuperPid) ->
+			SuperPid;
+		_ ->
+			supervisor
+	end;
+get_destination(_Config, [Dest]) when is_pid(Dest) -> 
 	Dest;
-get_destination(Dest) when is_pid(Dest) ->
+get_destination(_Config, Dest) when is_pid(Dest) ->
 	Dest;
-get_destination(WeirdDestination) ->
+get_destination(_Config, WeirdDestination) ->
 	%% @TODO: choose destination
 	io:format("~w COULDN'T send  message to ~w because of BAD FORMAT. " ++ 
 		"Using supervisor.~n~n", [self(), WeirdDestination]),
@@ -307,10 +313,10 @@ wait(Pid, Wait_time, {Ans, Dest}) ->
 
 get_destination_test_() ->
 	[
-		?_assertEqual(self(), get_destination([self()])),
-		?_assertEqual(self(), get_destination(self())),
-		?_assertEqual(supervisor, get_destination([])),
-		?_assertEqual(supervisor, get_destination([self(), self()]))
+		?_assertEqual(self(), get_destination(void, [self()])),
+		?_assertEqual(self(), get_destination(void, self())),
+		?_assertEqual(supervisor, get_destination(void, [])),
+		?_assertEqual(supervisor, get_destination(void, [self(), self()]))
 	].
 
 -endif.
