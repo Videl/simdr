@@ -11,6 +11,7 @@
    - [X] ID of every actor can be manual
    - [X] Clean DATA by separating information and actor
    - [ ] How are people writing ETS table for easy reading?
+   - [] Update supervisor's actor when ther is a change
    - [ ] Dumb supervisors
      - [X] Mode 1: always giving one direction
      - [ ] Mode 2: changing directions every time
