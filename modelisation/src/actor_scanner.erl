@@ -38,8 +38,8 @@ answer(ScannerConfig, {actor_product, ProductConfig}) ->
 		ProductConf =  ProductConfig
 	end,
 	{NewScannerConfig, NewProductConfig} = actor_contract:add_to_list_data(
-	ScannerConfig, {scanned,product, {ProductConf, quality, is, FinalQuality}},
-	ProductConf, {was,scanned,by,{ScannerConfig, quality, is, FinalQuality}}),
+	ScannerConfig, {{scanned,product, quality, is, FinalQuality, for}, {ProductConf}},
+	ProductConf, {{'of',quality, FinalQuality, was,scanned,by},{ScannerConfig}}),
 	% Answer
 	{NewScannerConfig, 
 	{actor_product, NewProductConfig, actor_contract:get_name(NewProductConfig)}, 
