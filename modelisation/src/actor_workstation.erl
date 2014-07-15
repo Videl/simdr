@@ -43,8 +43,8 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewProductConfig, Quality} = change_product(WSConfig, ProductConfig),
 	%%% List data fillers
 	{NewWSConfig, NewProductConfigBis} = actor_contract:add_to_list_data(
-		WSConfig, {changed,quality,'of',product, {ProductConfig, for, Quality}}, 
-		NewProductConfig, {quality,became,Quality,because,'of',{WSConfig}}),
+		WSConfig, {{changed,for, Quality,'of',product}, {ProductConfig}}, 
+		NewProductConfig, {{quality,became,Quality,because,'of'},{WSConfig}}),
 	%%% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Quality}, 
@@ -87,11 +87,11 @@ data_filler_test_() ->
 	[
 		%%% Test: last data exists in product
 		?_assertMatch(
-			{_ErlangNow, _Time, _BasePO, {quality,became,Quality,because,'of',{BaseWS}}},
+			{_ErlangNow, _Time, _BasePO, {{quality,became,Quality,because,'of'},{BaseWS}}},
 			LastDataPO),
 		%%% Test: last data exists in workstation
 		?_assertMatch(
-			{_ErlangNow, _Time, BaseWS, {changed,quality,'of',product, {BasePO, for, Quality}}}, 
+			{_ErlangNow, _Time, BaseWS, {{changed,for, Quality,'of',product}, {BasePO}}}, 
 			LastDataWS)
 	].
 
