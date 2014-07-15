@@ -11,7 +11,7 @@ Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end
 R1 = spawn(container, idling, [actor_railway:create()]).
 C1 = spawn(container, idling, [actor_conveyor:create()]).
 
-SO1 = spawn(supervisor_container, idling, [supervisor_purposeless:create(R1)]).
+SO1 = spawn(supervisor_container, idling, [supervisor_onedirection:create(R1)]).
 R1 ! C1 ! SO1 ! {start}.
 
 C1 ! {self(), {add, out, self()}}.
