@@ -8,7 +8,11 @@
 -export([
 	 create/1,
 	 add_data/3,
-	 action_on_request/3
+	 action_on_request/3,
+	 get_option/2,
+	 set_option/3,
+	 delete_option/2,
+	 add_option/3
 	]).
 
 %% ===================================================================
@@ -31,8 +35,15 @@
 
 
 create(Module) ->
+	Id = actor_contract:random_id(),
     #supervisor{module = Module,
-		id = actor_contract:random_id(),
+		id = Id,
+		options = ets:new(
+			list_to_atom(lists:concat(["supervisor_", Module, Id])), 
+			[duplicate_bag,
+			{write_concurrency, true},
+			{read_concurrency, true},
+			public]),
 		master_supervisor = void,
 		supervisors = [],
 	        actors = [],
@@ -118,17 +129,6 @@ delete_actor(Config, Pid) ->
 	NewConfig.
 	%%(ets:delete(Opts, Key)=:= true) orelse ?DLOG("Deletion failed"),
 
-delete_actor_helper([], Result, _Pid) ->
-	Result;
-
-delete_actor_helper(Actors, Result, Pid) ->
-	[Head| Rest] = Actors,
-	{Key, _Actor} = Head,
-	case Key =:= Pid of
-		true -> delete_actor_helper(Rest, Result, Pid);
-		false -> Result2 = Result ++ [Head],
-				delete_actor_helper(Rest, Result2 , Pid)
-	end.
 
 add_actor(Config, Actor) ->
 	CurrentActors = get_actors(Config),
@@ -143,6 +143,43 @@ get_actor(Config, Pid) ->
 	Actor = get_actor_helper(Actors, Pid),
 	Actor.
 
+get_option(Supervisor, Key) ->
+	Table = Supervisor#supervisor.options,
+	simdr_tools:get_option_from_ets(Table, Key).
+
+set_option(Supervisor, Key, Value) ->
+	Table = Supervisor#supervisor.options,
+	?DLOG(
+		actor_contract:get_name(Supervisor),
+		{lists:concat(["Inserting option to ", Table]), {Key, Value}}),
+	true = simdr_tools:set_option_in_ets(Table, Key, Value),
+	Supervisor.
+	
+delete_option(Supervisor, Key) ->
+	Table = Supervisor#supervisor.options,
+	simdr_tools:delete_option_in_ets(Table, Key),
+	%%(ets:delete(Table, Key)=:= true) orelse ?DLOG("Deletion failed"),
+	Supervisor.
+
+add_option(Supervisor, Key, Value) ->
+	Table = Supervisor#supervisor.options,
+	simdr_tools:add_option_in_ets(Table, Key, Value),
+	%%(ets:insert(Table, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
+	Supervisor.
+
+
+delete_actor_helper([], Result, _Pid) ->
+	Result;
+
+delete_actor_helper(Actors, Result, Pid) ->
+	[Head| Rest] = Actors,
+	{Key, _Actor} = Head,
+	case Key =:= Pid of
+		true -> delete_actor_helper(Rest, Result, Pid);
+		false -> Result2 = Result ++ [Head],
+				delete_actor_helper(Rest, Result2 , Pid)
+	end.
+
 get_actor_helper([], _Pid) ->
 	[];
 
@@ -153,7 +190,6 @@ get_actor_helper(Actors, Pid) ->
 		true -> Actor;
 		false ->get_actor_helper( Rest, Pid)
 	end.
-
 
 
 %% ===================================================================
@@ -197,5 +233,3 @@ delete_actor_test_() ->
  	].
 
 -endif.
-
-

@@ -1,6 +1,7 @@
 -record(supervisor, {
 	  module,
 	  id,
+	  options,
 	  master_supervisor,
 	  supervisors,
 	  actors,
