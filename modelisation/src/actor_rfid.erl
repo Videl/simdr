@@ -40,8 +40,8 @@ answer(RFIDConfig, Request) ->
 answer_test_() ->
 	ActorRFID = actor_rfid:create(),
 	ActorProduct = actor_product:create(),
-	Id = actor_contract:get_name(ActorProduct),
-	{_, {actor_product, EndProduct, NewId}, _Dest} = 
+	Name = actor_contract:get_name(ActorProduct),
+	{_, {actor_product, EndProduct, NewName}, _Dest} = 
 		actor_rfid:answer(ActorRFID, {actor_product, ActorProduct}),
 	[
 		%%% Test: The product does not change before/after the answer/2.
@@ -50,8 +50,8 @@ answer_test_() ->
 			EndProduct),
 		%%% Test: the ID is in the 'special place'.
 		?_assertEqual(
-			Id,
-			NewId)
+			Name,
+			NewName)
 	].
 
 -endif.
