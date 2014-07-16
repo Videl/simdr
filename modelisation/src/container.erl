@@ -247,13 +247,14 @@ manage_request({Config, NbWorkers, _Sender}, {add, out, Out}) ->
 	{NewConfig, NbWorkers};
 %%% Automatic register when receiving a supervisor.
 manage_request({Config, NbWorkers, _Sender}, {add, option, {supervisor, V}}) ->
-	V ! {self(), {add, actor, Config}},
+
 	%%% Normal request, it does not change NbWorkers value
 	%spawn(?MODULE, logical_work, [self(), Config, Request]),
-	FullAnswer = 
+	 FullAnswer = 
 		(actor_contract:get_module(Config)):answer(Config, {add, option, {supervisor, V}}),
-	{NewConfig, LittleAnswer, Destination} = FullAnswer,
-	send_message(Config, LittleAnswer, Destination),
+	{NewConfig, _LittleAnswer, _Destination} = FullAnswer,
+	V ! {self(), {add, actor, Config}},
+	% send_message(Config, LittleAnswer, Destination),
 	{NewConfig, NbWorkers};
 %%% If the request is not about products, then it's not about a
 %%% physical stream... so we launch a 'logical' work, directed at the 
