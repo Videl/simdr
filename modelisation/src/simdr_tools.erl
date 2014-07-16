@@ -47,3 +47,11 @@ get_option_helper_two([{Key, Value}|RestOfOptions], Result, Key) ->
 	get_option_helper_two(RestOfOptions, Result ++ [Value], Key);
 get_option_helper_two([_BadHead|RestOfOptions], Result, Key) ->
 	get_option_helper_two(RestOfOptions, Result, Key).
+
+%% ===================================================================
+%% Tests
+%% ===================================================================
+-ifdef(TEST).
+
+
+-endif.
