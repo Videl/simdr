@@ -224,10 +224,16 @@ delete_actor_test_() ->
 	Sup2 = add_actor(Sup, {Pid,Actor}),
  	NewSup = action_on_request(Sup2, Pid, 
  		{ state , on, changed}),
+ 	NewSup2 = action_on_request(Sup2, Pid, 
+ 		{ out , 3, added}),
+ 	[{_P,Actor4}] = get_actors(NewSup2),
  	[
 	?_assertEqual(
  			[{Pid,Actor2}],
  			get_actors(NewSup)
+		), 
+	?_assertEqual(
+ 			[3], actor_contract: get_out(Actor4)
 		)
 
  	].
