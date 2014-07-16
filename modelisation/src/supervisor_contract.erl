@@ -152,9 +152,9 @@ get_option(Supervisor, Key) ->
 
 set_option(Supervisor, Key, Value) ->
 	Table = Supervisor#supervisor.options,
-	?DLOG(
-		actor_contract:get_name(Supervisor),
-		{lists:concat(["Inserting option to ", Table]), {Key, Value}}),
+	% ?DLOG(
+	% 	actor_contract:get_name(Supervisor),
+	% 	{lists:concat(["Inserting option to ", Table]), {Key, Value}}),
 	true = simdr_tools:set_option_in_ets(Table, Key, Value),
 	Supervisor.
 	

@@ -49,7 +49,9 @@ action_on_request(Config, Sender, {out, Out, added})->
 					List ++ [Out]
 			 end,
 	%%% 2)
-	Config3 = supervisor_contract:set_option(Config2, {Sender, ToSave}),
+	ToSaveFlat = lists:flatten(ToSave),
+	io:format("~nNew list is: ~w.~n", [ToSaveFlat]),
+	Config3 = supervisor_contract:set_option(Config2, Sender, ToSaveFlat),
 	Config3;
 action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_out}}) ->
 	%%% 1) Fetch what I know from this Actor (through its pid)
@@ -57,7 +59,7 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	%%% 2) Fetch the head and send it back as solution
 	%%% 3) Update what I know about the actor.
 	%%% 1)
-	ToUse = case supervisor_contract:get_option(Config, Sender) of
+	[ToUse] = case supervisor_contract:get_option(Config, Sender) of
 				unknown_option ->
 					actor_contract:get_out(ActorConfig);
 				List when is_list(List) ->
@@ -67,7 +69,7 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	[H|Tail] = ToUse,
  	Sender ! {self(), {prob_out, Product, H}},
  	NewList = Tail ++ [H],
- 	Config2 = supervisor_contract:set_option(Config, {Sender, NewList}),
+ 	Config2 = supervisor_contract:set_option(Config, Sender, NewList),
  	Config2;
  action_on_request(Config, Sender, {ActorConfig, prob_in}) ->
  	[Head|_Rest] = actor_contract:get_in(ActorConfig),
