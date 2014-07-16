@@ -34,25 +34,41 @@ timer_time(_Config) ->
 timer_action(Config) ->
 	Config.
 
-action_on_request(Config, Sender, {state, [Value], status}) ->
+action_on_request(Config, Sender, {out, Out, added})->
+	%%% Base behaviour
+	Config2 = supervisor_contract:action_on_request(Config, 
+													Sender, 
+													{out, Out, added}),
 	%%% 1) Fetch the previous values about the actor saved in ETS table,
-	%%%    with value 'Sender', mix the new value and the old.
-	%%% 2) Remove the previous saved value.
-	%%% 3) Insert the new value given in the variable Value.
-	io:format("YOLO new data from actor! Received ~w.~n", [Value]),
-	ToSave = case supervisor_contract:get_option(Config, Sender) of
+	%%%    with value 'Sender', mix the new value with the old.
+	%%% 2) Set the new value.
+	ToSave = case supervisor_contract:get_option(Config2, Sender) of
 				unknown_option ->
-					[Value];
+					[Out];
 				List when is_list(List) ->
-					List ++ [Value]
+					List ++ [Out]
 			 end,
-	%%% 2) and 3)
-	supervisor_contract:set_option(Config, {Sender, ToSave}),
-	Config;
+	%%% 2)
+	Config3 = supervisor_contract:set_option(Config2, {Sender, ToSave}),
+	Config3;
 action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_out}}) ->
-	[H|_Rest] = actor_contract:get_out(ActorConfig),
+	%%% 1) Fetch what I know from this Actor (through its pid)
+	%%%    If I know nothing, I just take all the out info in ActorConfig
+	%%% 2) Fetch the head and send it back as solution
+	%%% 3) Update what I know about the actor.
+	%%% 1)
+	ToUse = case supervisor_contract:get_option(Config, Sender) of
+				unknown_option ->
+					actor_contract:get_out(ActorConfig);
+				List when is_list(List) ->
+					List
+			end, 
+	%%% 2)
+	[H|Tail] = ToUse,
  	Sender ! {self(), {prob_out, Product, H}},
- 	Config;
+ 	NewList = Tail ++ [H],
+ 	Config2 = supervisor_contract:set_option(Config, {Sender, NewList}),
+ 	Config2;
  action_on_request(Config, Sender, {ActorConfig, prob_in}) ->
  	[Head|_Rest] = actor_contract:get_in(ActorConfig),
 	Sender ! {self(), {prob_in, Head}},
