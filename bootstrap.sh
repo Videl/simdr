@@ -6,3 +6,6 @@ wget http://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
 apt-key add erlang_solutions.asc
 apt-get update
 apt-get install -y erlang
+cd /usr/local/bin
+wget https://github.com/rebar/rebar/wiki/rebar
+chmod a+x rebar
