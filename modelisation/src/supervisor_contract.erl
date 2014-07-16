@@ -59,8 +59,7 @@ add_data(_Supervisor, _Message, _Object) ->
 	ok.
 
 action_on_request(Config, Sender, {add, actor, Actor}) ->
-	CurrentActors = Config#supervisor.actors,
-	NewConfig = Config#supervisor{actors = CurrentActors ++ [{Sender, Actor}]},
+	NewConfig = add_actor(Config, {Sender, Actor}),
 	NewConfig;
 
 action_on_request(Config, Sender, {work_time, N, changed})->
