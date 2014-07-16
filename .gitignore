@@ -20,3 +20,4 @@ ebin/*
 *.csv
 */ebin/*
 *.toc
+*.vagrant
