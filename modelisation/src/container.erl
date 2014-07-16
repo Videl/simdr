@@ -251,7 +251,7 @@ manage_request({Config, NbWorkers, _Sender}, {add, option, {supervisor, V}}) ->
 	%%% Normal request, it does not change NbWorkers value
 	%spawn(?MODULE, logical_work, [self(), Config, Request]),
 	FullAnswer = 
-		(actor_contract:get_module(Config)):answer(Config, {add, actor, Config}),
+		(actor_contract:get_module(Config)):answer(Config, {add, option, {supervisor, V}}),
 	{NewConfig, LittleAnswer, Destination} = FullAnswer,
 	send_message(Config, LittleAnswer, Destination),
 	{NewConfig, NbWorkers};

@@ -59,6 +59,7 @@ add_data(_Supervisor, _Message, _Object) ->
 	ok.
 
 action_on_request(Config, Sender, {add, actor, Actor}) ->
+	% io:format("<><> Adding actor ~w.~n", [Actor]),
 	NewConfig = add_actor(Config, {Sender, Actor}),
 	NewConfig;
 
@@ -94,6 +95,7 @@ action_on_request(Config, Sender,  {speed, N, changed})->
 
   action_on_request(Config, Sender, {in, In, added})->
  	Actor = get_actor(Config, Sender),
+ 	% io:format("~n<><> ~w <><>~n", [Actor]),
 	NewActor = actor_contract:add_in(Actor, In),
 	{_In, Out} = actor_contract:get_in_out(NewActor),
 	NewActor2 = actor_contract:set_in_out(NewActor, {In, Out}),
@@ -130,6 +132,7 @@ delete_actor(Config, Pid) ->
 
 
 add_actor(Config, Actor) ->
+	% io:format("Supervisors > Adding actor ~w to list of actors.~n", [Actor]),
 	CurrentActors = get_actors(Config),
 	NewConfig = Config#supervisor{actors = CurrentActors ++ [Actor]},
 	NewConfig.
@@ -139,6 +142,7 @@ get_actors(Config) ->
 
 get_actor(Config, Pid) ->
 	Actors = get_actors(Config),
+ 	% io:format("~n<|><|> ~w <|><|>~n", [Actors]),
 	Actor = get_actor_helper(Actors, Pid),
 	Actor.
 

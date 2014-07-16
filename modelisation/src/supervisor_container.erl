@@ -32,7 +32,7 @@ processing(Config) ->
 				Config, 
 				Sender, 
 				Request),
-			processing(Config)
+			processing(NewConfig)
 		after (Config#supervisor.module):timer_time(Config)*1000 ->
 			NewConfig = (Config#supervisor.module):timer_action(Config),
 			processing(NewConfig)
