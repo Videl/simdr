@@ -5,7 +5,7 @@ echo "deb http://packages.erlang-solutions.com/ubuntu precise contrib" >> /etc/a
 wget http://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
 apt-key add erlang_solutions.asc
 apt-get update
-apt-get install -y erlang
+apt-get install -y erlang git
 cd /usr/local/bin
 wget https://github.com/rebar/rebar/wiki/rebar
 chmod a+x rebar
