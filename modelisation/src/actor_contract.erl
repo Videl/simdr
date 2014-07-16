@@ -276,43 +276,44 @@ answer(ActorConfig, {supervisor, ping}) ->
 
 answer(ActorConfig, {change, distance, N}) ->
 	NewConfig = actor_contract:set_distance(ActorConfig, N),
-	{NewConfig, {ActorConfig, distance, N, changed}, supervisor};
+	{NewConfig, {distance, N, changed}, supervisor};
 
 answer(ActorConfig, {change, speed, N}) ->
 	NewConfig = actor_contract:set_speed(ActorConfig, N),
-	{NewConfig, {ActorConfig, speed, N, changed}, supervisor};
+	{NewConfig, {speed, N, changed}, supervisor};
 
 answer(ActorConfig, {change, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
-	{NewConfig, {ActorConfig, work_time, N, changed}, supervisor};
+	{NewConfig, {work_time, N, changed}, supervisor};
+
 answer(ActorConfig, {change, state, State}) ->
 	NewConfig = actor_contract:set_state(ActorConfig, State),
-	{NewConfig, {ActorConfig, state, State, changed}, supervisor};
+	{NewConfig, {state, State, changed}, supervisor};
 
 answer(ActorConfig, {change, capacity, Capacity}) ->
 	NewConfig = actor_contract:set_capacity(ActorConfig, Capacity),
-	{NewConfig, {ActorConfig, capacity, Capacity, changed}, supervisor};
+	{NewConfig, {capacity, Capacity, changed}, supervisor};
 
 answer(ActorConfig, {change, in_out, {In, Out}}) ->
 	NewConfig = actor_contract:set_in_out(ActorConfig, {In, Out}),
-	{NewConfig, {ActorConfig, in_out, {In, Out}, changed}, supervisor};
+	{NewConfig, {in_out, {In, Out}, changed}, supervisor};
 
 answer(ActorConfig, {add, in, In}) ->
 	NewConfig = actor_contract:add_in(ActorConfig, In),
 	{_In, Out} = actor_contract:get_in_out(NewConfig),
 	NewConfig2 = actor_contract:set_in_out(NewConfig, {In, Out}),
-	{NewConfig2, {ActorConfig, in, In, added}, supervisor};
+	{NewConfig2, {in, In, added}, supervisor};
 
 answer(ActorConfig, {add, out, Out}) ->
 	NewConfig = actor_contract:add_out(ActorConfig, Out),
 	{In, _Out} = actor_contract:get_in_out(NewConfig),
 	NewConfig2 = actor_contract:set_in_out(NewConfig, {In, Out}),
-	{NewConfig2, {ActorConfig, out, Out, added}, supervisor};
+	{NewConfig2, {out, Out, added}, supervisor};
 
 answer(ActorConfig, {add, option, Opt}) ->
 	{Key, Desc}=Opt,
 	NewConfig = actor_contract:add_option(ActorConfig, Key, Desc),
-	{NewConfig, {ActorConfig, option, Opt, added}, supervisor};
+	{NewConfig, {option, Opt, added}, supervisor};
 
 answer(ActorConfig, {status, work_time}) ->
 	{ActorConfig, 
@@ -702,12 +703,12 @@ answer_test_() ->
 	NewWTime = set_work_time(Actor,10),
 	NewOpt = add_option(Actor,in,4),
 	[
-	% ?_assertEqual(
-	% 	{Actor, {state,on, status}, supervisor},
-	% 	answer(Actor, {status, state})),
-	% ?_assertEqual(
-	% 	{NewState, {state, off, changed}, supervisor},
-	% 	answer(Actor, {change, state, off})),
+	 ?_assertEqual(
+		{Actor, {state,on, status}, supervisor},
+	 	answer(Actor, {status, state})),
+	?_assertEqual(
+		{NewState, {state, off, changed}, supervisor},
+	 	answer(Actor, {change, state, off})),
 	?_assertEqual(
 		{Actor, {module, mod, status}, supervisor},
 		answer(Actor,{status, module})),
@@ -716,16 +717,13 @@ answer_test_() ->
 		answer(Actor,{status, pid})),
 	?_assertEqual(
 		{Actor, {work_time, 42, status}, supervisor},
-		answer(Actor, {status, work_time}))%,
-	% ?_assertEqual(
-	% 	{NewWTime, {work_time, 10, changed}, supervisor},
-	% 	answer(Actor, {change, work_time, 10})),
-	% ?_assertEqual(
-	% 	{NewOpt, {option,{in,4}, added}, supervisor},
-	% 	answer(Actor, {add, option,{in,4}}))%,
-	% ?_assertEqual(
-	% 	{Actor, {list_data, [5,6], status}, supervisor},
-	% 	answer(Actor, {status, list_data}))
+		answer(Actor, {status, work_time})),
+	 ?_assertEqual(
+	 	{NewWTime, {work_time, 10, changed}, supervisor},
+	 	answer(Actor,{change, work_time, 10})),
+	 ?_assertEqual(
+	 	{NewOpt, {option,{in,4}, added}, supervisor},
+	 	answer(Actor, {add, option,{in,4}}))
 	].
 
 
