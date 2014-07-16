@@ -25,4 +25,4 @@ BQ1 ! {self(), {actor_product, P3}}.
 
 BQ1 ! {self(), {csv_export, list_data}}.
 WST1 ! {self(), {csv_export, list_data}}.
-actor_contract:answer(P3, {file_export, list_data}).
+actor_contract:answer(P3, {csv_export, list_data}).

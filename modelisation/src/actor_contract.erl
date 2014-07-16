@@ -399,10 +399,11 @@ answer(ActorConfig, {csv_export, list_data}) ->
 					 				 % id here if its a number
 					 				 ".csv"]), [append, delayed_write, unicode]),
 	Fun = export_to(csv),
-	R = io_lib:format("~s;~s;~s;~s\n",["Year,Month,Day", 
+	R = io_lib:format("~s;~s;~s;~s;~s\n",["Year,Month,Day", 
 									   "Hour,Minutes,Seconds", 
-									   "Source actor", 
-									   "Message"]),
+									   "Source Actor", 
+									   "Message",
+									   "Destination Actor"]),
 	%RX = erlang:iolist_to_binary(R),
 	%RXF = lists:flatten(RX),
 	ok = file:write(F,  R),
@@ -514,11 +515,13 @@ export_to(file) ->
 export_to(csv) ->
 	fun(X, FileDescriptor) ->
 		%%% Value decomposition
-		{_Now, {YearMonthDate, HourMinSecs}, Actor, Message} = X,
-		R = io_lib:format("~w;~w;~w;~w\n",[YearMonthDate, 
+		% R = io_lib:format("~w\n", [X]),
+		 {_Now, {YearMonthDate, HourMinSecs}, Source, Message, Dest} = X,
+		 R = io_lib:format("~w;~w;~w;~w;~w\n",[YearMonthDate, 
 										   HourMinSecs, 
-										   Actor, 
-										   Message]),
+										   Source, 
+										   Message,
+										   Dest]),
 		%RX = erlang:iolist_to_binary(R),
 		%RXF = lists:flatten(RX),
 		ok = file:write(FileDescriptor,  R),
