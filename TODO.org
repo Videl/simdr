@@ -2,7 +2,7 @@
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
   
-  ** TODO [4/11]
+  ** TODO [9/17]
    - [X] New workstation actor for zone D
    - [X] finish Workstation takes care quality product to improve its quality
    - [ ] UML Documents
@@ -20,13 +20,13 @@
      - [ ] Mode 5: manual mode
      - [ ] Mode 6: product driven (quality first on first product)
      - [ ] Mode 7: team-mode
-   - [X] Prettier CVS data
+   - [ ] Prettier CVS data
      - [X] Add data on RFID
      - [X] Add data on Queues
      - [X] Add data on Railways
      - [X] Remove erlang:now() data when exporting
      - [X] CVS-like values
-     - [ ] More precise CVS data
+     - [X] More precise CVS data
      - [ ] Easy detection of saturation points
    - [X] Conveyor (everyone): work_time in distance/speed or seconds
    - [ ] Conveyor: products that are waiting have a transportation time before
