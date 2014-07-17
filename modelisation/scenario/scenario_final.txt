@@ -116,23 +116,45 @@ RC1 ! {self(), {add, option, {supervisor, So8}}}.
 CC4 ! {self(), {add, out, So9}}.
 
 
-Prod = actor_product:create().
-CA1 ! {self(), {actor_product, Prod}}.
+P1 = actor_product:create().
+P2 = actor_product:create().
+P3 = actor_product:create().
+P4 = actor_product:create().
+P5 = actor_product:create().
+P6 = actor_product:create().
+P7 = actor_product:create().
+P8 = actor_product:create().
+P9 = actor_product:create().
+P10 = actor_product:create().
 
-Prod2 = actor_product:create().
-CA1 ! {self(), {actor_product, Prod2}}.
-
-Prod3 = actor_product:create().
-CA1 ! {self(), {actor_product, Prod3}}.
+CA1 ! {self(), {actor_product, P1}}.
+CA1 ! {self(), {actor_product, P2}}.
+CA1 ! {self(), {actor_product, P3}}.
+CA1 ! {self(), {actor_product, P4}}.
+CA1 ! {self(), {actor_product, P5}}.
+CA1 ! {self(), {actor_product, P6}}.
+CA1 ! {self(), {actor_product, P7}}.
+CA1 ! {self(), {actor_product, P8}}.
+CA1 ! {self(), {actor_product, P9}}.
+CA1 ! {self(), {actor_product, P10}}.
 
 CA1 ! {self(), {csv_export, list_data}}.
-actor_contract:answer(Prod, {csv_export, list_data}).
+actor_contract:answer(P1, {csv_export, list_data}).
+actor_contract:answer(P2, {csv_export, list_data}).
+actor_contract:answer(P3, {csv_export, list_data}).
+actor_contract:answer(P4, {csv_export, list_data}).
+actor_contract:answer(P5, {csv_export, list_data}).
+actor_contract:answer(P6, {csv_export, list_data}).
+actor_contract:answer(P7, {csv_export, list_data}).
+actor_contract:answer(P8, {csv_export, list_data}).
+actor_contract:answer(P9, {csv_export, list_data}).
+actor_contract:answer(P10, {csv_export, list_data}).
 
-% R2 ! {self(), {prob_out, Prod, C3}}.
+% R2 ! {self(), {prob_out, P1, C3}}.
 
-% R4 ! {self(), {prob_out, Prod, CB1}}.
+% R4 ! {self(), {prob_out, P1, CB1}}.
 
-% RB1 ! {self(), {prob_out, Prod, CD1}}.
+% RB1 ! {self(), {prob_out, P1, CD1}}.
 
 
 
