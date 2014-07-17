@@ -177,6 +177,7 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 					TablePid, {awaiting, '$1'}),
 	case  actor_contract:list_size(Awaiting) > 0 of 
 		true -> 
+		%% Change first product with product of sender!!!!!!!!!!!!!!!!!!!!!!!
 			FirstAwaiting = actor_contract:first(Awaiting),
 			ets:delete_object(TablePid, FirstAwaiting);
 		false ->

@@ -5,8 +5,7 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--export([create/13, 
-		 create/9, 
+-export([create/11, 
 		 create/8, 
 		 create/6,
 		 create/3,
@@ -26,13 +25,9 @@
 		 get_capacity/1, 
 		 get_opt/1, 
 		 get_option/2,	
-		 get_speed/1,
-		 get_distance/1, 
 		 get_work_time/1, 
 		 get_state/1, 
 		 set_pid/2,
-		 set_speed/2,
-		 set_distance/2,
 		 set_work_time/2,
 		 set_name/2,
 		 set_state/2,
@@ -97,27 +92,12 @@ create(Module, Name, Opt, State, In, Out, Work_time, List_data) ->
 		Out, 
 		{In, Out}, 
 		infinity, 
-		1,
-		Work_time,
 		Work_time, 
 		List_data).
 
-create(Module, Name, Opt, State, In, Out, Speed, Distance, List_data) ->
-	actor_contract:create(Module, 
-		Name,
-		0, 
-		Opt, 
-		State, 
-		In, 
-		Out, 
-		{In, Out}, 
-		infinity, 
-		Speed,
-		Distance,
-		Distance/Speed, 
-		List_data).
 
-create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Speed, Distance, Work_time, List_data) ->
+
+create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
 	?CREATE_DEBUG_TABLE,
 	?DLOG(lists:concat(["Initialising ets tables of", Name])),
 	Actor = #config{
@@ -135,8 +115,6 @@ create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Speed, Distance, 
 		out       = Out, 
 		in_out    = InOut, 
 		capacity  = Capacity, 
-		speed = Speed,
-		distance = Distance,
 		work_time = Work_time, 
 		list_data = ets:new(
 						list_to_atom(lists:concat(["Data_",Module, Name])), 
@@ -178,18 +156,6 @@ get_opt(Actor) ->
 
 get_work_time(Actor) ->
 	Actor#config.work_time.
-
-get_speed(Actor) ->
-	Actor#config.speed.
-
-get_distance(Actor) ->
-	Actor#config.distance.
-
-set_speed(Actor, Speed) -> 
-	Actor#config{ speed = Speed, work_time = get_distance(Actor)/Speed}.
-
-set_distance(Actor, Distance) -> 
-	Actor#config{ distance = Distance, work_time = Distance/get_speed(Actor)}.
 
 get_state(Actor) ->
 	Actor#config.state.
@@ -258,7 +224,7 @@ add_option(Actor, Key, Value) ->
 	Actor.
 
 work(N) ->
-	timer:sleep(N*1000).
+	timer:sleep(round(N*1000)).
 
 list_size(List) ->
 	list_size_helper(List, 0).
@@ -273,14 +239,6 @@ first([H|_T]) ->
 
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
-
-answer(ActorConfig, {change, distance, N}) ->
-	NewConfig = actor_contract:set_distance(ActorConfig, N),
-	{NewConfig, {distance, N, changed}, supervisor};
-
-answer(ActorConfig, {change, speed, N}) ->
-	NewConfig = actor_contract:set_speed(ActorConfig, N),
-	{NewConfig, {speed, N, changed}, supervisor};
 
 answer(ActorConfig, {change, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
@@ -318,16 +276,6 @@ answer(ActorConfig, {add, option, Opt}) ->
 answer(ActorConfig, {status, work_time}) ->
 	{ActorConfig, 
 	{work_time, actor_contract:get_work_time(ActorConfig), status}, 
-	supervisor};
-
-answer(ActorConfig, {status, distance}) ->
-	{ActorConfig, 
-	{distance, actor_contract:get_distance(ActorConfig), status}, 
-	supervisor};
-
-answer(ActorConfig, {status, speed}) ->
-	{ActorConfig, 
-	{speed, actor_contract:get_speed(ActorConfig), status}, 
 	supervisor};
 
 answer(ActorConfig, {status, state}) ->
@@ -716,18 +664,9 @@ answer_test_() ->
 
 
 work_time_test_() ->
-	Actor = create(mod, id, [], on, [], [], 5, 10, []),
-	Actor2= set_speed(Actor,2),
-	Actor3= set_distance(Actor2,8),
-
+	Actor = create(mod, id, [], on, [], [], 10, []),
 	[?_assertEqual(
-		2.0, get_work_time(Actor)),
-	?_assertEqual(
-		5.0, get_work_time(Actor2)),
-	?_assertEqual(
-		2, get_speed(Actor2)),
-	?_assertEqual(
-		4.0, get_work_time(Actor3))
+		10, get_work_time(Actor))
 	].
 
 random_list_maker(List, _, 0) ->
