@@ -31,7 +31,7 @@
    - [X] Conveyor (everyone): work_time in distance/speed or seconds
    - [ ] Conveyor: products that are waiting have a transportation time before
                    being available again WHEN the first product leave
-   - [ ] Railway: time of transportation when in position =/= already in position
+   - [X] Railway: time of transportation when in position =/= already in position
    - [ ] Client's order
    - [X] New actor/supervisor/module for item making
    - [ ] New actor for item erasing (mostly stats and table-handling)
