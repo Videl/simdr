@@ -14,15 +14,12 @@
    - [X] Update supervisor's actor when ther is a change
    - [ ] Dumb supervisors
      - [X] Mode 1: always giving one direction
-     - [ ] Mode 2: changing directions every time
+     - [X] Mode 2: changing directions every time
      - [ ] Mode 3: random
      - [ ] Mode 4: round-robin
      - [ ] Mode 5: manual mode
      - [ ] Mode 6: product driven (quality first on first product)
      - [ ] Mode 7: team-mode
-    - [ ] Supervisors
-      - [ ] Refactor: add/get/set/remove option of contract (sim_dr)
-      - [ ] 
    - [X] Prettier CVS data
      - [X] Add data on RFID
      - [X] Add data on Queues
