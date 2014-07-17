@@ -3,8 +3,8 @@
 %%% Two conveyors connected. (C1 and C2.)
 %%%
 
-C1 = spawn(container, idling, [actor_conveyor:create()]).
-C2 = spawn(container, idling, [actor_conveyor:create()]).
+C1 = spawn(container, idling, [actor_conveyor:create('C1',3,4)]).
+C2 = spawn(container, idling, [actor_conveyor:create('C2',5,6)]).
 C1 ! C2 ! {start}.
 
 C1 ! {self(), {add, out, C2}}.
