@@ -59,14 +59,15 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	%%% 2) Fetch the head and send it back as solution
 	%%% 3) Update what I know about the actor.
 	%%% 1)
-	[ToUse] = case supervisor_contract:get_option(Config, Sender) of
+	ToUse = lists:flatten(case supervisor_contract:get_option(Config, Sender) of
 				unknown_option ->
 					actor_contract:get_out(ActorConfig);
 				List when is_list(List) ->
 					List
-			end, 
+			end), 
 	%%% 2)
-	[H|Tail] = ToUse,
+
+	[H|Tail] = ToUse, 
  	Sender ! {self(), {prob_out, Product, H}},
  	NewList = Tail ++ [H],
  	Config2 = supervisor_contract:set_option(Config, Sender, NewList),

@@ -44,14 +44,14 @@ CC4 = spawn(container, idling, [actor_conveyor:create('CC4')]).
 %CC6 = spawn(container, idling, [actor_conveyor:create('CC6')]).
 %CC7 = spawn(container, idling, [actor_conveyor:create('CC7')]).
 %SC = spawn(container, idling, [actor_scanner:create('SC')]).
-So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA1')]).
-So2 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA2')]).
-So3 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA3')]).
-So4 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA4')]).
-So5 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA5')]).
-So6 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA6')]).
-So7 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RB1')]).
-So8 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RC1')]).
+So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+So2 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+So3 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+So4 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+So5 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+So6 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+So7 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+So8 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
 
 
 CA1 ! RA1 ! CA2 ! RA2 ! CA3 ! BQA1 ! WSA1 ! CA4 ! CA5 ! RA3 ! CA6 ! RA4 ! CA7 ! RA5 ! 
@@ -103,6 +103,7 @@ CC4 ! {self(), {add, out, self()}}.
 %CC5 ! {self(), {add, out, BQC3}}.
 %BQC3 ! {self(), {add, out, WSC3}}.
 %WSC3 ! {self(), {add, out, CC6}}.
+
 
 RA1 ! {self(), {add, option, {supervisor, So1}}}.
 RA2 ! {self(), {add, option, {supervisor, So2}}}.
