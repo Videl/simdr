@@ -100,7 +100,7 @@ end_of_physical_work(
 					 {Config, NbWorkers}, 
 					 {NewConfig, LittleAnswer, Destination}) ->
 	[TablePid] = actor_contract:get_option(Config, ets), 
-	{actor_product, ProductConfig, Detail} = LittleAnswer,
+	{actor_product, ProductConfig, _Detail} = LittleAnswer,
 	Awaiting = ets:match_object(TablePid, {awaiting, '$1'}),
 	?DLOG(
 		actor_contract:get_module(Config), 
