@@ -6,6 +6,7 @@
               actor_rfid, actor_workstation, actor_conveyor, actor_basic_queue,
               container, supervisor_contract, supervisor_start,
               supervisor_container, supervisor_purposeless,
-              simdr_tools, supervisor_onedirection]}
+              simdr_tools, supervisor_onedirection,
+              supervisor_end]}
   ]
 }.

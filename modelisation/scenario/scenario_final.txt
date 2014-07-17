@@ -52,13 +52,14 @@ So5 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
 So6 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
 So7 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
 So8 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+So9 = spawn(supervisor_container, idling, [supervisor_end:create()]).
 
 
 CA1 ! RA1 ! CA2 ! RA2 ! CA3 ! BQA1 ! WSA1 ! CA4 ! CA5 ! RA3 ! CA6 ! RA4 ! CA7 ! RA5 ! 
 CA8 ! BQA2 ! WSA2 ! CA9 ! CA10 ! RA6 ! CA11 ! CB1 ! RB1 ! S ! CB2 ! CC1 ! BQC1 !
  WSC1 ! CC2 ! RC1 ! CC3 ! BQC2 ! WSC2 ! CC4 ! 
 %RC2 ! CC5 ! BQC3! WSC3 ! CC6 ! CC7 ! SC !
-So1 ! So2 ! So3 ! So4 ! So5 ! So6 ! So7 ! So8 !
+So1 ! So2 ! So3 ! So4 ! So5 ! So6 ! So7 ! So8 ! So9 !
 {start}.
 
 CA1 ! {self(), {add, out, RA1}}.
@@ -97,7 +98,6 @@ RC1! {self(), {add, out, CC3}}.
 CC3 ! {self(), {add, out, BQC2}}.
 BQC2 ! {self(), {add, out, WSC2}}.
 WSC2 ! {self(), {add, out, CC4}}.
-CC4 ! {self(), {add, out, self()}}.
 %CC4 ! {self(), {add, out, RC2}}.
 %RC2 ! {self(), {add, out, CC5}}.
 %CC5 ! {self(), {add, out, BQC3}}.
@@ -113,6 +113,7 @@ RA5 ! {self(), {add, option, {supervisor, So5}}}.
 RA6 ! {self(), {add, option, {supervisor, So6}}}.
 RB1 ! {self(), {add, option, {supervisor, So7}}}.
 RC1 ! {self(), {add, option, {supervisor, So8}}}.
+CC4 ! {self(), {add, out, So9}}.
 
 
 Prod = actor_product:create().
@@ -124,6 +125,7 @@ CA1 ! {self(), {actor_product, Prod2}}.
 Prod3 = actor_product:create().
 CA1 ! {self(), {actor_product, Prod3}}.
 
+CA1 ! {self(), {csv_export, list_data}}.
 actor_contract:answer(Prod, {csv_export, list_data}).
 
 % R2 ! {self(), {prob_out, Prod, C3}}.
