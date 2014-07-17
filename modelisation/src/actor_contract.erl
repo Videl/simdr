@@ -38,6 +38,7 @@
 		 set_option/3, 
 		 work/1,
 		 list_size/1,
+		 first_key/2,
 		 different_sender/1,
 		 answer/2,
 		 random_id/0,
@@ -234,6 +235,17 @@ list_size(List) ->
 
 add_to_list_data(FirstActor, FirstData, SecondActor, SecondData) ->
 	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
+
+first_key([], Key) ->
+	{ nothing, nothing};
+
+first_key(List, Key) ->
+[H|T] = List,
+{_Id, K} = H,
+case K =:= Key of
+	true -> {_Id, K};
+	false -> first_key(T, Key)
+end.
 
 first([]) ->
 	[];

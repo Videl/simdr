@@ -161,7 +161,7 @@ end_of_logical_work({_Config, NbWorkers},
 %%% So Awaiting > 0 when we are here, hopefully..
 %%% Returns: {NewConfig, NewNbWorkers}
 %%% @end
-manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
+manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 	io:format("~w receive product ~w ~n~n", 
 		[actor_contract:get_name(Config), 
 		 actor_contract:get_name(ProdConf)]),
@@ -177,8 +177,7 @@ manage_request({Config, NbWorkers, _Sender}, {actor_product, ProdConf}) ->
 					TablePid, {awaiting, '$1'}),
 	case  actor_contract:list_size(Awaiting) > 0 of 
 		true -> 
-		%% Change first product with product of sender!!!!!!!!!!!!!!!!!!!!!!!
-			FirstAwaiting = actor_contract:first(Awaiting),
+			FirstAwaiting = actor_contract:first_key(Awaiting,Sender),
 			ets:delete_object(TablePid, FirstAwaiting);
 		false ->
 			ok
