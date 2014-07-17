@@ -109,7 +109,7 @@ end_of_physical_work(
 	% 	[actor_contract:get_module(NewConfig), actor_contract:get_name(ProductConfig)]),
 	actor_contract:add_data(
 		NewConfig, 
-		{{work,on,product,is,done},{ProductConfig, Detail}}), 
+		{{work,on,product,is,done},{ProductConfig}}), 
 	actor_contract:add_data(
 		ProductConfig, 
 		{{processing,done,by},{NewConfig}}),

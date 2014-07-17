@@ -124,6 +124,7 @@ CA1 ! {self(), {actor_product, Prod2}}.
 Prod3 = actor_product:create().
 CA1 ! {self(), {actor_product, Prod3}}.
 
+CA1 ! {self(), {csv_export, list_data}}.
 actor_contract:answer(Prod, {csv_export, list_data}).
 
 % R2 ! {self(), {prob_out, Prod, C3}}.

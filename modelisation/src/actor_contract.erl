@@ -243,17 +243,20 @@ set_option(Actor, Key, Value) ->
 		actor_contract:get_name(Actor),
 		{lists:concat(["Inserting option to ", Table]), {Key, Value}}),
 	true = simdr_tools:set_option_in_ets(Table, Key, Value),
+	actor_contract:add_data(Actor, {{option,setted}, {{Key, Value}}}),
 	Actor.
 	
 delete_option(Actor, Key) ->
 	Table = Actor#config.opt,
 	simdr_tools:delete_option_in_ets(Table, Key),
+	actor_contract:add_data(Actor, {{option,deleted}, {Key}}),
 	%%(ets:delete(Table, Key)=:= true) orelse ?DLOG("Deletion failed"),
 	Actor.
 
 add_option(Actor, Key, Value) ->
 	Table = Actor#config.opt,
 	simdr_tools:add_option_in_ets(Table, Key, Value),
+	actor_contract:add_data(Actor, {{option,added}, {{Key, Value}}}),
 	%%(ets:insert(Table, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
@@ -383,7 +386,8 @@ answer(ActorConfig, {file_export, list_data}) ->
 	%% File creation
 	{ok, F} = file:open(lists:concat(["data_", 
 					 				 actor_contract:get_module(ActorConfig),
-					 				 % id here if its a number
+					 				 "_",
+					 				 actor_contract:get_name(ActorConfig),
 					 				 ".log"]), [append, delayed_write, unicode]),
 	Fun = export_to(file),
 	ets:foldl(Fun, F, TablePid),
@@ -397,7 +401,8 @@ answer(ActorConfig, {csv_export, list_data}) ->
 	%% File creation
 	{ok, F} = file:open(lists:concat(["data_", 
 					 				 actor_contract:get_module(ActorConfig),
-					 				 % id here if its a number
+					 				 "_",
+					 				 actor_contract:get_name(ActorConfig),
 					 				 ".csv"]), [append, delayed_write, unicode]),
 	Fun = export_to(csv),
 	R = io_lib:format("~s;~s;~s;~s;~s\n",["Year,Month,Day", 
@@ -518,11 +523,13 @@ export_to(csv) ->
 		%%% Value decomposition
 		% R = io_lib:format("~w\n", [X]),
 		 {_Now, {YearMonthDate, HourMinSecs}, Source, Message, Dest} = X,
+		 ShortSource = actor_sumup(Source),
+		 ShortDest = actor_sumup(Dest),
 		 R = io_lib:format("~w;~w;~w;~w;~w\n",[YearMonthDate, 
 										   HourMinSecs, 
-										   Source, 
+										   ShortSource, 
 										   Message,
-										   Dest]),
+										   ShortDest]),
 		%RX = erlang:iolist_to_binary(R),
 		%RXF = lists:flatten(RX),
 		ok = file:write(FileDescriptor,  R),
@@ -535,6 +542,17 @@ export_to(_) ->
 		%RXF = lists:flatten(RX),
 		io:format("~w~n", [R]), Y
 	end.
+
+actor_sumup(Actor) when is_record(Actor, config) ->
+	{actor_contract:get_module(Actor), 
+	 actor_contract:get_name(Actor),
+	 actor_contract:get_state(Actor)};
+actor_sumup({Actor}) when is_record(Actor, config) ->
+	{actor_contract:get_module(Actor), 
+	 actor_contract:get_name(Actor),
+	 actor_contract:get_state(Actor)};
+actor_sumup(Actor) ->
+	Actor.
 
 add_datas_helper(Actor, []) ->
 	Actor;
