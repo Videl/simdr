@@ -146,7 +146,7 @@ end_of_physical_work(
 			%%% No new products incoming.
 			wait
 	end,
-	{actor_contract:set_state(NewConfig, free), Workers}.
+	{actor_contract:set_state(NewConfig, on), Workers}.
 
 
 end_of_logical_work({_Config, NbWorkers}, 
@@ -209,7 +209,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
 			%io:format("End of sending product..~n"),
-			NewConfig = actor_contract:set_state(Config, free),
+			NewConfig = actor_contract:set_state(Config, on),
 			NewNbWorkers = NbWorkers-1;
 
 		false ->
