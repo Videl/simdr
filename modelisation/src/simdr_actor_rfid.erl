@@ -22,14 +22,14 @@ create(Name) ->
 	simdr_actor_contract:create(?MODULE, Name, [], off, 2, []).
 
 
-answer(RFIDConfig, {simdr_actor_product, ProductConfig}) ->
+answer(RFIDConfig, {actor_product, ProductConfig}) ->
 	simdr_actor_contract:work(simdr_actor_contract:get_work_time(RFIDConfig)),
 	{NewRFIDConfig, NewProductConfig} = simdr_actor_contract:add_to_list_data(
 		RFIDConfig, {{scanned,product}, {ProductConfig}}, 
 		ProductConfig, {{was,scanned,by},{RFIDConfig}}),
 	%%% Answer
 	{NewRFIDConfig, 
-	{simdr_actor_product, NewProductConfig, simdr_actor_contract:get_name(NewProductConfig)}, 
+	{actor_product, NewProductConfig, simdr_actor_contract:get_name(NewProductConfig)}, 
 	supervisor};
 answer(RFIDConfig, Request) ->
 	simdr_actor_defaullt:answer(RFIDConfig, Request).

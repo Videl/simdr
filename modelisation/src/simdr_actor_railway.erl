@@ -23,7 +23,7 @@ create() ->
 create(Name) ->
 	simdr_actor_contract:create(?MODULE, Name, [], off, 5, []).
 
-answer(RailwayConfig, {simdr_actor_product, ProductConfig}) ->
+answer(RailwayConfig, {actor_product, ProductConfig}) ->
 	Supervisor = simdr_actor_contract:get_option(RailwayConfig, supervisor) ,
 	spawn(?MODULE, send_scanner, [RailwayConfig, ProductConfig]),
 
@@ -47,7 +47,7 @@ answer(RailwayConfig, {simdr_actor_product, ProductConfig}) ->
 			{RailwayConfig, {simdr_actor_product, ProductConfig, InfoProb}, Dest};
 		false -> 
 			%{In, _Out}= simdr_actor_contract: get_in_out(RailwayConfig),
-			{RailwayConf, {simdr_actor_product, ProductConf, InfoProb}, Dest}
+			{RailwayConf, {actor_product, ProductConf, InfoProb}, Dest}
 	end;
 
 answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
@@ -64,11 +64,11 @@ answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 		true ->	
 			RailwayConf = simdr_actor_contract:set_in_out(ActorConfig, {In, NewOut}),
 			simdr_actor_contract:work(simdr_actor_contract:get_work_time(RailwayConf)),
-			{RailwayConf,{simdr_actor_product, Prod,switched}, NewOut};
+			{RailwayConf,{actor_product, Prod,switched}, NewOut};
 		false -> 
 			Time = simdr_actor_contract:get_work_time(RailwayConfig)/3,
 			simdr_actor_contract:work(Time),
-			{ActorConfig,{simdr_actor_product, Prod,switched}, NewOut}
+			{ActorConfig,{actor_product, Prod,switched}, NewOut}
 	end;
 	
 answer(RailwayConfig, Request) ->
@@ -77,7 +77,7 @@ answer(RailwayConfig, Request) ->
 send_scanner(Conf, ProdConf) ->
  io:format(" option : ~w ~n", [simdr_actor_contract:get_option(Conf, scanner)]),
 	case simdr_actor_contract:get_option(Conf, scanner) of 
-		[SCANNER] -> SCANNER ! {self(), {simdr_actor_product, ProdConf}};
+		[SCANNER] -> SCANNER ! {self(), {actor_product, ProdConf}};
 		_ -> {nothing}
 	end.
 
