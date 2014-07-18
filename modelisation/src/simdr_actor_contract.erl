@@ -98,7 +98,7 @@ create(Module, Name, Opt, State, In, Out, Work_time, List_data) ->
 create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
 	?CREATE_DEBUG_TABLE,
 	?DLOG(lists:concat(["Initialising ets tables of", Name])),
-	Actor = #config{
+	Actor = #actor{
 		module    = Module,
 		name 	= Name, 
 		pid        = Pid, 
@@ -127,12 +127,12 @@ create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Work_time, List_d
 	Actor4.
 
 get_module(Actor) ->
-	Actor#config.module.
+	Actor#actor.module.
 
 add_data(Actor, X) ->
 	{Info, Destination}=X,
 	Data = {erlang:now(), erlang:localtime(), Actor, Info, Destination},
-	ETSData = Actor#config.list_data,
+	ETSData = Actor#actor.list_data,
 	?DLOG(
 		simdr_actor_contract:get_name(Actor),
 		{lists:concat(["Inserting data to", ETSData]), Data}),
@@ -141,68 +141,68 @@ add_data(Actor, X) ->
 	Actor.
 
 set_pid(Actor, Pid) ->
-	Actor#config{pid= Pid}.
+	Actor#actor{pid= Pid}.
 
 get_pid(Actor) ->
-	Actor#config.pid.
+	Actor#actor.pid.
 
 get_name(Actor) ->
-	Actor#config.name.
+	Actor#actor.name.
 
 get_opt(Actor) ->
-	Actor#config.opt.
+	Actor#actor.opt.
 
 get_work_time(Actor) ->
-	Actor#config.work_time.
+	Actor#actor.work_time.
 
 get_state(Actor) ->
-	Actor#config.state.
+	Actor#actor.state.
 
 set_work_time(Actor, Work_time)->
-	 Actor#config{work_time =Work_time}.
+	 Actor#actor{work_time =Work_time}.
 
 set_state(Actor, State) ->
-	Actor#config {state = State}.
+	Actor#actor {state = State}.
 
 set_name(Actor, Name) ->
-	Actor#config {name = Name}.
+	Actor#actor {name = Name}.
 
 get_in(Actor) ->
-	Actor#config.in.
+	Actor#actor.in.
 
 set_in(Actor, In) ->
-	Actor#config{in = In}.
+	Actor#actor{in = In}.
 
 add_in(Actor, In) ->
-	Actor#config{in = [In] ++ Actor#config.in}.
+	Actor#actor{in = [In] ++ Actor#actor.in}.
 
 get_out(Actor) ->
-	Actor#config.out.
+	Actor#actor.out.
 
 set_out(Actor, Out) ->
-	Actor#config{out = Out}.
+	Actor#actor{out = Out}.
 
 add_out(Actor, Out) ->
-	Actor#config{out = [Out] ++ Actor#config.out}.
+	Actor#actor{out = [Out] ++ Actor#actor.out}.
 
 get_in_out(Actor) ->
-	Actor#config.in_out.
+	Actor#actor.in_out.
 
 set_in_out(Actor, {In, Out}) ->
-	Actor#config{in_out = {In, Out}}.
+	Actor#actor{in_out = {In, Out}}.
 
 get_capacity(Actor) -> 
-	Actor#config.capacity.
+	Actor#actor.capacity.
 
 set_capacity(Actor, Capacity) ->
-	Actor#config{capacity = Capacity}.
+	Actor#actor{capacity = Capacity}.
 
 get_option(Actor, Key) ->
-	Table = Actor#config.opt,
+	Table = Actor#actor.opt,
 	simdr_tools:get_option_from_ets(Table, Key).
 
 set_option(Actor, Key, Value) ->
-	Table = Actor#config.opt,
+	Table = Actor#actor.opt,
 	?DLOG(
 		simdr_actor_contract:get_name(Actor),
 		{lists:concat(["Inserting option to ", Table]), {Key, Value}}),
@@ -211,14 +211,14 @@ set_option(Actor, Key, Value) ->
 	Actor.
 	
 delete_option(Actor, Key) ->
-	Table = Actor#config.opt,
+	Table = Actor#actor.opt,
 	simdr_tools:delete_option_in_ets(Table, Key),
 	simdr_actor_contract:add_data(Actor, {{option,deleted}, {Key}}),
 	%%(ets:delete(Table, Key)=:= true) orelse ?DLOG("Deletion failed"),
 	Actor.
 
 add_option(Actor, Key, Value) ->
-	Table = Actor#config.opt,
+	Table = Actor#actor.opt,
 	simdr_tools:add_option_in_ets(Table, Key, Value),
 	simdr_actor_contract:add_data(Actor, {{option,added}, {{Key, Value}}}),
 	%%(ets:insert(Table, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
@@ -250,7 +250,7 @@ first([H|_T]) ->
 	H.
 
 get_data(Actor) ->
-	ETS = Actor#config.list_data,
+	ETS = Actor#actor.list_data,
 	Key = ets:first(ETS),
 	[HeadData|_Rest] = ets:lookup(ETS, Key),
 	?DLOG(lists:concat(["First element from ", ETS]), HeadData),
@@ -316,7 +316,7 @@ get_module_test() ->
 % add_data_test() ->
 % 	Actor = create(mod, test, [], on, 0, [1,2]),
 % 	NewActor = add_data(Actor, 3),
-% 	[3,1,2] = NewActor#config.list_data.
+% 	[3,1,2] = NewActor#actor.list_data.
 
 get_name_test() ->
 	Actor = create(mod, test, [], off, 0, []),
@@ -349,7 +349,7 @@ get_state_2_test() ->
 set_work_time_test()->
 	Actor = create(mod, test, [{key, value}], on, 42, []),
 	NewActor = set_work_time(Actor, 12),
-	12 = NewActor#config.work_time.
+	12 = NewActor#actor.work_time.
 
 get_option_test_() ->
 	Actor = create(mod, test, [{friend, yes}, {friendo, no}, {friend, haha}], on, 42, []),

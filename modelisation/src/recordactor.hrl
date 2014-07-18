@@ -1,4 +1,4 @@
--record(config, {
+-record(actor, {
 	module,
 	name,
 	pid,
