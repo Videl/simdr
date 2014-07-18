@@ -20,12 +20,12 @@ idling(Config) ->
 	receive
 		{start} ->
 			?DLOG(
-				actor_contract:get_module(Config), 
+				simdr_actor_contract:get_module(Config), 
 				"Entering processing state."),
-			NewConfig = actor_contract:set_pid(Config, self()),
-			processing(actor_contract:set_state(NewConfig, awaiting), 0);
+			NewConfig = simdr_actor_contract:set_pid(Config, self()),
+			processing(simdr_actor_contract:set_state(NewConfig, awaiting), 0);
 		{Sender, actor_product, _, _} when is_pid(Sender) ->
-			Sender ! {state, actor_contract:get_state(Config)},
+			Sender ! {state, simdr_actor_contract:get_state(Config)},
 			idling(Config);
 		_ ->
 			idling(Config)
@@ -35,9 +35,9 @@ idling(Config) ->
 processing(Config, NbWorkers) ->
 	receive
 		{_Sender, {prob_in, Decision}} ->
-			{_In, Out} = actor_contract:get_in_out(Config),
+			{_In, Out} = simdr_actor_contract:get_in_out(Config),
 			NewIn = Decision,
-			NewConfig = actor_contract:set_in_out(Config, {NewIn, Out}),
+			NewConfig = simdr_actor_contract:set_in_out(Config, {NewIn, Out}),
 			NewIn ! {self(), {control, ok}},
 			processing(NewConfig, NbWorkers);
 
@@ -71,13 +71,13 @@ processing(Config, NbWorkers) ->
 
 physical_work(Master, MasterConfig, Request) ->
 	FullAnswer = 
-		(actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
+		(simdr_actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
 	Master ! {self(), end_physical_work, FullAnswer}.
 
 
 logical_work(Master, MasterConfig, Request) ->
 	FullAnswer = 
-		(actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
+		(simdr_actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
 	Master ! {self(), end_logical_work, FullAnswer}.
 
 
@@ -99,36 +99,36 @@ end_of_physical_work({_Config, NbWorkers},{NewConf, {actor_product, _ProductConf
 end_of_physical_work(
 					 {Config, NbWorkers}, 
 					 {NewConfig, LittleAnswer, Destination}) ->
-	[TablePid] = actor_contract:get_option(Config, ets), 
+	[TablePid] = simdr_actor_contract:get_option(Config, ets), 
 	{actor_product, ProductConfig, _Detail} = LittleAnswer,
 	Awaiting = ets:match_object(TablePid, {awaiting, '$1'}),
 	?DLOG(
-		actor_contract:get_module(Config), 
+		simdr_actor_contract:get_module(Config), 
 		{work,done,on,product,ProductConfig}),
 	% io:format("~w >>> Work is done on product id ~p.\n", 
-	% 	[actor_contract:get_module(NewConfig), actor_contract:get_name(ProductConfig)]),
-	actor_contract:add_data(
+	% 	[simdr_actor_contract:get_module(NewConfig), simdr_actor_contract:get_name(ProductConfig)]),
+	simdr_actor_contract:add_data(
 		NewConfig, 
 		{{work,on,product,is,done},{ProductConfig}}), 
-	actor_contract:add_data(
+	simdr_actor_contract:add_data(
 		ProductConfig, 
 		{{processing,done,by},{NewConfig}}),
 	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
-		[actor_contract:get_module(NewConfig), 
-		 actor_contract:get_name(NewConfig), 
-		 actor_contract:get_name(ProductConfig)]),
+		[simdr_actor_contract:get_module(NewConfig), 
+		 simdr_actor_contract:get_name(NewConfig), 
+		 simdr_actor_contract:get_name(ProductConfig)]),
 	ets:insert(TablePid, {product, awaiting_sending, ProductConfig}),
  	send_message(Config, awaiting_product, Destination),
-	%[Awaiting] = actor_contract:get_option(NewConfig, awaiting),
-	case actor_contract:list_size(Awaiting) > 0 of
+	%[Awaiting] = simdr_actor_contract:get_option(NewConfig, awaiting),
+	case simdr_actor_contract:list_size(Awaiting) > 0 of
 		true -> 
-			case actor_contract:list_size(actor_contract:get_in(Config)) of 
+			case simdr_actor_contract:list_size(simdr_actor_contract:get_in(Config)) of 
 				1 ->
-					[InActor] = actor_contract:get_in(Config),
+					[InActor] = simdr_actor_contract:get_in(Config),
 					Workers = NbWorkers+1,
 					InActor ! {self(), {control, ok}};
 				_ -> 
-					case actor_contract:different_sender(Awaiting) of 
+					case simdr_actor_contract:different_sender(Awaiting) of 
 						%%% Sending messageder to supervisor 
 						true ->	
 							Workers = NbWorkers,
@@ -146,7 +146,7 @@ end_of_physical_work(
 			%%% No new products incoming.
 			wait
 	end,
-	{actor_contract:set_state(NewConfig, awaiting), Workers}.
+	{simdr_actor_contract:set_state(NewConfig, awaiting), Workers}.
 
 
 end_of_logical_work({_Config, NbWorkers}, 
@@ -162,22 +162,22 @@ end_of_logical_work({_Config, NbWorkers},
 %%% @end
 manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 	io:format("~w receive product ~w ~n~n", 
-		[actor_contract:get_name(Config), 
-		 actor_contract:get_name(ProdConf)]),
+		[simdr_actor_contract:get_name(Config), 
+		 simdr_actor_contract:get_name(ProdConf)]),
 	?DLOG(
-		actor_contract:get_module(Config), 
+		simdr_actor_contract:get_module(Config), 
 		{starting,to,work,on,product,ProdConf}),
-	% io:format("~w >>> Work is starting on product id ~p.\n", [actor_contract:get_module(NewConfig), actor_contract:get_name(ProdConf)]),
-	actor_contract:add_data(Config, {{new,product,has,arrived}, {ProdConf}}), 
-	actor_contract:add_data(ProdConf, {{processing,started,by},Config}),
+	% io:format("~w >>> Work is starting on product id ~p.\n", [simdr_actor_contract:get_module(NewConfig), simdr_actor_contract:get_name(ProdConf)]),
+	simdr_actor_contract:add_data(Config, {{new,product,has,arrived}, {ProdConf}}), 
+	simdr_actor_contract:add_data(ProdConf, {{processing,started,by},Config}),
 	%%% Decrement the number of products waiting for us.
-	[TablePid] = actor_contract:get_option(Config, ets),
+	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	Awaiting = ets:match_object(
 					TablePid, {awaiting, '$1'}),
-	case  actor_contract:list_size(Awaiting) > 0 of 
+	case  simdr_actor_contract:list_size(Awaiting) > 0 of 
 		true -> 
-			FirstAwaiting = actor_contract:first_key_awaiting(Awaiting,Sender),
-			io:format(" ~w liste dattente ~w, FirstAwaiting ~w ~n",[actor_contract:get_name(Config), Awaiting, FirstAwaiting]),
+			FirstAwaiting = simdr_actor_contract:first_key_awaiting(Awaiting,Sender),
+			io:format(" ~w liste dattente ~w, FirstAwaiting ~w ~n",[simdr_actor_contract:get_name(Config), Awaiting, FirstAwaiting]),
 			ets:delete_object(TablePid, FirstAwaiting),
 			Awaiting2 = ets:match_object(
 					TablePid, {awaiting, '$1'}),
@@ -193,23 +193,23 @@ manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 %%% is sent.
 %%% @end
 manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
-	io:format("~w receive request of product~n~n", [actor_contract:get_name(Config)]),
-	[TablePid] = actor_contract:get_option(Config, ets),
+	io:format("~w receive request of product~n~n", [simdr_actor_contract:get_name(Config)]),
+	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	ListEntry = ets:match_object(
 					TablePid, {product, awaiting_sending, '$1'}
 				),
-	case actor_contract:list_size(ListEntry) > 0 of
+	case simdr_actor_contract:list_size(ListEntry) > 0 of
 		true ->
 			%io:format("Sending product..~n"),
-			FirstEntry = actor_contract:first(ListEntry),
+			FirstEntry = simdr_actor_contract:first(ListEntry),
 			{product, awaiting_sending, Prod} = FirstEntry,
-			actor_contract:add_data(Config, {{sending, product}, {Prod}}), 
-			actor_contract:add_data(Prod, {{being,sent,to, Sender, by},{Config}}), 
+			simdr_actor_contract:add_data(Config, {{sending, product}, {Prod}}), 
+			simdr_actor_contract:add_data(Prod, {{being,sent,to, Sender, by},{Config}}), 
 			send_message(Config, {actor_product, Prod}, Sender),
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
 			%io:format("End of sending product..~n"),
-			NewConfig = actor_contract:set_state(Config, awaiting),
+			NewConfig = simdr_actor_contract:set_state(Config, on),
 			NewNbWorkers = NbWorkers-1;
 
 		false ->
@@ -222,10 +222,10 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 %%% a product can be sent.
 %%% @end
 manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
-	Capacity= actor_contract:get_capacity(Config),
+	Capacity= simdr_actor_contract:get_capacity(Config),
 	io:format(" ~w < ~w ~n", [NbWorkers, Capacity]),
-	%[Awaiting] = actor_contract:get_option(Config, awaiting),
-	[TablePid] = actor_contract:get_option(Config, ets),
+	%[Awaiting] = simdr_actor_contract:get_option(Config, awaiting),
+	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	ets:insert(TablePid, {awaiting, {Sender, erlang:now()}}),
 	case NbWorkers < Capacity of
 		true -> 
@@ -244,7 +244,7 @@ manage_request({Config, NbWorkers, _Sender}, {add, out, Out}) ->
 	%%% Normal request, it does not change NbWorkers value
 	%spawn(?MODULE, logical_work, [self(), Config, {add, out, Out}]),
 	FullAnswer = 
-		(actor_contract:get_module(Config)):answer(Config, {add, out, Out}),
+		(simdr_actor_contract:get_module(Config)):answer(Config, {add, out, Out}),
 	{NewConfig, LittleAnswer, Destination} = FullAnswer,
 	send_message(Config, LittleAnswer, Destination),
 	{NewConfig, NbWorkers};
@@ -254,7 +254,7 @@ manage_request({Config, NbWorkers, _Sender}, {add, option, {supervisor, V}}) ->
 	%%% Normal request, it does not change NbWorkers value
 	%spawn(?MODULE, logical_work, [self(), Config, Request]),
 	 FullAnswer = 
-		(actor_contract:get_module(Config)):answer(Config, {add, option, {supervisor, V}}),
+		(simdr_actor_contract:get_module(Config)):answer(Config, {add, option, {supervisor, V}}),
 	{NewConfig, _LittleAnswer, _Destination} = FullAnswer,
 	V ! {self(), {add, actor, Config}},
 	% send_message(Config, LittleAnswer, Destination),
@@ -267,7 +267,7 @@ manage_request({Config, NbWorkers, _Sender}, Request) ->
 	%%% Normal request, it does not change NbWorkers value
 	%spawn(?MODULE, logical_work, [self(), Config, Request]),
 	FullAnswer = 
-		(actor_contract:get_module(Config)):answer(Config, Request),
+		(simdr_actor_contract:get_module(Config)):answer(Config, Request),
 	{NewConfig, LittleAnswer, Destination} = FullAnswer,
 	send_message(Config, LittleAnswer, Destination),
 	{NewConfig, NbWorkers}.
@@ -278,7 +278,7 @@ send_message(Config, Ans, RawDest) ->
 
 get_destination(Config, supervisor) ->
 	%%% Find supervisor PID in ETS option table.
-	case actor_contract:get_option(Config, supervisor) of
+	case simdr_actor_contract:get_option(Config, supervisor) of
 		[SuperPid] when is_pid(SuperPid) ->
 			SuperPid;
 		_ ->
@@ -302,13 +302,13 @@ sender(Ans, Dest) ->
 
 
 wait(Pid, Wait_time, {Ans, [Dest]}) when is_pid(Dest)->
-	actor_contract:work(Wait_time),
+	simdr_actor_contract:work(Wait_time),
 	Dest ! {Pid, {Ans}};
 wait(Pid, Wait_time, {Ans, Dest}) when is_pid(Dest)->
-	actor_contract:work(Wait_time),
+	simdr_actor_contract:work(Wait_time),
 	Dest ! {Pid, {Ans}};
 wait(Pid, Wait_time, {Ans, Dest}) ->
-	actor_contract:work(Wait_time),
+	simdr_actor_contract:work(Wait_time),
 	io:format(" ~w send ~w to ~w.~n~n", [Pid, Ans, Dest]).
 
 
@@ -318,7 +318,7 @@ wait(Pid, Wait_time, {Ans, Dest}) ->
 -ifdef(TEST).
 
 % mock_actor_create() ->
-% 	actor_contract:create(mocking_actor, 
+% 	simdr_actor_contract:create(mocking_actor, 
 % 		777, 
 % 		[], 
 % 		off, 
