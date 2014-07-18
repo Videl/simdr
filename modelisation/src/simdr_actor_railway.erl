@@ -54,7 +54,7 @@ answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 	{In, Out} = simdr_actor_contract:get_in_out(RailwayConfig),
 	NewOut = Decision,
 	%%% List data fillers
-	{simdr_ActorConfig, Prod} = simdr_actor_contract:add_to_list_data(
+	{ActorConfig, Prod} = simdr_actor_contract:add_to_list_data(
 		RailwayConfig, 
 		{{going,into,position,{In, NewOut},for},ProductConfig}, 
 		ProductConfig, 
@@ -62,13 +62,13 @@ answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 	%%% Answer
 	case Decision =/= Out of
 		true ->	
-			RailwayConf = simdr_actor_contract:set_in_out(simdr_ActorConfig, {In, NewOut}),
+			RailwayConf = simdr_actor_contract:set_in_out(ActorConfig, {In, NewOut}),
 			simdr_actor_contract:work(simdr_actor_contract:get_work_time(RailwayConf)),
 			{RailwayConf,{simdr_actor_product, Prod,switched}, NewOut};
 		false -> 
 			Time = simdr_actor_contract:get_work_time(RailwayConfig)/3,
 			simdr_actor_contract:work(Time),
-			{simdr_ActorConfig,{simdr_actor_product, Prod,switched}, NewOut}
+			{ActorConfig,{simdr_actor_product, Prod,switched}, NewOut}
 	end;
 	
 answer(RailwayConfig, Request) ->

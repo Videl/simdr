@@ -1,13 +1,13 @@
--module(actor_rfid).
+-module(simdr_actor_rfid).
 -include("app_configuration.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--behaviour(actor_contract).
+-behaviour(simdr_actor_contract).
 
-%% Actor Contract Behaviors Callbacks
+%% simdr_Actor Contract Behaviors Callbacks
 
 -export([
 	create/0,
@@ -17,32 +17,32 @@
 %% Behavior implementation
 
 create() ->
-	create(actor_contract:random_id()).
+	create(simdr_actor_contract:random_id()).
 create(Name) ->
-	actor_contract:create(?MODULE, Name, [], off, 2, []).
+	simdr_actor_contract:create(?MODULE, Name, [], off, 2, []).
 
 
-answer(RFIDConfig, {actor_product, ProductConfig}) ->
-	actor_contract:work(actor_contract:get_work_time(RFIDConfig)),
-	{NewRFIDConfig, NewProductConfig} = actor_contract:add_to_list_data(
+answer(RFIDConfig, {simdr_actor_product, ProductConfig}) ->
+	simdr_actor_contract:work(simdr_actor_contract:get_work_time(RFIDConfig)),
+	{NewRFIDConfig, NewProductConfig} = simdr_actor_contract:add_to_list_data(
 		RFIDConfig, {{scanned,product}, {ProductConfig}}, 
 		ProductConfig, {{was,scanned,by},{RFIDConfig}}),
 	%%% Answer
 	{NewRFIDConfig, 
-	{actor_product, NewProductConfig, actor_contract:get_name(NewProductConfig)}, 
+	{simdr_actor_product, NewProductConfig, simdr_actor_contract:get_name(NewProductConfig)}, 
 	supervisor};
 answer(RFIDConfig, Request) ->
-	actor_contract:answer(RFIDConfig, Request).
+	simdr_actor_defaullt:answer(RFIDConfig, Request).
 
 %% Tests
 -ifdef(TEST).
 
 answer_test_() ->
-	ActorRFID = actor_rfid:create(),
-	ActorProduct = actor_product:create(),
-	Name = actor_contract:get_name(ActorProduct),
+	ActorRFID = simdr_actor_rfid:create(),
+	ActorProduct = simdr_actor_product:create(),
+	Name = simdr_actor_contract:get_name(ActorProduct),
 	{_, {actor_product, EndProduct, NewName}, _Dest} = 
-		actor_rfid:answer(ActorRFID, {actor_product, ActorProduct}),
+		simdr_actor_rfid:answer(ActorRFID, {actor_product, ActorProduct}),
 	[
 		%%% Test: The product does not change before/after the answer/2.
 		?_assertEqual(
