@@ -20,7 +20,7 @@
 	\item Worker nodes that represent a task (when calling answer()) are not 
 	represented.
 	\item The lifeline of an actor is the \textit{receive ... end} clause
-	in the processing loop function.
+	in the processing loop function of the container.
 	\item Message passing between Actors are done as if they are concurrent
 	function calls. When you see a call looking like `\{...\}', they are 
 	just plain messages triggering a \textit{receive} clause on the other end.
@@ -32,6 +32,7 @@
 \end{itemize}
 
 \begin{landscape}
+\section*{Erlang messages}
 
 \thispagestyle{empty}
 \begin{center}
@@ -104,6 +105,83 @@
 			\begin{messcall}
 			{actor_wst1}
 			{\{self(), awaiting\_product\}}
+			{supervisor}
+
+			\end{messcall}
+		\end{messcall}
+
+	\end{sequencediagram}
+\end{center}
+\end{landscape}
+
+\begin{landscape}
+\section*{Semantic of messages}
+
+\thispagestyle{empty}
+\begin{center}
+	\begin{sequencediagram}
+	\newthread[white]{user}{User}
+	%\tikzstyle {inststyle}+=[bottom color =white, top color=white, rounded corners=3mm]
+	%\newinst[0.1]{mw_consulter}{:PanelConsulter}
+	%\newinst[0.1]{user}{:User}
+	\newinst[7]{actor_bq1}{BQ1:BasicQueue}
+	\newinst[3]{actor_wst1}{WTS1:Workstation}
+	\newinst[3]{supervisor}{SO1:Supervisor}
+	%\newinst[0.1]{mw_planifier}{:PanelPlanifier}
+		 
+		\begin{sdblock}{Standard}{Behaviour of all Actors}
+			\begin{messcall}
+				{user}
+				{Product}
+				{actor_bq1}
+
+				\begin{callself}
+					{actor_bq1}
+					{
+						Product
+					}
+					{
+						Work done on product
+					}
+				\end{callself}
+				\postlevel
+				\postlevel
+				\begin{messcall}
+					{actor_bq1}
+					{Product ready to be sent}
+					{actor_wst1}
+
+				\end{messcall}
+			\end{messcall}
+		\end{sdblock}
+
+		\begin{messcall}
+		{actor_wst1}
+		{Send me the product}
+		{actor_bq1}
+
+		\end{messcall}
+
+		\begin{messcall}
+			{actor_bq1}
+			{Product}
+			{actor_wst1}
+
+			\begin{callself}
+				{actor_wst1}
+				{
+					Product
+				}
+				{
+					Work done on product
+				}
+			\end{callself}
+
+			\postlevel
+			\postlevel
+			\begin{messcall}
+			{actor_wst1}
+			{Product ready to be sent}
 			{supervisor}
 
 			\end{messcall}
