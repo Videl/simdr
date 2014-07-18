@@ -62,7 +62,7 @@ create(Module, Work_time) ->
 
 create(Module, State, Work_time) ->
 	simdr_actor_contract:create(Module, 
-		simdr_actor_contractt:random_id(), 
+		simdr_actor_contract:random_id(), 
 		[], 
 		State, 
 		[], 
@@ -204,7 +204,7 @@ get_option(Actor, Key) ->
 set_option(Actor, Key, Value) ->
 	Table = Actor#config.opt,
 	?DLOG(
-		simdr_actor_contractt:get_name(Actor),
+		simdr_actor_contract:get_name(Actor),
 		{lists:concat(["Inserting option to ", Table]), {Key, Value}}),
 	true = simdr_tools:set_option_in_ets(Table, Key, Value),
 	simdr_actor_contract:add_data(Actor, {{option,setted}, {{Key, Value}}}),
@@ -391,10 +391,10 @@ set_option_test_() ->
 	Actor = simdr_actor_contract:create(mod, test, [{del, 3}, {save, 9}], on, 42, []),
 	ActorD = simdr_actor_contract:create(mod, test, [{save, 9}, {save, 4578247}], on, 42, []),
 	NewResult = simdr_actor_contract:get_option(
-		simdr_actor_contractt:set_option(Actor, del, 9),
+		simdr_actor_contract:set_option(Actor, del, 9),
 		del),
 	NewResult2 = simdr_actor_contract:get_option(
-		simdr_actor_contractt:set_option(ActorD, save, 42),
+		simdr_actor_contract:set_option(ActorD, save, 42),
 		save),
 	[
 	?_assertMatch(

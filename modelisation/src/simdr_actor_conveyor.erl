@@ -87,7 +87,7 @@ send_rfid(Conf, ProdConf) ->
 answer_test_() ->
 	Conv = create('C1', 4, 6),
 	Prod = simdr_actor_product:create(),
-	{_, {simdr_actor_product, ProdTwo, Destination}, Destination} = answer(Conv, {simdr_actor_product, Prod}),
+	{_, {actor_product, ProdTwo, Destination}, Destination} = answer(Conv, {actor_product, Prod}),
 	[
 		%%% Test: product does not change
 		?_assertEqual(
