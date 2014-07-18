@@ -38,7 +38,7 @@
 		 set_option/3, 
 		 work/1,
 		 list_size/1,
-		 first_key/2,
+		 first_key_awaiting/2,
 		 different_sender/1,
 		 answer/2,
 		 random_id/0,
@@ -236,15 +236,15 @@ list_size(List) ->
 add_to_list_data(FirstActor, FirstData, SecondActor, SecondData) ->
 	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
 
-first_key([], Key) ->
+first_key_awaiting([], _Key) ->
 	{ nothing, nothing};
 
-first_key(List, Key) ->
+first_key_awaiting(List, Key) ->
 [H|T] = List,
-{_Id, K} = H,
+{awaiting,{K, Id}} = H,
 case K =:= Key of
-	true -> {_Id, K};
-	false -> first_key(T, Key)
+	true -> {awaiting,{K,Id}};
+	false -> first_key_awaiting(T, Key)
 end.
 
 first([]) ->

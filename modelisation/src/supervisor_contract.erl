@@ -7,6 +7,7 @@
 
 -export([
 	 create/1,
+	 create/2,
 	 add_data/3,
 	 action_on_request/3,
 	 get_option/2,
@@ -35,7 +36,10 @@
 
 
 create(Module) ->
-	Id = actor_contract:random_id(),
+create(Module,actor_contract:random_id()).
+
+ create(Module, Name) ->
+  Id= Name,
     #supervisor{module = Module,
 		id = Id,
 		options = ets:new(

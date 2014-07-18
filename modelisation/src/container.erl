@@ -118,7 +118,6 @@ end_of_physical_work(
 		 actor_contract:get_name(NewConfig), 
 		 actor_contract:get_name(ProductConfig)]),
 	ets:insert(TablePid, {product, awaiting_sending, ProductConfig}),
-	%io:format("await"),
  	send_message(Config, awaiting_product, Destination),
 	%[Awaiting] = actor_contract:get_option(NewConfig, awaiting),
 	case actor_contract:list_size(Awaiting) > 0 of
@@ -177,8 +176,12 @@ manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 					TablePid, {awaiting, '$1'}),
 	case  actor_contract:list_size(Awaiting) > 0 of 
 		true -> 
-			FirstAwaiting = actor_contract:first_key(Awaiting,Sender),
-			ets:delete_object(TablePid, FirstAwaiting);
+			FirstAwaiting = actor_contract:first_key_awaiting(Awaiting,Sender),
+			io:format(" ~w liste dattente ~w, FirstAwaiting ~w ~n",[actor_contract:get_name(Config), Awaiting, FirstAwaiting]),
+			ets:delete_object(TablePid, FirstAwaiting),
+			Awaiting2 = ets:match_object(
+					TablePid, {awaiting, '$1'}),
+			io:format("liste dattente ~w, après suppresion de  ~w ~n",[Awaiting2, FirstAwaiting]);
 		false ->
 			ok
 	end,
@@ -201,7 +204,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			FirstEntry = actor_contract:first(ListEntry),
 			{product, awaiting_sending, Prod} = FirstEntry,
 			actor_contract:add_data(Config, {{sending, product}, {Prod}}), 
-			actor_contract:add_data(Prod, {{being,sent,by},{Config}}), 
+			actor_contract:add_data(Prod, {{being,sent,to, Sender, by},{Config}}), 
 			send_message(Config, {actor_product, Prod}, Sender),
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),

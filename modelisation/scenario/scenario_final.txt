@@ -27,7 +27,7 @@ CA11 = spawn(container, idling, [actor_conveyor:create('CA11')]).
 CB1 = spawn(container, idling, [actor_conveyor:create('CB1')]).
 RB1 = spawn(container, idling, [actor_railway:create('RB1')]).
 S = spawn(container, idling, [actor_scanner:create('S')]).
-CB2 = spawn(container, idling, [actor_conveyor:create('CC2')]).
+CB2 = spawn(container, idling, [actor_conveyor:create('CB2')]).
 CC1 = spawn(container, idling, [actor_conveyor:create('CC1')]).
 BQC1 = spawn(container, idling, [actor_basic_queue:create('BQC1')]).
 WSC1 = spawn(container, idling, [actor_workstation_assembly:create('WSC1')]).
@@ -44,14 +44,14 @@ CC4 = spawn(container, idling, [actor_conveyor:create('CC4')]).
 %CC6 = spawn(container, idling, [actor_conveyor:create('CC6')]).
 %CC7 = spawn(container, idling, [actor_conveyor:create('CC7')]).
 %SC = spawn(container, idling, [actor_scanner:create('SC')]).
-So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So2 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So3 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So4 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So5 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So6 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So7 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So8 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So1')]).
+So2 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So2')]).
+So3 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So3')]).
+So4 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So4')]).
+So5 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So5')]).
+So6 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So6')]).
+So7 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So7')]).
+So8 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So7')]).
 So9 = spawn(supervisor_container, idling, [supervisor_end:create()]).
 
 
@@ -70,8 +70,10 @@ RA2 ! {self(), {add, out, CA4}}.
 CA4 ! {self(), {add, out, BQA1}}.
 BQA1 ! {self(), {add, out, WSA1}}.
 WSA1 ! {self(), {add, out, CA5}}.
-CA5 ! {self(), {add, out, RA4}}.
-CA3 ! {self(), {add, out, RA4}}.
+CA5 ! {self(), {add, out, RA3}}.
+CA3 ! {self(), {add, out, RA3}}.
+RA3 ! {self(), {add, out, CA6}}.
+CA6 ! {self(), {add, out, RA4}}.
 RA4 ! {self(), {add, out, CA7}}.
 CA7 ! {self(), {add, out, RA5}}.
 RA5 ! {self(), {add, out, CA8}}.
@@ -82,6 +84,7 @@ WSA2 ! {self(), {add, out, CA10}}.
 CA10 ! {self(), {add, out, RA6}}.
 CA9 ! {self(), {add, out, RA6}}.
 RA6 ! {self(), {add, out, CA11}}.
+CA11 ! {self(), {add, out, RA1}}.
 
 
 RA4 ! {self(), {add, out, CB1}}.
@@ -127,6 +130,9 @@ CA1 ! {self(), {actor_product, Prod3}}.
 
 CA1 ! {self(), {csv_export, list_data}}.
 actor_contract:answer(Prod, {csv_export, list_data}).
+actor_contract:answer(Prod2, {csv_export, list_data}).
+actor_contract:answer(Prod3, {csv_export, list_data}).
+RA1 ! {self(), {csv_export, list_data}}.
 
 % R2 ! {self(), {prob_out, Prod, C3}}.
 
