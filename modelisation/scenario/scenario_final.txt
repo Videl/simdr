@@ -44,14 +44,14 @@ CC4 = spawn(container, idling, [actor_conveyor:create('CC4')]).
 %CC6 = spawn(container, idling, [actor_conveyor:create('CC6')]).
 %CC7 = spawn(container, idling, [actor_conveyor:create('CC7')]).
 %SC = spawn(container, idling, [actor_scanner:create('SC')]).
-So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So2 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So3 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So4 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So5 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So6 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So7 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
-So8 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So1')]).
+So2 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So2')]).
+So3 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So3')]).
+So4 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So4')]).
+So5 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So5')]).
+So6 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So6')]).
+So7 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So7')]).
+So8 = spawn(supervisor_container, idling, [supervisor_purposeless:create('So7')]).
 So9 = spawn(supervisor_container, idling, [supervisor_end:create()]).
 
 
@@ -84,6 +84,7 @@ WSA2 ! {self(), {add, out, CA10}}.
 CA10 ! {self(), {add, out, RA6}}.
 CA9 ! {self(), {add, out, RA6}}.
 RA6 ! {self(), {add, out, CA11}}.
+CA11 ! {self(), {add, out, RA1}}.
 
 
 RA4 ! {self(), {add, out, CB1}}.
@@ -141,6 +142,7 @@ CA1 ! {self(), {actor_product, P9}}.
 CA1 ! {self(), {actor_product, P10}}.
 
 CA1 ! {self(), {csv_export, list_data}}.
+
 actor_contract:answer(P1, {csv_export, list_data}).
 actor_contract:answer(P2, {csv_export, list_data}).
 actor_contract:answer(P3, {csv_export, list_data}).

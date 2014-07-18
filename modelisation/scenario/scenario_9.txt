@@ -1,6 +1,6 @@
 CA1 = spawn(container, idling, [actor_conveyor:create('CA1')]).
 RA1 = spawn(container, idling, [actor_railway:create('RA1')]).
-So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create('RA1')]).
+So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
 
 CA1 ! RA1 !So1 ! {start}.
 
