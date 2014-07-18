@@ -23,7 +23,7 @@ idling(Config) ->
 				actor_contract:get_module(Config), 
 				"Entering processing state."),
 			NewConfig = actor_contract:set_pid(Config, self()),
-			processing(actor_contract:set_state(NewConfig, on), 0);
+			processing(actor_contract:set_state(NewConfig, awaiting), 0);
 		{Sender, actor_product, _, _} when is_pid(Sender) ->
 			Sender ! {state, actor_contract:get_state(Config)},
 			idling(Config);
@@ -146,7 +146,7 @@ end_of_physical_work(
 			%%% No new products incoming.
 			wait
 	end,
-	{actor_contract:set_state(NewConfig, on), Workers}.
+	{actor_contract:set_state(NewConfig, awaiting), Workers}.
 
 
 end_of_logical_work({_Config, NbWorkers}, 
@@ -209,7 +209,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
 			%io:format("End of sending product..~n"),
-			NewConfig = actor_contract:set_state(Config, on),
+			NewConfig = actor_contract:set_state(Config, awaiting),
 			NewNbWorkers = NbWorkers-1;
 
 		false ->
