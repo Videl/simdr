@@ -31,7 +31,7 @@ create(Quality) ->
 	create(actor_contract:random_id(), Quality).
 
 create(Name, Quality) ->
-	actor_contract:create(?MODULE, Name, [{quality_required, Quality}], raw, 0, []).
+	actor_contract:create(?MODULE, Name, [{initial_quality, random()}, {quality_required, Quality}], raw, 0, []).
 
 answer(ProdConfig, {change, Data,_}) ->
 	{ProdConfig, Data, no_change};
