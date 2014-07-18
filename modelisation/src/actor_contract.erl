@@ -1,3 +1,15 @@
+%%% @doc Common contract for all actors.
+%%% 
+%%% This module provides you with a lot of functions to maintain, use, control,
+%%% edit actors.
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(actor_contract).
 -include("app_configuration.hrl").
 
@@ -58,9 +70,24 @@
 %% Helper functions
 %% ===================================================================
 
+%%% @doc Helper function for create/11. This function call create/3 then.
+%%% Some values are already set up:
+%%%  * State = off
+%%% @see create/3
+%%% @see create/11
+%%% @end
 create(Module, Work_time) ->
 	actor_contract:create(Module, off, Work_time).
 
+%%% @doc Helper function for create/11. This function call create/8 then.
+%%% Some values are already set up:
+%%%  * Opt = [] (empty)
+%%%  * In = [] (empty)
+%%%  * Out = [] (empty)
+%%%  * List_data = [] (empty)
+%%% @see create/8
+%%% @see create/11
+%%% @end
 create(Module, State, Work_time) ->
 	actor_contract:create(Module, 
 		actor_contract:random_id(), 
@@ -71,6 +98,13 @@ create(Module, State, Work_time) ->
 		Work_time, 
 		[]).
 
+%%% @doc Helper function for create/11. This function call create/8 then.
+%%% Some values are already set up:
+%%%  * In = [] (empty)
+%%%  * Out = [] (empty)
+%%% @see create/8
+%%% @see create/11
+%%% @end
 create(Module, Name, Opt, State, Work_time, List_data) ->
 	actor_contract:create(Module,
 		Name, 
@@ -81,6 +115,12 @@ create(Module, Name, Opt, State, Work_time, List_data) ->
 		Work_time, 
 		List_data).
 
+%%% @doc Helper function for create/11. This function call create/11 then.
+%%% Some values are already set up:
+%%%  * Pid = 0 (will be changed automatically when actor is started.)
+%%%  * Capacity = infinity
+%%% @see create/11
+%%% @end
 create(Module, Name, Opt, State, In, Out, Work_time, List_data) ->
 	actor_contract:create(Module, 
 		Name, 
@@ -95,14 +135,18 @@ create(Module, Name, Opt, State, In, Out, Work_time, List_data) ->
 		List_data).
 
 
-
+%%% @doc Set up a configuration for an Actor.
+%%% All ETS tables are initialized. All default values must be given by 
+%%% parameters of the function.
+%%% 
+%%% @end
 create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
 	?CREATE_DEBUG_TABLE,
 	?DLOG(lists:concat(["Initialising ets tables of", Name])),
-	Actor = #config{
+		Actor     = #config{
 		module    = Module,
-		name 	= Name, 
-		pid        = Pid, 
+		name 	  = Name, 
+		pid       = Pid, 
 		opt       = ets:new(
 						list_to_atom(lists:concat(["Options_", Module, Name])),
 						[duplicate_bag,
@@ -121,15 +165,21 @@ create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Work_time, List_d
 						{write_concurrency, true}, 
 						{read_concurrency, true}, 
 						public])},
-	Actor1     = add_options_helper(Actor, Opt),
-	TableQueue = ets:new(list_to_atom(lists:concat(["Queue_",Module, Name])), [duplicate_bag, public]),
-	Actor3     = actor_contract:set_option(Actor1, ets, TableQueue),
-	Actor4     = add_datas_helper(Actor3, List_data),
+	Actor1        = add_options_helper(Actor, Opt),
+	TableQueue    = ets:new(list_to_atom(lists:concat(["Queue_",Module, Name])), [duplicate_bag, public]),
+	Actor3        = actor_contract:set_option(Actor1, ets, TableQueue),
+	Actor4        = add_datas_helper(Actor3, List_data),
 	Actor4.
 
+%%% @doc Get module name of an Actor.
+%%% @end
 get_module(Actor) ->
 	Actor#config.module.
 
+%%% @doc Add data in the actor's database. (To be exported)
+%%% Is it stored in an ETS database.
+%%% @spec (Actor, X) -> Actor
+%%% @end
 add_data(Actor, X) ->
 	{Info, Destination}=X,
 	Data = {erlang:now(), erlang:localtime(), Actor, Info, Destination},
@@ -141,67 +191,115 @@ add_data(Actor, X) ->
 %%	(ets:insert(ETSData, Data)=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
+%%% @doc Set Pid of an Actor.
+%%% @spec (Actor, Pid) -> Actor
+%%% @end
 set_pid(Actor, Pid) ->
 	Actor#config{pid= Pid}.
 
+%%% @doc Get Pid of an Actor.
+%%% @spec (Actor) -> integer() | pid()
+%%% @end
 get_pid(Actor) ->
 	Actor#config.pid.
 
+%%% @doc Get Name of an Actor.
+%%% @spec (Actor) -> string()
+%%% @end
 get_name(Actor) ->
 	Actor#config.name.
 
+%%% @doc Get ETS table identifier of an Actor.
+%%% @spec (Actor) -> integer()
+%%% @end
 get_opt(Actor) ->
 	Actor#config.opt.
 
+%%% @doc Get work_time of an Actor.
+%%% @spec (Actor) -> integer()
+%%% @end
 get_work_time(Actor) ->
 	Actor#config.work_time.
 
+%%% @doc Get State of an Actor.
+%%% @spec (Actor) -> string()
+%%% @end
 get_state(Actor) ->
 	Actor#config.state.
 
+%%% @doc
+%%% @end
 set_work_time(Actor, Work_time)->
 	 Actor#config{work_time =Work_time}.
 
+%%% @doc
+%%% @end
 set_state(Actor, State) ->
 	Actor#config {state = State}.
 
+%%% @doc
+%%% @end
 set_name(Actor, Name) ->
 	Actor#config {name = Name}.
 
+%%% @doc
+%%% @end
 get_in(Actor) ->
 	Actor#config.in.
 
+%%% @doc
+%%% @end
 set_in(Actor, In) ->
 	Actor#config{in = In}.
 
+%%% @doc
+%%% @end
 add_in(Actor, In) ->
 	Actor#config{in = [In] ++ Actor#config.in}.
 
+%%% @doc
+%%% @end
 get_out(Actor) ->
 	Actor#config.out.
 
+%%% @doc
+%%% @end
 set_out(Actor, Out) ->
 	Actor#config{out = Out}.
 
+%%% @doc
+%%% @end
 add_out(Actor, Out) ->
 	Actor#config{out = [Out] ++ Actor#config.out}.
 
+%%% @doc
+%%% @end
 get_in_out(Actor) ->
 	Actor#config.in_out.
 
+%%% @doc
+%%% @end
 set_in_out(Actor, {In, Out}) ->
 	Actor#config{in_out = {In, Out}}.
 
+%%% @doc
+%%% @end
 get_capacity(Actor) -> 
 	Actor#config.capacity.
 
+%%% @doc
+%%% @end
 set_capacity(Actor, Capacity) ->
 	Actor#config{capacity = Capacity}.
 
+%%% @doc
+%%% @end
 get_option(Actor, Key) ->
 	Table = Actor#config.opt,
 	simdr_tools:get_option_from_ets(Table, Key).
 
+%%% @doc
+%%% @end
 set_option(Actor, Key, Value) ->
 	Table = Actor#config.opt,
 	?DLOG(
@@ -211,6 +309,8 @@ set_option(Actor, Key, Value) ->
 	actor_contract:add_data(Actor, {{option,setted}, {{Key, Value}}}),
 	Actor.
 	
+%%% @doc
+%%% @end
 delete_option(Actor, Key) ->
 	Table = Actor#config.opt,
 	simdr_tools:delete_option_in_ets(Table, Key),
@@ -218,6 +318,8 @@ delete_option(Actor, Key) ->
 	%%(ets:delete(Table, Key)=:= true) orelse ?DLOG("Deletion failed"),
 	Actor.
 
+%%% @doc
+%%% @end
 add_option(Actor, Key, Value) ->
 	Table = Actor#config.opt,
 	simdr_tools:add_option_in_ets(Table, Key, Value),
@@ -225,112 +327,160 @@ add_option(Actor, Key, Value) ->
 	%%(ets:insert(Table, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
+%%% @doc
+%%% @end
 work(N) ->
 	timer:sleep(round(N*1000)).
 
+%%% @doc
+%%% @end
 list_size(List) ->
 	list_size_helper(List, 0).
 
+%%% @doc
+%%% @end
 add_to_list_data(FirstActor, FirstData, SecondActor, SecondData) ->
 	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
 
+%%% @doc
+%%% @end
 first_key_awaiting([], _Key) ->
 	{ nothing, nothing};
 
+%%% @doc
+%%% @end
 first_key_awaiting(List, Key) ->
-[H|T] = List,
-{awaiting,{K, Id}} = H,
-case K =:= Key of
-	true -> {awaiting,{K,Id}};
-	false -> first_key_awaiting(T, Key)
-end.
+	[H|T] = List,
+	{awaiting,{K, Id}} = H,
+	case K =:= Key of
+		true -> {awaiting,{K,Id}};
+		false -> first_key_awaiting(T, Key)
+	end.
 
+%%% @doc
+%%% @end
 first([]) ->
 	[];
 first([H|_T]) ->
 	H.
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {change, work_time, N}) ->
 	NewConfig = actor_contract:set_work_time(ActorConfig, N),
 	{NewConfig, {work_time, N, changed}, supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {change, state, State}) ->
 	NewConfig = actor_contract:set_state(ActorConfig, State),
 	{NewConfig, {state, State, changed}, supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {change, capacity, Capacity}) ->
 	NewConfig = actor_contract:set_capacity(ActorConfig, Capacity),
 	{NewConfig, {capacity, Capacity, changed}, supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {change, in_out, {In, Out}}) ->
 	NewConfig = actor_contract:set_in_out(ActorConfig, {In, Out}),
 	{NewConfig, {in_out, {In, Out}, changed}, supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {add, in, In}) ->
 	NewConfig = actor_contract:add_in(ActorConfig, In),
 	{_In, Out} = actor_contract:get_in_out(NewConfig),
 	NewConfig2 = actor_contract:set_in_out(NewConfig, {In, Out}),
 	{NewConfig2, {in, In, added}, supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {add, out, Out}) ->
 	NewConfig = actor_contract:add_out(ActorConfig, Out),
 	{In, _Out} = actor_contract:get_in_out(NewConfig),
 	NewConfig2 = actor_contract:set_in_out(NewConfig, {In, Out}),
 	{NewConfig2, {out, Out, added}, supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {add, option, Opt}) ->
 	{Key, Desc}=Opt,
 	NewConfig = actor_contract:add_option(ActorConfig, Key, Desc),
 	{NewConfig, {option, Opt, added}, supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {status, work_time}) ->
 	{ActorConfig, 
 	{work_time, actor_contract:get_work_time(ActorConfig), status}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {status, state}) ->
 	{ActorConfig, 
 	{state, actor_contract:get_state(ActorConfig), status}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {status, in}) ->
 	{ActorConfig, 
 	{state, actor_contract:get_in(ActorConfig), status}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {status, out}) ->
 	{ActorConfig, 
 	{state, actor_contract:get_out(ActorConfig), status}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {status, in_out}) ->
 	{ActorConfig, 
 	{state, actor_contract:get_in_out(ActorConfig), status}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {status, capacity}) ->
 	{ActorConfig, 
 	{state, actor_contract:get_capacity(ActorConfig), status}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {status, option, Key}) ->
 	{ActorConfig, 
 	{option, actor_contract:get_option(ActorConfig, Key), status}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {status, module}) ->
 	{ActorConfig, 
 	{module, actor_contract:get_module(ActorConfig), status}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {status, pid}) ->
 	{ActorConfig, 
 	{pid, actor_contract:get_pid(ActorConfig), status}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {io_export, list_data}) ->
 	TablePid = ActorConfig#config.list_data,
 	Fun = export_to(io),
@@ -339,6 +489,8 @@ answer(ActorConfig, {io_export, list_data}) ->
 	{io_export, actor_contract:get_module(ActorConfig), format}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {file_export, list_data}) ->
 	TablePid = ActorConfig#config.list_data,
 	%% File creation
@@ -354,6 +506,8 @@ answer(ActorConfig, {file_export, list_data}) ->
 	{file_export, actor_contract:get_module(ActorConfig), format}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {csv_export, list_data}) ->
 	TablePid = ActorConfig#config.list_data,
 	%% File creation
@@ -377,6 +531,8 @@ answer(ActorConfig, {csv_export, list_data}) ->
 	{file_export, actor_contract:get_module(ActorConfig), format}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {io_export, debug}) ->
 	?CREATE_DEBUG_TABLE,
 	Fun = export_to(io),
@@ -385,6 +541,8 @@ answer(ActorConfig, {io_export, debug}) ->
 	{io_export, actor_contract:get_module(ActorConfig), format}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {file_export, debug}) ->
 	?CREATE_DEBUG_TABLE,
 	%% File creation
@@ -396,6 +554,8 @@ answer(ActorConfig, {file_export, debug}) ->
 	{file_export, actor_contract:get_module(ActorConfig), format}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(ActorConfig, {csv_export, debug}) ->
 	?CREATE_DEBUG_TABLE,
 	%% File creation
@@ -407,13 +567,19 @@ answer(ActorConfig, {csv_export, debug}) ->
 	{file_export, actor_contract:get_module(ActorConfig), format}, 
 	supervisor};
 
+%%% @doc
+%%% @end
 answer(_, Request) ->
 	io:format(">>>UNKNOWN ANSWER<<< (~w) (~w:~w)~n", [Request, ?MODULE, ?LINE]),
 	exit(unknown_request).
 
+%%% @doc
+%%% @end
 random_id() ->
 	random:uniform(1000).
 
+%%% @doc
+%%% @end
 get_data(Actor) ->
 	ETS = Actor#config.list_data,
 	Key = ets:first(ETS),
@@ -421,6 +587,8 @@ get_data(Actor) ->
 	?DLOG(lists:concat(["First element from ", ETS]), HeadData),
 	HeadData.
 
+%%% @doc
+%%% @end
 different_sender(Awaiting)->
 	[H|T] = Awaiting, 
 	different_sender_helper(H, T).
@@ -429,6 +597,8 @@ different_sender(Awaiting)->
 %% Internal API
 %% ===================================================================
 
+%%% @doc Export in file mode.
+%%% @end
 export_to(file) ->
 	fun(X, FileDescriptor) -> 
 		R = io_lib:format("~w\n",[X]),
@@ -437,6 +607,8 @@ export_to(file) ->
 		ok = file:write(FileDescriptor,  R),
 		FileDescriptor 
 	end;
+%%% @doc Export in csv mode.
+%%% @end
 export_to(csv) ->
 	fun(X, FileDescriptor) ->
 		%%% Value decomposition
@@ -454,6 +626,8 @@ export_to(csv) ->
 		ok = file:write(FileDescriptor,  R),
 		FileDescriptor 
 	end;
+%%% @doc Export in a standard way.
+%%% @end
 export_to(_) ->
 	fun(X, Y) ->
 		R = io_lib:format("~w\n",[X]),
@@ -461,7 +635,8 @@ export_to(_) ->
 		%RXF = lists:flatten(RX),
 		io:format("~w~n", [R]), Y
 	end.
-
+%%% @doc
+%%% @end
 actor_sumup(Actor) when is_record(Actor, config) ->
 	{actor_contract:get_module(Actor), 
 	 actor_contract:get_name(Actor),
