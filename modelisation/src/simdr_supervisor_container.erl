@@ -1,4 +1,4 @@
--module(supervisor_container).
+-module(simdr_supervisor_container).
 -include("app_configuration.hrl").
 
 -ifdef(TEST).
