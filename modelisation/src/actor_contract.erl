@@ -364,8 +364,6 @@ first([]) ->
 first([H|_T]) ->
 	H.
 
-%%% @doc
-%%% @end
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
