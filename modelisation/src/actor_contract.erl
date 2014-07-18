@@ -250,6 +250,17 @@ first([]) ->
 first([H|_T]) ->
 	H.
 
+get_data(Actor) ->
+	ETS = Actor#config.list_data,
+	Key = ets:first(ETS),
+	[HeadData|_Rest] = ets:lookup(ETS, Key),
+	?DLOG(lists:concat(["First element from ", ETS]), HeadData),
+	HeadData.
+
+different_sender(Awaiting)->
+	[H|T] = Awaiting, 
+	different_sender_helper(H, T).
+	
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
@@ -414,16 +425,6 @@ answer(_, Request) ->
 random_id() ->
 	random:uniform(1000).
 
-get_data(Actor) ->
-	ETS = Actor#config.list_data,
-	Key = ets:first(ETS),
-	[HeadData|_Rest] = ets:lookup(ETS, Key),
-	?DLOG(lists:concat(["First element from ", ETS]), HeadData),
-	HeadData.
-
-different_sender(Awaiting)->
-	[H|T] = Awaiting, 
-	different_sender_helper(H, T).
 
 %% ===================================================================
 %% Internal API
