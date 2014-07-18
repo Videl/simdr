@@ -1,4 +1,4 @@
--module(supervisor_contract).
+-module(simdr_supervisor_contract).
 -include("app_configuration.hrl").
 
 -ifdef(TEST).
@@ -36,7 +36,7 @@
 
 
 create(Module) ->
-create(Module,actor_contract:random_id()).
+create(Module,simdr_actor_contract:random_id()).
 
  create(Module, Name) ->
   Id= Name,
@@ -69,52 +69,52 @@ action_on_request(Config, Sender, {add, actor, Actor}) ->
 
 action_on_request(Config, Sender, {work_time, N, changed})->
 	Actor = get_actor(Config, Sender),
-	NewActor = actor_contract:set_work_time(Actor, N),
+	NewActor = simdr_actor_contract:set_work_time(Actor, N),
  	update_actor(Config, Sender, NewActor);
 
 action_on_request(Config, Sender, {distance, N, changed})->
  	Actor = get_actor(Config, Sender),
-	NewActor = actor_contract:set_distance(Actor, N),
+	NewActor = simdr_actor_contract:set_distance(Actor, N),
  	update_actor(Config, Sender, NewActor);
 
 action_on_request(Config, Sender,  {speed, N, changed})->
  	Actor = get_actor(Config, Sender),
-	NewActor = actor_contract:set_speed(Actor, N),
+	NewActor = simdr_actor_contract:set_speed(Actor, N),
  	update_actor(Config, Sender, NewActor);
 
  action_on_request(Config, Sender, {state, State, changed})->
  	Actor = get_actor(Config, Sender),
-	NewActor = actor_contract:set_state(Actor, State),
+	NewActor = simdr_actor_contract:set_state(Actor, State),
  	update_actor(Config, Sender, NewActor);
 
  action_on_request(Config, Sender, {capacity, Capacity, changed})->
  	Actor = get_actor(Config, Sender),
-	NewActor = actor_contract:set_capacity(Actor, Capacity),
+	NewActor = simdr_actor_contract:set_capacity(Actor, Capacity),
  	update_actor(Config, Sender, NewActor);
 
  action_on_request(Config, Sender, {in_out, {In, Out}, changed})->
  	Actor = get_actor(Config, Sender),
-	NewActor = actor_contract:set_in_out(Actor, {In, Out}),
+	NewActor = simdr_actor_contract:set_in_out(Actor, {In, Out}),
  	update_actor(Config, Sender, NewActor);
 
   action_on_request(Config, Sender, {in, In, added})->
  	Actor = get_actor(Config, Sender),
  	% io:format("~n<><> ~w <><>~n", [Actor]),
-	NewActor = actor_contract:add_in(Actor, In),
-	{_In, Out} = actor_contract:get_in_out(NewActor),
-	NewActor2 = actor_contract:set_in_out(NewActor, {In, Out}),
+	NewActor = simdr_actor_contract:add_in(Actor, In),
+	{_In, Out} = simdr_actor_contract:get_in_out(NewActor),
+	NewActor2 = simdr_actor_contract:set_in_out(NewActor, {In, Out}),
  	update_actor(Config, Sender, NewActor2);
  
   action_on_request(Config, Sender, {out, Out, added})->
  	Actor = get_actor(Config, Sender),
-	NewActor = actor_contract:add_out(Actor, Out),
-	{In, _Out} = actor_contract:get_in_out(NewActor),
-	NewActor2 = actor_contract:set_in_out(NewActor, {In, Out}),
+	NewActor = simdr_actor_contract:add_out(Actor, Out),
+	{In, _Out} = simdr_actor_contract:get_in_out(NewActor),
+	NewActor2 = simdr_actor_contract:set_in_out(NewActor, {In, Out}),
  	update_actor(Config, Sender, NewActor2);
 
    action_on_request(Config, Sender, {add, option, Opt})->
  	Actor = get_actor(Config, Sender),
-	NewActor = actor_contract:add_option(Actor, Opt),
+	NewActor = simdr_actor_contract:add_option(Actor, Opt),
  	update_actor(Config, Sender, NewActor);
 
  	
@@ -157,7 +157,7 @@ get_option(Supervisor, Key) ->
 set_option(Supervisor, Key, Value) ->
 	Table = Supervisor#supervisor.options,
 	% ?DLOG(
-	% 	actor_contract:get_name(Supervisor),
+	% 	simdr_actor_contract:get_name(Supervisor),
 	% 	{lists:concat(["Inserting option to ", Table]), {Key, Value}}),
 	true = simdr_tools:set_option_in_ets(Table, Key, Value),
 	Supervisor.
@@ -209,8 +209,8 @@ delete_actor_test_() ->
 	Sup2 = add_actor(Sup, {1,'C1'}),
 	Sup3 = add_actor(Sup2, {2,'C2'}),
 	Sup4 = add_actor(Sup3, {3,'C3'}),
-	Actor = actor_conveyor:create('C1'),
-	Pid = actor_contract:get_pid(Actor),
+	Actor = simdr_actor_conveyor:create('C1'),
+	Pid = simdr_actor_contract:get_pid(Actor),
 	Sup5 = add_actor(Sup, {Pid,Actor}),
 	[
 	?_assertEqual(
@@ -225,9 +225,9 @@ delete_actor_test_() ->
 
  action_on_request_test_() -> 
 	Sup = create(mod),
-	Actor = actor_conveyor:create('C1'),
-	Pid = actor_contract:get_pid(Actor),
-	Actor2 = actor_contract:set_state(Actor,on),
+	Actor = simdr_actor_conveyor:create('C1'),
+	Pid = simdr_actor_contract:get_pid(Actor),
+	Actor2 = simdr_actor_contract:set_state(Actor,on),
 	Sup2 = add_actor(Sup, {Pid,Actor}),
  	NewSup = action_on_request(Sup2, Pid, 
  		{ state , on, changed}),
@@ -240,7 +240,7 @@ delete_actor_test_() ->
  			get_actors(NewSup)
 		), 
 	?_assertEqual(
- 			[3], actor_contract: get_out(Actor4)
+ 			[3], simdr_actor_contract: get_out(Actor4)
 		)
 
  	].
