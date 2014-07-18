@@ -8,6 +8,8 @@
 \usepackage{pdflscape}
 \usepackage{tabularx}
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
 
 \setlength{\parskip}{1.1em}
 
@@ -388,6 +390,34 @@
 			permet d'augmenter la qualité d'un produit de un si la commande
 			client le demande. De même que pour la station de travail 
 			d'assemblage, la commande est à inscrire dans les options.
+
+	\section{Diagramme d'état d'un container configuré avec un acteur}
+
+		Voici le fonctionnement d'un acteur vis-à-vis des autres acteurs.
+		\begin{center}
+			\begin{tikzpicture}
+			[->,
+			 >=stealth',
+			 shorten >=1pt,
+			 auto,
+			 node distance=8cm,
+			 thick,
+			 main node/.style={circle,draw,font=\sffamily\Large\bfseries}]
+
+			  \node[main node] (1) {off};
+			  \node[main node] (2) [right of=1] {waiting};
+			  \node[main node] (3) [right of=2] {processing};
+			  % \node[main node] (2) [below left of=1] {on};
+			  % \node[main node] (3) [below right of=2] {processing};
+			  % \node[main node] (4) [below right of=1] {4};
+
+			  \path[every node/.style={font=\sffamily\small}]
+			    (1) edge node {Allumage} (2)
+			    (2) edge [loop above] node {Nouveau produit \textbf{et} place disponible} (2)
+			        edge [bend right] node[below] {Nouveau produit \textbf{et} aucune place disponible} (3)
+			    (3) edge node [above] {Traitement d'un produit terminé} (2);
+			\end{tikzpicture}
+		\end{center}
 
 	\section{Tests unitaires}
 		Sur demande de Arnould Guidat, nous avons programmé des tests unitaires
