@@ -1,4 +1,4 @@
--module(container).
+-module(simdr_actor_container).
 -include("app_configuration.hrl").
 
 -ifdef(TEST).

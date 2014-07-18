@@ -1,11 +1,11 @@
--module(actor_basic_queue).
+-module(simdr_actor_basic_queue).
 -include("app_configuration.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--behaviour(actor_contract).
+-behaviour(simdr_actor_contract).
 
 %% Actor Contract Behaviors Callbacks
 
