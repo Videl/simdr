@@ -1,11 +1,11 @@
--module(supervisor_start).
+-module(simdr_supervisor_start).
 -include("app_configuration.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--behaviour(supervisor_contract).
+-behaviour(simdr_supervisor_contract).
 
 -export([
      create/0,
@@ -19,11 +19,11 @@
     ]).
 
 create() ->
-    Ac1 = supervisor_contract:create(?MODULE),
+    Ac1 = simdr_supervisor_contract:create(?MODULE),
     Ac1.    
 
 create(Actor) ->
-    Ac1 = supervisor_contract:create(?MODULE),
+    Ac1 = simdr_supervisor_contract:create(?MODULE),
     Ac2 = Ac1#supervisor{actors = [Actor]},
     Ac2.
 
@@ -36,12 +36,12 @@ timer_action(Config) ->
     % Fetch head
     [H|_T] = List,
     % Create new product
-    Product = actor_product:create(),
+    Product = simdr_actor_product:create(),
     % Log the product
-    supervisor_contract:add_data(Config, {created, product}, Product),
+    simdr_supervisor_contract:add_data(Config, {created, product}, Product),
     H ! {self(), {actor_product, Product}},
     Config.
 
 %%% Nothing special to do
 action_on_request(Config, Sender, Request) ->
-	supervisor_contract:action_on_request(Config, Sender, Request).
+	simdr_supervisor_contract:action_on_request(Config, Sender, Request).
