@@ -90,7 +90,7 @@ answer(ActorConfig, {status, pid}) ->
 	supervisor};
 
 answer(ActorConfig, {io_export, list_data}) ->
-	TablePid = ActorConfig#config.list_data,
+	TablePid = ActorConfig#actor.list_data,
 	Fun = export_to(io),
 	ets:foldl(Fun, ok, TablePid),
 	{ActorConfig, 
@@ -98,7 +98,7 @@ answer(ActorConfig, {io_export, list_data}) ->
 	supervisor};
 
 answer(ActorConfig, {file_export, list_data}) ->
-	TablePid = ActorConfig#config.list_data,
+	TablePid = ActorConfig#actor.list_data,
 	%% File creation
 	{ok, F} = file:open(lists:concat(["data_", 
 					 				 simdr_actor_contract:get_module(ActorConfig),
@@ -113,7 +113,7 @@ answer(ActorConfig, {file_export, list_data}) ->
 	supervisor};
 
 answer(ActorConfig, {csv_export, list_data}) ->
-	TablePid = ActorConfig#config.list_data,
+	TablePid = ActorConfig#actor.list_data,
 	%% File creation
 	{ok, F} = file:open(lists:concat(["data_", 
 					 				 simdr_actor_contract:get_module(ActorConfig),
@@ -205,11 +205,11 @@ export_to(_) ->
 		io:format("~w~n", [R]), Y
 	end.
 
-actor_sumup(Actor) when is_record(Actor, config) ->
+actor_sumup(Actor) when is_record(Actor, actor) ->
 	{simdr_actor_contract:get_module(Actor), 
 	 simdr_actor_contract:get_name(Actor),
 	 simdr_actor_contract:get_state(Actor)};
-actor_sumup({Actor}) when is_record(Actor, config) ->
+actor_sumup({Actor}) when is_record(Actor, actor) ->
 	{simdr_actor_contract:get_module(Actor), 
 	 simdr_actor_contract:get_name(Actor),
 	 simdr_actor_contract:get_state(Actor)};
