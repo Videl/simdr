@@ -177,11 +177,9 @@ manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 	case  simdr_actor_contract:list_size(Awaiting) > 0 of 
 		true -> 
 			FirstAwaiting = simdr_actor_contract:first_key_awaiting(Awaiting,Sender),
-			io:format(" ~w liste dattente ~w, FirstAwaiting ~w ~n",[simdr_actor_contract:get_name(Config), Awaiting, FirstAwaiting]),
 			ets:delete_object(TablePid, FirstAwaiting),
 			Awaiting2 = ets:match_object(
-					TablePid, {awaiting, '$1'}),
-			io:format("liste dattente ~w, après suppresion de  ~w ~n",[Awaiting2, FirstAwaiting]);
+					TablePid, {awaiting, '$1'});
 		false ->
 			ok
 	end,

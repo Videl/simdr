@@ -44,7 +44,7 @@ answer(RailwayConfig, {actor_product, ProductConfig}) ->
 
 	case Dest =:= Supervisor of
 		true ->	
-			{RailwayConfig, {simdr_actor_product, ProductConfig, InfoProb}, Dest};
+			{RailwayConfig, {actor_product, ProductConfig, InfoProb}, Dest};
 		false -> 
 			%{In, _Out}= simdr_actor_contract: get_in_out(RailwayConfig),
 			{RailwayConf, {actor_product, ProductConf, InfoProb}, Dest}

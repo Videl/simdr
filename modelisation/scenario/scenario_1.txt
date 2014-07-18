@@ -4,8 +4,8 @@
 %%%
 
 
-BQ1 = spawn(container, idling, [actor_basic_queue:create()]).
-WST1 = spawn(container, idling, [actor_workstation:create()]).
+BQ1 = spawn(simdr_actor_container, idling, [simdr_actor_basic_queue:create()]).
+WST1 = spawn(simdr_actor_container, idling, [simdr_actor_workstation:create()]).
 BQ1 ! WST1 ! {start}.
 
 BQ1 ! {self(), {add, out, WST1}}.
@@ -13,9 +13,9 @@ WST1 ! {self(), {change, capacity, 2}}.
 BQ1 ! {self(), {change, work_time, 10}}.
 
 
-P1 = actor_product:create().
-P2 = actor_product:create().
-P3 = actor_product:create().
+P1 = simdr_actor_product:create().
+P2 = simdr_actor_product:create().
+P3 = simdr_actor_product:create().
 
 BQ1 ! {self(), {actor_product, P1}}.
 BQ1 ! {self(), {actor_product, P2}}.
@@ -25,4 +25,4 @@ BQ1 ! {self(), {actor_product, P3}}.
 
 BQ1 ! {self(), {csv_export, list_data}}.
 WST1 ! {self(), {csv_export, list_data}}.
-actor_contract:answer(P3, {csv_export, list_data}).
+simdr_actor_default:answer(P3, {csv_export, list_data}).
