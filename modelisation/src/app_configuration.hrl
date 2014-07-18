@@ -4,7 +4,7 @@
 -endif.
 
 %%% config record
--include("recordconfig.hrl").
+-include("recordactor.hrl").
 
 %%% supervisor record
 -include("recordsupervisor.hrl").
