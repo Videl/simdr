@@ -51,7 +51,7 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	simdr_actor_contract:get_out(NewWSConfig)};
 	
 answer(WSConfig, Request) ->
-	simdr_actor_contract:answer(WSConfig, Request).
+	simdr_actor_default:answer(WSConfig, Request).
 
 %% Internal API
 
