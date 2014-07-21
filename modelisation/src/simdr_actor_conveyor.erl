@@ -47,26 +47,26 @@ answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	{NewConveyorConfig, {actor_product, NewProductConfig, Destination}, Destination};
 
 
-answer(ActorConfig, {change, distance, N}) ->
-	simdr_actor_contract:set_option(ActorConfig, distance, N),
-	Speed = simdr_actor_contract:get_option(ActorConfig,speed),
-	NewConfig = simdr_actor_contract:set_work_time(N/Speed),
+answer(ConveyorConfig, {change, distance, N}) ->
+	simdr_actor_contract:set_option(ConveyorConfig, distance, N),
+	Speed = simdr_actor_contract:get_option(ConveyorConfig,speed),
+	NewConfig = simdr_actor_contract:set_work_time(ConveyorConfig, N/Speed),
 	{NewConfig, {distance, N, changed}, supervisor};
 
-answer(ActorConfig, {change, speed, N}) ->
-	simdr_actor_contract: set_option(ActorConfig, speed, N),
-	Distance = simdr_actor_contract:get_option(ActorConfig,distance),
-	NewConfig = simdr_actor_contract:set_work_time(Distance/N),
+answer(ConveyorConfig, {change, speed, N}) ->
+	simdr_actor_contract: set_option(ConveyorConfig, speed, N),
+	Distance = simdr_actor_contract:get_option(ConveyorConfig,distance),
+	NewConfig = simdr_actor_contract:set_work_time(ConveyorConfig, Distance/N),
 	{NewConfig, {speed, N, changed}, supervisor};
 
 
-answer(ActorConfig, {status, distance}) ->
-	[Distance] = simdr_actor_contract:get_option(ActorConfig,distance),
-	{ActorConfig, {distance, Distance, status}, supervisor};
+answer(ConveyorConfig, {status, distance}) ->
+	[Distance] = simdr_actor_contract:get_option(ConveyorConfig,distance),
+	{ConveyorConfig, {distance, Distance, status}, supervisor};
 
-answer(ActorConfig, {status, speed}) ->
-	[Speed] = simdr_actor_contract:get_option(ActorConfig,speed),
-	{ActorConfig, {speed, Speed , status}, 	supervisor};
+answer(ConveyorConfig, {status, speed}) ->
+	[Speed] = simdr_actor_contract:get_option(ConveyorConfig,speed),
+	{ConveyorConfig, {speed, Speed , status}, 	supervisor};
 
 answer(ConveyorConfig, Request) ->
 	simdr_actor_default:answer(ConveyorConfig, Request).
