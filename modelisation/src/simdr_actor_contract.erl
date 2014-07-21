@@ -84,6 +84,10 @@ create(Module, Work_time) ->
 %%%  * In = [] (empty)
 %%%  * Out = [] (empty)
 %%%  * List_data = [] (empty)
+%%% @spec (Module, State, WorkTime) -> Actor
+%%% 	   Module = atom()
+%%% 	   State = atom()
+%%% 	   WorkTime = non_neg_integer()
 %%% @see create/8
 %%% @see create/11
 %%% @end
@@ -118,6 +122,14 @@ create(Module, Name, Opt, State, Work_time, List_data) ->
 %%% Some values are already set up:
 %%%  * Pid = 0 (will be changed automatically when actor is started.)
 %%%  * Capacity = infinity
+%%% @spec (Module, Name, Opt, State, In, Out, Work_time, List_data) -> Actor
+%%%       Module = atom()
+%%%		  Name = any()
+%%%		  Opt = list(tuple(any(), any()))
+%%%		  In = tuple()
+%%%		  Out = tuple()
+%%%		  Work_time = non_neg_integer()
+%%%		  List_data = list(any())
 %%% @see create/11
 %%% @end
 create(Module, Name, Opt, State, In, Out, Work_time, List_data) ->
@@ -137,9 +149,30 @@ create(Module, Name, Opt, State, In, Out, Work_time, List_data) ->
 %%% @doc Set up a configuration for an Actor.
 %%% All ETS tables are initialized. All default values must be given by 
 %%% parameters of the function.
-%%% 
+%%% @spec (Module :: atom(), 
+%%%        Name :: any(), 
+%%% 	   Pid :: any(), 
+%%% 	   Opt :: list(tuple(any(), any())), 
+%%% 	   State :: atom(), 
+%%% 	   In :: list(pid()), 
+%%% 	   Out :: list(pid()), 
+%%% 	   InOut :: any(), 
+%%% 	   Capacity :: integer(), 
+%%% 	   Work_time :: integer(), 
+%%% 	   List_data :: any()) -> Actor
 %%% @end
-create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
+create(
+		Module, 
+		Name, 
+		Pid, 
+		Opt, 
+		State, 
+		In, 
+		Out, 
+		InOut, 
+		Capacity, 
+		Work_time, 
+		List_data) ->
 	?CREATE_DEBUG_TABLE,
 	?DLOG(lists:concat(["Initialising ets tables of", Name])),
 	Actor = #actor{
@@ -209,7 +242,7 @@ get_name(Actor) ->
 	Actor#actor.name.
 
 %%% @doc Get ETS table identifier of an Actor.
-%%% @spec (Actor) -> integer()
+%%% @spec (Actor) -> number()
 %%% @end
 get_opt(Actor) ->
 	Actor#actor.opt.
@@ -292,23 +325,29 @@ get_in_out(Actor) ->
 set_in_out(Actor, {In, Out}) ->
 	Actor#actor{in_out = {In, Out}}.
 
-%%% @doc
+%%% @doc Get `capacity' field of an Actor.
+%%% @spec (Actor) -> non_neg_integer()
 %%% @end
 get_capacity(Actor) -> 
 	Actor#actor.capacity.
 
-%%% @doc
+%%% @doc Set `capacity' field of an Actor.
+%%% @spec (ActorA, non_neg_integer()) -> (ActorB)
 %%% @end
 set_capacity(Actor, Capacity) ->
 	Actor#actor{capacity = Capacity}.
 
-%%% @doc
+%%% @doc Search an option using the Key.
+%%% 	 Uses the ETS table in field `opts'.
 %%% @end
 get_option(Actor, Key) ->
 	Table = Actor#actor.opt,
 	simdr_tools:get_option_from_ets(Table, Key).
 
-%%% @doc
+%%% @doc Set an option using `Key' and `Value'.
+%%% @spec (Actor, Key, Value) -> Actor
+%%% 	  Key = atom()
+%%% 	  Value = any()
 %%% @end
 set_option(Actor, Key, Value) ->
 	Table = Actor#actor.opt,
@@ -455,14 +494,6 @@ get_name_test() ->
 get_opt_1_test() ->
 	Actor = create(mod, test, [{key, value}], on, 0, []),
 	[value] = simdr_actor_contract:get_option(Actor, key).
-
-get_opt_2_test() ->
-	Actor = create(mod, test, 0),
-	[
-	?_assertMatch(
-		[{ets, _}, {awaiting, 0}],
-		get_opt(Actor))
-	].
 
 get_work_time_test() ->
 	Actor = create(mod, test, [{key, value}], on, 42, []),

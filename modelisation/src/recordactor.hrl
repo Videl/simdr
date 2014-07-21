@@ -6,7 +6,7 @@
 	state :: atom(),
 	in :: list(pid()),
 	out :: list(pid()),
-	in_out :: undefined | list(pid()), 
+	in_out :: any(),%tuple(pid(), pid()), 
 	capacity :: infinity | non_neg_integer(),
 	work_time :: non_neg_integer(), 
 	list_data :: number()  %% ETS table
