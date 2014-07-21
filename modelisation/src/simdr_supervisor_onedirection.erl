@@ -22,10 +22,9 @@ create() ->
     Ac1 = simdr_supervisor_contract:create(?MODULE),
     Ac1.    
 
-create(Actor) ->
-    Ac1 = simdr_supervisor_contract:create(?MODULE),
-    Ac2 = Ac1#supervisor{actors = [Actor]},
-    Ac2.
+create(Name) ->
+    Ac1 = simdr_supervisor_contract:create(?MODULE, Name),
+    Ac1.
 
 %%% Disable timer.
 timer_time(_Config) ->
