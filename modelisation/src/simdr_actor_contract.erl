@@ -364,7 +364,8 @@ set_option(Actor, Key, Value) ->
 	simdr_actor_contract:add_data(Actor, {{option,setted}, {{Key, Value}}}),
 	Actor.
 
-%%% @doc
+%%% @doc Delete one option in the Actor ETS option table.
+%%% @spec (Actor, Key :: any()) -> Actor
 %%% @end	
 delete_option(Actor, Key) ->
 	Table = Actor#actor.opt,
@@ -373,7 +374,8 @@ delete_option(Actor, Key) ->
 	%%(ets:delete(Table, Key)=:= true) orelse ?DLOG("Deletion failed"),
 	Actor.
 
-%%% @doc
+%%% @doc Add one option in the Actor ETS option table.
+%%% @spec (Actor, Key :: any(), Value :: any) -> Actor
 %%% @end
 add_option(Actor, Key, Value) ->
 	Table = Actor#actor.opt,
@@ -382,17 +384,20 @@ add_option(Actor, Key, Value) ->
 	%%(ets:insert(Table, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
-%%% @doc
+%%% @doc Sleep for the specified time (in seconds).
+%%% @spec (N :: non_neg_integer()) -> ok
 %%% @end
 work(N) ->
 	timer:sleep(round(N*1000)).
 
-%%% @doc
+%%% @doc Size of a list.
+%%% @spec (List) -> non_neg_integer()
 %%% @end
 list_size(List) ->
 	list_size_helper(List, 0).
 
-%%% @doc
+%%% @doc Helper function to add data to two actors.
+%%% @spec (ActorA, DataA, ActorB, DataB) -> tuple(ActorA, ActorB)
 %%% @end
 add_to_list_data(FirstActor, FirstData, SecondActor, SecondData) ->
 	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
@@ -405,21 +410,22 @@ first_key_awaiting([], _Key) ->
 %%% @doc
 %%% @end
 first_key_awaiting(List, Key) ->
-[H|T] = List,
-{awaiting,{K, Id}} = H,
-case K =:= Key of
-	true -> {awaiting,{K,Id}};
-	false -> first_key_awaiting(T, Key)
-end.
+	[H|T] = List,
+	{awaiting, {K, Id}} = H,
+	case K =:= Key of
+		true -> {awaiting, {K, Id}};
+		false -> first_key_awaiting(T, Key)
+	end.
 
-%%% @doc
+%%% @doc Returns head of a list..
+%%% @spec (list()) -> any()
 %%% @end
 first([]) ->
 	[];
 first([H|_T]) ->
 	H.
 
-%%% @doc
+%%% @doc Get first data inputted in the actor option ETS table.
 %%% @end
 get_data(Actor) ->
 	ETS = Actor#actor.list_data,
@@ -434,7 +440,8 @@ different_sender(Awaiting)->
 	[H|T] = Awaiting, 
 	different_sender_helper(H, T).
 
-%%% @doc
+%%% @doc Generate a number between 1 and 1000.
+%%% @spec () -> non_neg_integer()
 %%% @end
 random_id() ->
 	random:uniform(1000).
