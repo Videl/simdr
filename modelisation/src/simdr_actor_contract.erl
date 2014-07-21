@@ -38,7 +38,8 @@
 		 get_opt/1, 
 		 get_option/2,	
 		 get_work_time/1, 
-		 get_state/1, 
+		 get_state/1,
+		 get_list_data/1, 
 		 set_pid/2,
 		 set_work_time/2,
 		 set_name/2,
@@ -257,7 +258,12 @@ get_work_time(Actor) ->
 %%% @spec (Actor) -> string()
 %%% @end
 get_state(Actor) ->
-	Actor#actor.state.
+	Actor#actor.state.	
+
+%%% @doc
+%%% @end
+get_list_data(Actor) ->
+	Actor#actor.list_data.
 
 %%% @doc Set work time field of an Actor.
 %%% @spec (Actor, integer()) -> Actor
