@@ -54,8 +54,8 @@ answer(ScannerConfig, {actor_product, ProductConfig}) ->
 	{actor_product, NewProductConfig, simdr_actor_contract:get_name(NewProductConfig)}, 
 	supervisor};
 
-answer(RFIDConfig, Request) ->
-	simdr_actor_contract:answer(RFIDConfig, Request).
+answer(ScannerConfig, Request) ->
+	simdr_actor_contract:answer(ScannerConfig, Request).
 
 
 %% ===================================================================
