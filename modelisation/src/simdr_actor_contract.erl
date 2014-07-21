@@ -398,6 +398,7 @@ list_size(List) ->
 
 %%% @doc Helper function to add data to two actors.
 %%% @spec (ActorA, DataA, ActorB, DataB) -> tuple(ActorA, ActorB)
+%%% @see add_data/2
 %%% @end
 add_to_list_data(FirstActor, FirstData, SecondActor, SecondData) ->
 	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.

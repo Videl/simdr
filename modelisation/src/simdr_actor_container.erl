@@ -15,6 +15,12 @@
 %% Loops functions
 %% ===================================================================
 
+%%% @doc Initial loop of a container node used with an Actor configuration.
+%%% This function mainly starts the function and waits for the {start} message.
+%%% The pid and state field values are altered when the function goes on
+%%% to processing/2.
+%%% @see processing/2
+%%% @end
 idling(Config) ->
 	?CREATE_DEBUG_TABLE,
 	receive
@@ -31,7 +37,11 @@ idling(Config) ->
 			idling(Config)
 	end.
 
-
+%%% @doc Main loop of a container used with an Actor configuration.
+%%%      This loop has a main `receive ... end' that awais any request.
+%%%      Requests can be of two types: physical and logical.
+%%%      The function manage_request/2 makes the distinction.
+%%% @end
 processing(Config, NbWorkers) ->
 	receive
 		{_Sender, {prob_in, Decision}} ->
@@ -79,6 +89,10 @@ logical_work(Master, MasterConfig, Request) ->
 	FullAnswer = 
 		(simdr_actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
 	Master ! {self(), end_logical_work, FullAnswer}.
+
+%% ===================================================================
+%% Internal API
+%% ===================================================================
 
 
 %%% If there is a problem of destinations, a specific messsage is sent to 
@@ -154,11 +168,17 @@ end_of_logical_work({_Config, NbWorkers},
 	send_message(NewConfig, LittleAnswer, Destination),
 	{NewConfig, NbWorkers}.
 
+%%% @doc Taking care of request type actor_product
+%%% * Physical: There is a physical item passing between actors.
+%%%             Here, it's a product (actor_product), but can be enhanced.
+%%% *Logical: Any other thing is a logical request.
+%%%           The physical request are then being passed on to logical_work
 %%% Receiving a product
 %%% This function is called when we receive a product, and we receive a
 %%% product when WE ask for it first.
 %%% So Awaiting > 0 when we are here, hopefully..
 %%% Returns: {NewConfig, NewNbWorkers}
+%%% @todo: have a way to program a request to be 'physical' or not.
 %%% @end
 manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 	io:format("~w receive product ~w ~n~n", 
@@ -177,16 +197,16 @@ manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 	case  simdr_actor_contract:list_size(Awaiting) > 0 of 
 		true -> 
 			FirstAwaiting = simdr_actor_contract:first_key_awaiting(Awaiting,Sender),
-			ets:delete_object(TablePid, FirstAwaiting),
-			Awaiting2 = ets:match_object(
-					TablePid, {awaiting, '$1'});
+			ets:delete_object(TablePid, FirstAwaiting);
+			% Awaiting2 = ets:match_object(
+			% 		TablePid, {awaiting, '$1'});
 		false ->
 			ok
 	end,
 	Request = {actor_product, ProdConf},
 	spawn(?MODULE, physical_work, [self(), Config, Request]),
 	{Config, NbWorkers};
-%%% Receiving request of a product from actor in `out'.
+%%% @doc Taking care of request of a product from actor in `out'.
 %%% Consequence: one of my product in the waiting list
 %%% is sent.
 %%% @end
@@ -216,8 +236,8 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			NewNbWorkers = NbWorkers
 	end,
 	{NewConfig, NewNbWorkers};
-%%% Receiving a notification from one of my actor in `in' that
-%%% a product can be sent.
+%%% @doc Taking care of request type notification from one of my actor in `in' 
+%%% actor record field that a product can be sent.
 %%% @end
 manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 	Capacity= simdr_actor_contract:get_capacity(Config),
@@ -234,7 +254,7 @@ manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 	end,
 	{Config, Workers};
 
-%%% Automatic propagation of `in' configuration to next actor
+%%% @doc Automatic propagation of `in' configuration to next actor
 %%% when suplying the `out' option.
 %%% @end
 manage_request({Config, NbWorkers, _Sender}, {add, out, Out}) ->
@@ -246,7 +266,8 @@ manage_request({Config, NbWorkers, _Sender}, {add, out, Out}) ->
 	{NewConfig, LittleAnswer, Destination} = FullAnswer,
 	send_message(Config, LittleAnswer, Destination),
 	{NewConfig, NbWorkers};
-%%% Automatic register when receiving a supervisor.
+%%% @doc Automatic register when receiving a supervisor.
+%%% @end
 manage_request({Config, NbWorkers, _Sender}, {add, option, {supervisor, V}}) ->
 
 	%%% Normal request, it does not change NbWorkers value
@@ -257,6 +278,7 @@ manage_request({Config, NbWorkers, _Sender}, {add, option, {supervisor, V}}) ->
 	V ! {self(), {add, actor, Config}},
 	% send_message(Config, LittleAnswer, Destination),
 	{NewConfig, NbWorkers};
+%%% @doc Taking care of normal request.
 %%% If the request is not about products, then it's not about a
 %%% physical stream... so we launch a 'logical' work, directed at the 
 %%% supervisor in the end.
@@ -270,10 +292,19 @@ manage_request({Config, NbWorkers, _Sender}, Request) ->
 	send_message(Config, LittleAnswer, Destination),
 	{NewConfig, NbWorkers}.
 
+%%% @doc Send specified message to destionation.
+%%% @spec (Actor, Ans, RawDest) -> tuple(pid(), Ans)
+%%%        Ans = any()
+%%%        RawDest = atom() | pid()
+%%% @end
 send_message(Config, Ans, RawDest) ->
 	Destination = get_destination(Config, RawDest),
 	sender(Ans, Destination).
 
+%%% @doc Find the right destination
+%%% If supervisor, find supervisor's pid
+%%% Or else, try to find the pid in the data.
+%%% @end
 get_destination(Config, supervisor) ->
 	%%% Find supervisor PID in ETS option table.
 	case simdr_actor_contract:get_option(Config, supervisor) of
@@ -289,7 +320,7 @@ get_destination(_Config, Dest) when is_pid(Dest) ->
 get_destination(_Config, WeirdDestination) ->
 	%% @TODO: choose destination
 	io:format("~w COULDN'T send  message to ~w because of BAD FORMAT. " ++ 
-		"Using supervisor.~n~n", [self(), WeirdDestination]),
+		"Message not sent.~n~n", [self(), WeirdDestination]),
 	supervisor.
 
 sender(Ans, supervisor) ->
@@ -314,14 +345,6 @@ wait(Pid, Wait_time, {Ans, Dest}) ->
 %% Tests
 %% ===================================================================
 -ifdef(TEST).
-
-% mock_actor_create() ->
-% 	simdr_actor_contract:create(mocking_actor, 
-% 		777, 
-% 		[], 
-% 		off, 
-% 		1, 
-% 		[]).
 
 get_destination_test_() ->
 	[
