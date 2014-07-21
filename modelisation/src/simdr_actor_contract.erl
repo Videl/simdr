@@ -170,7 +170,7 @@ create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Work_time, List_d
 	Actor4     = add_datas_helper(Actor3, List_data),
 	Actor4.
 
-%%% @doc Get module name of an Actor.
+%%% @doc Get module field name of an Actor.
 %%% @end
 get_module(Actor) ->
 	Actor#actor.module.
@@ -196,13 +196,13 @@ add_data(Actor, X) ->
 set_pid(Actor, Pid) ->
 	Actor#actor{pid= Pid}.
 
-%%% @doc Get Pid of an Actor.
+%%% @doc Get pid field of an Actor.
 %%% @spec (Actor) -> integer() | pid()
 %%% @end
 get_pid(Actor) ->
 	Actor#actor.pid.
 
-%%% @doc Get Name of an Actor.
+%%% @doc Get name field of an Actor.
 %%% @spec (Actor) -> string()
 %%% @end
 get_name(Actor) ->
@@ -214,69 +214,80 @@ get_name(Actor) ->
 get_opt(Actor) ->
 	Actor#actor.opt.
 
-%%% @doc Get work_time of an Actor.
+%%% @doc Get work time field of an Actor.
 %%% @spec (Actor) -> integer()
 %%% @end
 get_work_time(Actor) ->
 	Actor#actor.work_time.
 
-%%% @doc Get State of an Actor.
+%%% @doc Get state field of an Actor.
 %%% @spec (Actor) -> string()
 %%% @end
 get_state(Actor) ->
 	Actor#actor.state.
 
-%%% @doc
+%%% @doc Set work time field of an Actor.
+%%% @spec (Actor, integer()) -> Actor
 %%% @end
 set_work_time(Actor, Work_time)->
 	 Actor#actor{work_time =Work_time}.
 
-%%% @doc
+%%% @doc Set state field of an Actor.
+%%% @spec (Actor, any()) -> Actor
 %%% @end
 set_state(Actor, State) ->
 	Actor#actor {state = State}.
 
-%%% @doc
+%%% @doc Set name field of an Actor.
 %%% @end
 set_name(Actor, Name) ->
 	Actor#actor {name = Name}.
 
-%%% @doc
+%%% @doc Get `in' field of an Actor.
 %%% @end
 get_in(Actor) ->
 	Actor#actor.in.
 
-%%% @doc
+%%% @doc Set `in' field of an Actor.
 %%% @end
 set_in(Actor, In) ->
 	Actor#actor{in = In}.
 
-%%% @doc
+%%% @doc Add pid in `in' field of Actor.
+%%% @spec (ActorA, In :: pid()) -> ActorB
 %%% @end
 add_in(Actor, In) ->
 	Actor#actor{in = [In] ++ Actor#actor.in}.
 
-%%% @doc
+%%% @doc Get `out' field of an Actor.
+%%% @spec (Actor) -> list(pid())
 %%% @end
 get_out(Actor) ->
 	Actor#actor.out.
 
-%%% @doc
+%%% @doc Set `out' field of an Actor.
+%%% @spec (Actor, Out) -> ActorB
 %%% @end
 set_out(Actor, Out) ->
 	Actor#actor{out = Out}.
 
-%%% @doc
+%%% @doc Add pid in `out' field of an Actor.
+%%% @spec (ActorA, Out) -> ActorB
 %%% @end
 add_out(Actor, Out) ->
 	Actor#actor{out = [Out] ++ Actor#actor.out}.
 
-%%% @doc
+%%% @doc Get `in_out' field of an Actor.
+%%% @spec (Actor) -> List
+%%% 	  List = [pid()]
 %%% @end
 get_in_out(Actor) ->
 	Actor#actor.in_out.
 
-%%% @doc
+%%% @doc Set `in_out' field of Actor.
+%%% @spec (ActorB, {In, Out}) -> ActorB
+%%% 	  In = pid()
+%%%		  Out = pid()
 %%% @end
 set_in_out(Actor, {In, Out}) ->
 	Actor#actor{in_out = {In, Out}}.
