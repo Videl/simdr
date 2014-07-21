@@ -90,7 +90,7 @@ answer(ActorConfig, {status, pid}) ->
 	supervisor};
 
 answer(ActorConfig, {io_export, list_data}) ->
-	TablePid = ActorConfig#actor.list_data,
+	TablePid =  simdr_actor_contract:get_list_data(ActorConfig),
 	Fun = export_to(io),
 	ets:foldl(Fun, ok, TablePid),
 	{ActorConfig, 
@@ -113,7 +113,7 @@ answer(ActorConfig, {file_export, list_data}) ->
 	supervisor};
 
 answer(ActorConfig, {csv_export, list_data}) ->
-	TablePid = ActorConfig#actor.list_data,
+	TablePid = simdr_actor_contract:get_list_data(ActorConfig),
 	%% File creation
 	{ok, F} = file:open(lists:concat(["data_", 
 					 				 simdr_actor_contract:get_module(ActorConfig),
