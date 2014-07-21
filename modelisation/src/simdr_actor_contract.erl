@@ -1,3 +1,15 @@
+%%% @doc Common contract for all actors.
+%%% 
+%%% This module provides you with a lot of functions to maintain, use, control,
+%%% edit actors.
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_contract).
 -include("app_configuration.hrl").
 
@@ -57,9 +69,24 @@
 %% Helper functions
 %% ===================================================================
 
+%%% @doc Helper function for create/11. This function call create/3 then.
+%%% Some values are already set up:
+%%%  * State = off
+%%% @see create/3
+%%% @see create/11
+%%% @end
 create(Module, Work_time) ->
 	simdr_actor_contract:create(Module, off, Work_time).
 
+%%% @doc Helper function for create/11. This function call create/8 then.
+%%% Some values are already set up:
+%%%  * Opt = [] (empty)
+%%%  * In = [] (empty)
+%%%  * Out = [] (empty)
+%%%  * List_data = [] (empty)
+%%% @see create/8
+%%% @see create/11
+%%% @end
 create(Module, State, Work_time) ->
 	simdr_actor_contract:create(Module, 
 		simdr_actor_contract:random_id(), 
@@ -70,6 +97,13 @@ create(Module, State, Work_time) ->
 		Work_time, 
 		[]).
 
+%%% @doc Helper function for create/11. This function call create/8 then.
+%%% Some values are already set up:
+%%%  * In = [] (empty)
+%%%  * Out = [] (empty)
+%%% @see create/8
+%%% @see create/11
+%%% @end
 create(Module, Name, Opt, State, Work_time, List_data) ->
 	simdr_actor_contract:create(Module,
 		Name, 
@@ -80,6 +114,12 @@ create(Module, Name, Opt, State, Work_time, List_data) ->
 		Work_time, 
 		List_data).
 
+%%% @doc Helper function for create/11. This function call create/11 then.
+%%% Some values are already set up:
+%%%  * Pid = 0 (will be changed automatically when actor is started.)
+%%%  * Capacity = infinity
+%%% @see create/11
+%%% @end
 create(Module, Name, Opt, State, In, Out, Work_time, List_data) ->
 	simdr_actor_contract:create(Module, 
 		Name, 
@@ -94,7 +134,11 @@ create(Module, Name, Opt, State, In, Out, Work_time, List_data) ->
 		List_data).
 
 
-
+%%% @doc Set up a configuration for an Actor.
+%%% All ETS tables are initialized. All default values must be given by 
+%%% parameters of the function.
+%%% 
+%%% @end
 create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Work_time, List_data) ->
 	?CREATE_DEBUG_TABLE,
 	?DLOG(lists:concat(["Initialising ets tables of", Name])),
@@ -126,9 +170,15 @@ create(Module,Name, Pid, Opt, State, In, Out, InOut, Capacity, Work_time, List_d
 	Actor4     = add_datas_helper(Actor3, List_data),
 	Actor4.
 
+%%% @doc Get module name of an Actor.
+%%% @end
 get_module(Actor) ->
 	Actor#actor.module.
 
+%%% @doc Add data in the actor's database. (To be exported)
+%%% Is it stored in an ETS database.
+%%% @spec (Actor, X) -> Actor
+%%% @end
 add_data(Actor, X) ->
 	{Info, Destination}=X,
 	Data = {erlang:now(), erlang:localtime(), Actor, Info, Destination},
@@ -140,67 +190,115 @@ add_data(Actor, X) ->
 %%	(ets:insert(ETSData, Data)=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
+%%% @doc Set Pid of an Actor.
+%%% @spec (Actor, Pid) -> Actor
+%%% @end
 set_pid(Actor, Pid) ->
 	Actor#actor{pid= Pid}.
 
+%%% @doc Get Pid of an Actor.
+%%% @spec (Actor) -> integer() | pid()
+%%% @end
 get_pid(Actor) ->
 	Actor#actor.pid.
 
+%%% @doc Get Name of an Actor.
+%%% @spec (Actor) -> string()
+%%% @end
 get_name(Actor) ->
 	Actor#actor.name.
 
+%%% @doc Get ETS table identifier of an Actor.
+%%% @spec (Actor) -> integer()
+%%% @end
 get_opt(Actor) ->
 	Actor#actor.opt.
 
+%%% @doc Get work_time of an Actor.
+%%% @spec (Actor) -> integer()
+%%% @end
 get_work_time(Actor) ->
 	Actor#actor.work_time.
 
+%%% @doc Get State of an Actor.
+%%% @spec (Actor) -> string()
+%%% @end
 get_state(Actor) ->
 	Actor#actor.state.
 
+%%% @doc
+%%% @end
 set_work_time(Actor, Work_time)->
 	 Actor#actor{work_time =Work_time}.
 
+%%% @doc
+%%% @end
 set_state(Actor, State) ->
 	Actor#actor {state = State}.
 
+%%% @doc
+%%% @end
 set_name(Actor, Name) ->
 	Actor#actor {name = Name}.
 
+%%% @doc
+%%% @end
 get_in(Actor) ->
 	Actor#actor.in.
 
+%%% @doc
+%%% @end
 set_in(Actor, In) ->
 	Actor#actor{in = In}.
 
+%%% @doc
+%%% @end
 add_in(Actor, In) ->
 	Actor#actor{in = [In] ++ Actor#actor.in}.
 
+%%% @doc
+%%% @end
 get_out(Actor) ->
 	Actor#actor.out.
 
+%%% @doc
+%%% @end
 set_out(Actor, Out) ->
 	Actor#actor{out = Out}.
 
+%%% @doc
+%%% @end
 add_out(Actor, Out) ->
 	Actor#actor{out = [Out] ++ Actor#actor.out}.
 
+%%% @doc
+%%% @end
 get_in_out(Actor) ->
 	Actor#actor.in_out.
 
+%%% @doc
+%%% @end
 set_in_out(Actor, {In, Out}) ->
 	Actor#actor{in_out = {In, Out}}.
 
+%%% @doc
+%%% @end
 get_capacity(Actor) -> 
 	Actor#actor.capacity.
 
+%%% @doc
+%%% @end
 set_capacity(Actor, Capacity) ->
 	Actor#actor{capacity = Capacity}.
 
+%%% @doc
+%%% @end
 get_option(Actor, Key) ->
 	Table = Actor#actor.opt,
 	simdr_tools:get_option_from_ets(Table, Key).
 
+%%% @doc
+%%% @end
 set_option(Actor, Key, Value) ->
 	Table = Actor#actor.opt,
 	?DLOG(
@@ -209,7 +307,9 @@ set_option(Actor, Key, Value) ->
 	true = simdr_tools:set_option_in_ets(Table, Key, Value),
 	simdr_actor_contract:add_data(Actor, {{option,setted}, {{Key, Value}}}),
 	Actor.
-	
+
+%%% @doc
+%%% @end	
 delete_option(Actor, Key) ->
 	Table = Actor#actor.opt,
 	simdr_tools:delete_option_in_ets(Table, Key),
@@ -217,6 +317,8 @@ delete_option(Actor, Key) ->
 	%%(ets:delete(Table, Key)=:= true) orelse ?DLOG("Deletion failed"),
 	Actor.
 
+%%% @doc
+%%% @end
 add_option(Actor, Key, Value) ->
 	Table = Actor#actor.opt,
 	simdr_tools:add_option_in_ets(Table, Key, Value),
@@ -224,18 +326,28 @@ add_option(Actor, Key, Value) ->
 	%%(ets:insert(Table, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
+%%% @doc
+%%% @end
 work(N) ->
 	timer:sleep(round(N*1000)).
 
+%%% @doc
+%%% @end
 list_size(List) ->
 	list_size_helper(List, 0).
 
+%%% @doc
+%%% @end
 add_to_list_data(FirstActor, FirstData, SecondActor, SecondData) ->
 	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
 
+%%% @doc
+%%% @end
 first_key_awaiting([], _Key) ->
 	{ nothing, nothing};
 
+%%% @doc
+%%% @end
 first_key_awaiting(List, Key) ->
 [H|T] = List,
 {awaiting,{K, Id}} = H,
@@ -244,11 +356,15 @@ case K =:= Key of
 	false -> first_key_awaiting(T, Key)
 end.
 
+%%% @doc
+%%% @end
 first([]) ->
 	[];
 first([H|_T]) ->
 	H.
 
+%%% @doc
+%%% @end
 get_data(Actor) ->
 	ETS = Actor#actor.list_data,
 	Key = ets:first(ETS),
@@ -256,11 +372,14 @@ get_data(Actor) ->
 	?DLOG(lists:concat(["First element from ", ETS]), HeadData),
 	HeadData.
 
+%%% @doc
+%%% @end
 different_sender(Awaiting)->
 	[H|T] = Awaiting, 
 	different_sender_helper(H, T).
 
-
+%%% @doc
+%%% @end
 random_id() ->
 	random:uniform(1000).
 

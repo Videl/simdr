@@ -56,22 +56,22 @@ answer(ActorConfig, {status, state}) ->
 
 answer(ActorConfig, {status, in}) ->
 	{ActorConfig, 
-	{state, simdr_actor_contract:get_in(ActorConfig), status}, 
+	{in, simdr_actor_contract:get_in(ActorConfig), status}, 
 	supervisor};
 
 answer(ActorConfig, {status, out}) ->
 	{ActorConfig, 
-	{state, simdr_actor_contract:get_out(ActorConfig), status}, 
+	{out, simdr_actor_contract:get_out(ActorConfig), status}, 
 	supervisor};
 
 answer(ActorConfig, {status, in_out}) ->
 	{ActorConfig, 
-	{state, simdr_actor_contract:get_in_out(ActorConfig), status}, 
+	{in_out, simdr_actor_contract:get_in_out(ActorConfig), status}, 
 	supervisor};
 
 answer(ActorConfig, {status, capacity}) ->
 	{ActorConfig, 
-	{state, simdr_actor_contract:get_capacity(ActorConfig), status}, 
+	{capacity, simdr_actor_contract:get_capacity(ActorConfig), status}, 
 	supervisor};
 
 answer(ActorConfig, {status, option, Key}) ->
