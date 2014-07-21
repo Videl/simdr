@@ -8,10 +8,12 @@
 -export([
 	 create/1,
 	 create/2,
+	 get_actor/2,
 	 add_data/3,
-	 action_on_request/3,
+	 add_actor/2,
 	 get_option/2,
 	 set_option/3,
+	 update_actor/3,
 	 delete_option/2,
 	 add_option/3
 	]).
@@ -62,66 +64,6 @@ add_data(_Supervisor, _Message, _Object) ->
 	%%% @TODO
 	ok.
 
-action_on_request(Config, Sender, {add, actor, Actor}) ->
-	% io:format("<><> Adding actor ~w.~n", [Actor]),
-	NewConfig = add_actor(Config, {Sender, Actor}),
-	NewConfig;
-
-action_on_request(Config, Sender, {work_time, N, changed})->
-	Actor = get_actor(Config, Sender),
-	NewActor = simdr_actor_contract:set_work_time(Actor, N),
- 	update_actor(Config, Sender, NewActor);
-
-action_on_request(Config, Sender, {distance, N, changed})->
- 	Actor = get_actor(Config, Sender),
-	NewActor = simdr_actor_contract:set_distance(Actor, N),
- 	update_actor(Config, Sender, NewActor);
-
-action_on_request(Config, Sender,  {speed, N, changed})->
- 	Actor = get_actor(Config, Sender),
-	NewActor = simdr_actor_contract:set_speed(Actor, N),
- 	update_actor(Config, Sender, NewActor);
-
- action_on_request(Config, Sender, {state, State, changed})->
- 	Actor = get_actor(Config, Sender),
-	NewActor = simdr_actor_contract:set_state(Actor, State),
- 	update_actor(Config, Sender, NewActor);
-
- action_on_request(Config, Sender, {capacity, Capacity, changed})->
- 	Actor = get_actor(Config, Sender),
-	NewActor = simdr_actor_contract:set_capacity(Actor, Capacity),
- 	update_actor(Config, Sender, NewActor);
-
- action_on_request(Config, Sender, {in_out, {In, Out}, changed})->
- 	Actor = get_actor(Config, Sender),
-	NewActor = simdr_actor_contract:set_in_out(Actor, {In, Out}),
- 	update_actor(Config, Sender, NewActor);
-
-  action_on_request(Config, Sender, {in, In, added})->
- 	Actor = get_actor(Config, Sender),
- 	% io:format("~n<><> ~w <><>~n", [Actor]),
-	NewActor = simdr_actor_contract:add_in(Actor, In),
-	{_In, Out} = simdr_actor_contract:get_in_out(NewActor),
-	NewActor2 = simdr_actor_contract:set_in_out(NewActor, {In, Out}),
- 	update_actor(Config, Sender, NewActor2);
- 
-  action_on_request(Config, Sender, {out, Out, added})->
- 	Actor = get_actor(Config, Sender),
-	NewActor = simdr_actor_contract:add_out(Actor, Out),
-	{In, _Out} = simdr_actor_contract:get_in_out(NewActor),
-	NewActor2 = simdr_actor_contract:set_in_out(NewActor, {In, Out}),
- 	update_actor(Config, Sender, NewActor2);
-
-   action_on_request(Config, Sender, {add, option, Opt})->
- 	Actor = get_actor(Config, Sender),
-	NewActor = simdr_actor_contract:add_option(Actor, Opt),
- 	update_actor(Config, Sender, NewActor);
-
- 	
-
-action_on_request(Config, Sender, Request) ->
-	io:format("SUPERVISOR <><> UNKNOWN REQUEST ~w (from ~w).~n", [Request, Sender]),
-	Config.
 
 update_actor(Supervisor, Pid,  NewActor) ->
 	Supervisor1 =  delete_actor(Supervisor, Pid),
@@ -223,26 +165,6 @@ delete_actor_test_() ->
 		)
 	].
 
- action_on_request_test_() -> 
-	Sup = create(mod),
-	Actor = simdr_actor_conveyor:create('C1'),
-	Pid = simdr_actor_contract:get_pid(Actor),
-	Actor2 = simdr_actor_contract:set_state(Actor,on),
-	Sup2 = add_actor(Sup, {Pid,Actor}),
- 	NewSup = action_on_request(Sup2, Pid, 
- 		{ state , on, changed}),
- 	NewSup2 = action_on_request(Sup2, Pid, 
- 		{ out , 3, added}),
- 	[{_P,Actor4}] = get_actors(NewSup2),
- 	[
-	?_assertEqual(
- 			[{Pid,Actor2}],
- 			get_actors(NewSup)
-		), 
-	?_assertEqual(
- 			[3], simdr_actor_contract: get_out(Actor4)
-		)
 
- 	].
 
 -endif.
