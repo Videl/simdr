@@ -36,4 +36,4 @@ action_on_request(Config, _Sender, {actor_product, Product}) ->
     Config;
 %%% Nothing special to do
 action_on_request(Config, Sender, Request) ->
-	simdr_supervisor_contract:action_on_request(Config, Sender, Request).
+    simdr_supervisor_default:action_on_request(Config, Sender, Request).

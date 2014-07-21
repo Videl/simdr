@@ -22,10 +22,9 @@ create() ->
     Ac1 = simdr_supervisor_contract:create(?MODULE),
     Ac1.    
 
-create(Actor) ->
-    Ac1 = simdr_supervisor_contract:create(?MODULE),
-    Ac2 = Ac1#supervisor{actors = [Actor]},
-    Ac2.
+create(Name) ->
+    Ac1 = simdr_supervisor_contract:create(?MODULE, Name),
+    Ac1.
 
 %%% Disable timer.
 timer_time(_Config) ->
@@ -46,4 +45,4 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	Config;
 %%% Default behaviour
 action_on_request(Config, Sender, Request) ->
-	simdr_supervisor_contract:action_on_request(Config, Sender, Request).
+	simdr_supervisor_default:action_on_request(Config, Sender, Request).
