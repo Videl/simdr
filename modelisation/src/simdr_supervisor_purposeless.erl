@@ -35,7 +35,7 @@ timer_action(Config) ->
 
 action_on_request(Config, Sender, {out, Out, added})->
 	%%% Base behaviour
-	Config2 = simdr_supervisor_contract:action_on_request(Config, 
+	Config2 = simdr_supervisor_default:action_on_request(Config, 
 													Sender, 
 													{out, Out, added}),
 	%%% 1) Fetch the previous values about the actor saved in ETS table,
@@ -77,4 +77,4 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	Config;
 %%% Default behaviour
 action_on_request(Config, Sender, Request) ->
-	simdr_supervisor_contract:action_on_request(Config, Sender, Request).
+	simdr_supervisor_default:action_on_request(Config, Sender, Request).

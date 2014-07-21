@@ -46,4 +46,4 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	Config;
 %%% Default behaviour
 action_on_request(Config, Sender, Request) ->
-	simdr_supervisor_contract:action_on_request(Config, Sender, Request).
+	simdr_supervisor_default:action_on_request(Config, Sender, Request).
