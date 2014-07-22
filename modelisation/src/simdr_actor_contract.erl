@@ -136,7 +136,7 @@ create(Module, Name, Opt, State, Work_time, List_data) ->
 create(Module, Name, Opt, State, In, Out, Work_time, List_data) ->
 	simdr_actor_contract:create(Module, 
 		Name, 
-		0,
+		simdr_actor_contract:random_id(),
 		Opt, 
 		State, 
 		In, 
