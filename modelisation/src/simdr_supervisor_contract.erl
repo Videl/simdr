@@ -8,6 +8,7 @@
 -export([
 	 create/1,
 	 create/2,
+	 get_actors/1,
 	 get_actor/2,
 	 add_data/3,
 	 add_actor/2,

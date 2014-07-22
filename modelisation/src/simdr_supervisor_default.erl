@@ -76,11 +76,12 @@ action_on_request_test_() ->
  		{ out , 3, added}),
  	[{_P,Actor4}] = simdr_supervisor_contract:get_actors(NewSup2),
  	[
+
 	?_assertEqual(
  			[{Pid,Actor2}],
  			simdr_supervisor_contract:get_actors(NewSup)
-		), 
-	?_assertEqual(
+		),
+	 ?_assertEqual(
  			[3], simdr_actor_contract:get_out(Actor4)
 		)
 
