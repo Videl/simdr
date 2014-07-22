@@ -238,9 +238,6 @@ NewOpt = simdr_actor_contract:add_option(Actor,in,4),
 		{Actor, {module, mod, status}, supervisor},
 		answer(Actor,{status, module})),
 	?_assertEqual(
-		{Actor, {pid, 0, status}, supervisor},
-		answer(Actor,{status, pid})),
-	?_assertEqual(
 		{Actor, {work_time, 42, status}, supervisor},
 		answer(Actor, {status, work_time})),
 	 ?_assertEqual(
