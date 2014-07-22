@@ -26,7 +26,7 @@ start() ->
 	StartToken = make_ref(), ets:insert(T, {StartToken,  self()} ), 
 	% Put one token to allow a start signal for discrete event mode. 
 	(whereis(tc51eventmgr) =:= undefined) orelse unregister(tc51eventmgr), 
-	register(tc51eventmgr, spawn_link (tc51eventmgr, loop, [E, T, 1, 0, {0, now()}])),
+	register(tc51eventmgr, spawn_link (tc51eventmgr, loop, [E, T, 0, 0, {0, now()}])),
 	%%%% ets:insert(tc51TestOutput, {"testing 1 2 3"} ),
 	{ok, {StartToken, self()}}. 
 
@@ -86,7 +86,8 @@ loop( E, T, Count, Time, Clock ) ->
 	if 
 	%% Case 1: Simulation time has caught up with the earliest "post".
 	%%  To Do: Notify the "posting process" and remove event from calendar.
-		NET =< Time -> 
+		NET =< Time ->
+			io:format("CASE1: UP TO DATE (Tokens: ~w)~n", [Count]),
 			#tc51event{notifyPid = NotifyPid, load = Load } = tc51etstb:first(E),
 			Token = make_ref(), ets:insert_new(T, {Token, NotifyPid}),
 			NotifyPid ! {notify, Time, Token, Load}, tc51etstb:removefirst(E),
@@ -96,6 +97,7 @@ loop( E, T, Count, Time, Clock ) ->
 	%%  To Do: Receive event postings, token returns, 
 	%%         handle time and token requests
 		NET =:= infinity -> 
+			io:format("CASE2: EMPTY (Tokens: ~w)~n", [Count]),
 			receive 
 				{ post__incr_event, Delay, NotifyPid, Load } -> 
 					CurrentTime = adaptTime(Clock),
@@ -124,14 +126,14 @@ loop( E, T, Count, Time, Clock ) ->
 	%%  To Do: Move simulation time forward until the time of the earliest event in the calendar.
 	%%         Resynchronise simulation time, which becomes NET, with computer's clock (i.e. now). 
 		Count =< 0 -> %% all tokens have been returned, so jump to the next event
-			io:format("CASE3: ALL TOKENS HAVE BEEN RETURNED~n"),
+			io:format("CASE3: ALL TOKENS HAVE BEEN RETURNED (Tokens: ~w)~n", [Count]),
 			?MODULE:loop(E, T, Count, NET, {NET, now()}); %% count ought to be zero, not negative. 
 			
 	%% Case 4: In real time mode, waiting until the time catches up with the earliest event in
 	%%         the simulation calendar. There still is at least one event that needs processing. 
 	%%  To Do: Receive event postings, token returns, handle time and token requests
 		true ->
-			io:format("CASE4: RT MODE~n"),
+			io:format("CASE4: RT MODE (Tokens: ~w)~n", [Count]),
 			receive 
 					stop -> void;	 %% to stop the testing run;	
 					{ post__incr_event, Delay, NotifyPid, Load } -> 

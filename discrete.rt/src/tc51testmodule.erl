@@ -10,7 +10,8 @@ loop() ->
 	    loop();
 	{notify, _Time, Token, Load} ->
 	    io:format("Received notify! (Load: ~w).~n", [Load]),
-	    io:format("Sending token back.~n"),
+	    io:format("Sending token back in five seconds.~n"),
+	    timer:sleep(5000),
 	    tc51eventmgr:returntoken(Token, self()),
 	    loop();
 	V ->
