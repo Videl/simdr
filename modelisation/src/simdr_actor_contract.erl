@@ -394,7 +394,14 @@ set_options(Actor, Key, List) ->
 %%% @spec (N :: non_neg_integer()) -> ok
 %%% @end
 work(N) ->
-	timer:sleep(round(N*1000)).
+	Time = N*1000,
+	tc51eventmgr:postincr(Time, self(), {time, delayer}),
+	receive
+		{notify, _SimuTime, Token, {time, delayer}} ->
+			timer:sleep(round(N*1000)),
+			tc51eventmgr:returntoken(Token, self())
+	end.
+
 
 %%% @doc Size of a list.
 %%% @spec (List) -> non_neg_integer()

@@ -155,7 +155,9 @@ loop( E, T, Count, Time, Clock ) ->
 						ets:insert_new(T, {Tok3, OwnerPid3}),
 						ResponsePid3 ! {CurrentTime, Tok3},
 						?MODULE:loop(E, T , (Count + 1), CurrentTime, Clock)											
-			after (NET - Time) ->  %% ToDo: add a speed-up/slow-down factor 
+			after 1000 ->%(NET - Time) ->   
+				%% @TODO: add a speed-up/slow-down factor
+				%% @TODO: Sometimes it bugs because value is weird (NET - Time)
 				?MODULE:loop(E, T, Count, adaptTime(Clock), Clock)
 				%% timeout will be at least (NET - Time), 
 				%% likely to be 1-25 milliseconds longer. 
