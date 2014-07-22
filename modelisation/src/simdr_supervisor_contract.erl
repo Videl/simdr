@@ -15,7 +15,8 @@
 	 set_option/3,
 	 update_actor/3,
 	 delete_option/2,
-	 add_option/3
+	 add_option/3,
+	 list_size/1
 	]).
 
 %% ===================================================================
@@ -116,6 +117,15 @@ add_option(Supervisor, Key, Value) ->
 	%%(ets:insert(Table, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Supervisor.
 
+list_size(List) ->
+	list_size_helper(List, 0).
+
+list_size_helper([], Acc) ->
+	Acc;
+list_size_helper(unknown_option, 0) ->
+	0;
+list_size_helper([_H|T], Acc) ->
+	list_size_helper(T, Acc+1).
 
 delete_actor_helper([], Result, _Pid) ->
 	Result;
