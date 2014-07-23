@@ -32,9 +32,9 @@ create(Name) ->
 create(Name, Quality) ->
 	simdr_actor_contract:create(?MODULE, Name, [{initial_quality, Quality}], raw, 0, []).
 
+
 answer(ProdConfig, {change, Data,_}) ->
 	{ProdConfig, Data, no_change};
-
 answer(ProdConfig, Request) ->
 	simdr_actor_default:answer(ProdConfig, Request).
 

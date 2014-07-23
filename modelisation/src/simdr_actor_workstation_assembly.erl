@@ -40,7 +40,7 @@ create(Name, {Stop, Manip, Evac}) ->
 
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
-	simdr_actor_contract:work(simdr_actor_contract:get_work_time(WSConfig)),
+	simdr_actor_contract:work(WSConfig),
 
 	case simdr_actor_contract:get_option(WSConfig, order) of 
 		unknown_option -> Transfo = {'Q1',{1,0,1,0}},
@@ -63,7 +63,6 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Assembly}, 
 	simdr_actor_contract:get_out(NewWSConfig)};
-	
 answer(WSConfig, Request) ->
 	simdr_actor_default:answer(WSConfig, Request).
 

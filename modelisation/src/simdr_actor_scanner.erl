@@ -23,7 +23,7 @@ create(Name) ->
 	simdr_actor_contract:create(?MODULE, Name, [], off, 2, []).
 
 answer(ScannerConfig, {actor_product, ProductConfig}) ->
-	simdr_actor_contract:work(simdr_actor_contract:get_work_time(ScannerConfig)),
+	simdr_actor_contract:work(ScannerConfig),
 	case simdr_actor_contract:get_option(ProductConfig, quality) =:= unknown_option  of 
 		true -> 
 			Transfo = simdr_actor_contract:get_option(ProductConfig, processed),

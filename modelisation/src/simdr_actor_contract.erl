@@ -40,6 +40,7 @@
 		 get_option/2,	
 		 get_work_time/1, 
 		 get_state/1,
+		 get_mode/1,
 		 get_list_data/1, 
 		 set_pid/2,
 		 set_work_time/2,
@@ -51,6 +52,7 @@
 		 set_capacity/2,
 		 set_option/3, 
 		 work/1,
+		 work/2,
 		 list_size/1,
 		 first_key_awaiting/2,
 		 different_sender/1,
@@ -62,7 +64,8 @@
 %% Contract for Actors
 %% ===================================================================
 
--callback create() -> Actor :: term().
+-callback create() -> 
+	Actor :: term().
 
 -callback answer(Config :: term(), Entering :: term()) ->
 	Exiting :: term().
@@ -200,8 +203,9 @@ create(
 						{read_concurrency, true}, 
 						public])},
 	Actor1     = add_options_helper(Actor, Opt),
+	Actor2	   = set_option(Actor1, mode, discrete),
 	TableQueue = ets:new(list_to_atom(lists:concat(["Queue_",Module, Name])), [duplicate_bag, public]),
-	Actor3     = simdr_actor_contract:set_option(Actor1, ets, TableQueue),
+	Actor3     = simdr_actor_contract:set_option(Actor2, ets, TableQueue),
 	Actor4     = add_datas_helper(Actor3, List_data),
 	Actor4.
 
@@ -254,6 +258,13 @@ get_opt(Actor) ->
 %%% @end
 get_work_time(Actor) ->
 	Actor#actor.work_time.
+
+%%% @doc Get mode option of an Actor.
+%%% @spec (Actor) -> integer()
+%%% @end
+get_mode(Actor) ->
+	A = get_option(Actor, mode),
+	get_mode_helper(A).
 
 %%% @doc Get state field of an Actor.
 %%% @spec (Actor) -> string()
@@ -390,13 +401,19 @@ set_options(Actor, Key, List) ->
 	true = simdr_tools:set_options_in_ets(Table, Key, List),
 	Actor.
 
-%%% @doc Sleep for the specified time (in seconds).
-%%% @spec (N :: non_neg_integer()) -> ok
+%%% @doc Shortcut for work/2.
+%%% @see work/2
 %%% @end
-work(N) ->
-	work(N, discrete).
+work(N) when is_record(N, actor) ->
+	Mode = get_mode(N),
+	Time = get_work_time(N),
+	work(Time, Mode).
 
-work(N, discrete) ->
+%%% @doc Sleep for the specified time (in seconds).
+%%% 	 It is aware of the mode: discrete/real-time.
+%%% @spec (N :: non_neg_integer(), Mode :: atom()) -> ok
+%%% @end
+work(N, rt) ->
 	Time = N*1000,
 	tc51eventmgr:postincr(100, self(), {work_beginner}),
 	receive
@@ -408,7 +425,7 @@ work(N, discrete) ->
 					%%% Time to send back all tokens
 					tc51eventmgr:returntoken(EndWorkToken, self()),
 					tc51eventmgr:returntoken(BeginningWorkToken, self()),
-					io:format("<io><io> Sent all tokens (D). <oi><oi>~n")
+					io:format("<io><io> Sent all tokens (RT). <oi><oi>~n")
 			end
 	end;
 work(N, _) ->
@@ -419,7 +436,7 @@ work(N, _) ->
 			%%% Work is done
 			%%% Time to send back all tokens
 			tc51eventmgr:returntoken(EndWorkToken, self()),
-			io:format("<io><io> Sent all tokens (RT). <oi><oi>~n")
+			io:format("<io><io> Sent all tokens (D). <oi><oi>~n")
 	end.
 
 
@@ -484,6 +501,18 @@ random_id() ->
 %% ===================================================================
 %% Internal API
 %% ===================================================================
+
+get_mode_helper(discrete) ->
+	discrete;
+get_mode_helper([discrete]) ->
+	discrete;
+get_mode_helper(rt) ->
+	rt;
+get_mode_helper([rt]) ->
+	rt;
+get_mode_helper(V) ->
+	io:format("<><><> WEIRD MODE: ~w~n", [V]),
+	rt.
 
 add_datas_helper(Actor, []) ->
 	Actor;

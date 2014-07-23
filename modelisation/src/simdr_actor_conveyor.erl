@@ -11,18 +11,26 @@
 
 -export([
 	create/0,
+	answer/2
+	]).
+
+%% User functions export
+
+-export([
 	create/1,
-	create/3,
-	answer/2]).
+	create/3
+	]).
 
 %% Export for spawns
+
 -export([
-	send_rfid/2]).
+	send_rfid/2
+	]).
 
 %% Behavior implementation
 
 create() ->
-	create( simdr_actor_contract:random_id()).
+	create(simdr_actor_contract:random_id()).
 	
 create(Name) ->
 	create(Name, 1,1).
@@ -36,7 +44,7 @@ create(Name, Speed, Distance) ->
 
 answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	spawn(?MODULE, send_rfid, [ConveyorConfig, ProductConfig]),
-	simdr_actor_contract:work(simdr_actor_contract:get_work_time(ConveyorConfig)),
+	simdr_actor_contract:work(ConveyorConfig),
 	{NewConveyorConfig, NewProductConfig} = simdr_actor_contract:add_to_list_data(
 		ConveyorConfig, 
 		{{moved, simdr_actor_contract:get_module(ProductConfig)}, {ProductConfig}}, 
@@ -45,29 +53,22 @@ answer(ConveyorConfig, {actor_product, ProductConfig}) ->
 	%%% Answer
 	Destination = simdr_actor_contract:get_out(ConveyorConfig),
 	{NewConveyorConfig, {actor_product, NewProductConfig, Destination}, Destination};
-
-
 answer(ConveyorConfig, {change, distance, N}) ->
 	simdr_actor_contract:set_option(ConveyorConfig, distance, N),
 	Speed = simdr_actor_contract:get_option(ConveyorConfig,speed),
 	NewConfig = simdr_actor_contract:set_work_time(ConveyorConfig, N/Speed),
 	{NewConfig, {distance, N, changed}, supervisor};
-
 answer(ConveyorConfig, {change, speed, N}) ->
 	simdr_actor_contract: set_option(ConveyorConfig, speed, N),
 	Distance = simdr_actor_contract:get_option(ConveyorConfig,distance),
 	NewConfig = simdr_actor_contract:set_work_time(ConveyorConfig, Distance/N),
 	{NewConfig, {speed, N, changed}, supervisor};
-
-
 answer(ConveyorConfig, {status, distance}) ->
 	[Distance] = simdr_actor_contract:get_option(ConveyorConfig,distance),
 	{ConveyorConfig, {distance, Distance, status}, supervisor};
-
 answer(ConveyorConfig, {status, speed}) ->
 	[Speed] = simdr_actor_contract:get_option(ConveyorConfig,speed),
 	{ConveyorConfig, {speed, Speed , status}, 	supervisor};
-
 answer(ConveyorConfig, Request) ->
 	simdr_actor_default:answer(ConveyorConfig, Request).
 

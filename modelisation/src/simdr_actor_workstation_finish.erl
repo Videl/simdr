@@ -55,11 +55,11 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 						['Q1'] -> 
 							'Q1';
 						['Q2'] ->
-							simdr_actor_contract:work(simdr_actor_contract:get_work_time(WSConfig)),
+							simdr_actor_contract:work(WSConfig),
 							simdr_actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
 							{'Q1', pastille};
 						['Q3'] ->
-							simdr_actor_contract:work(simdr_actor_contract:get_work_time(WSConfig)),
+							simdr_actor_contract:work(WSConfig),
 							simdr_actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
 							{'Q2', pastille};
 						_ ->
@@ -74,10 +74,9 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewWSConfig, NewProductConfigBis} = simdr_actor_contract:add_to_list_data(
 		WSConfig, {{finish, for, Finish, 'of',product}, {ProductConfig}}, 
 		NewProductConfig, {{quality,became,Finish,because,'of'},{WSConfig}}),
-
-	 case simdr_actor_contract:get_option(WSConfig, order) of 
-	 	 unknown_option -> nothing;
-	 	 _-> simdr_actor_contract:set_options(WSConfig, order, R)
+	case simdr_actor_contract:get_option(WSConfig, order) of 
+	 	unknown_option -> nothing;
+	 	_-> simdr_actor_contract:set_options(WSConfig, order, R)
 	end,
 	% end,
 	% io:format("Order après delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
@@ -85,11 +84,9 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Finish}, 
 	simdr_actor_contract:get_out(NewWSConfig)};
-	
 answer(WSConfig, Request) ->
 	simdr_actor_default:answer(WSConfig, Request).
 
-%improve Q2 ? 
 improve (Q1, Q2) ->
 	case Q1 of 
 		'Q1' -> 

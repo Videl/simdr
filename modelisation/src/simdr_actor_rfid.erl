@@ -23,7 +23,7 @@ create(Name) ->
 
 
 answer(RFIDConfig, {actor_product, ProductConfig}) ->
-	simdr_actor_contract:work(simdr_actor_contract:get_work_time(RFIDConfig)),
+	simdr_actor_contract:work(RFIDConfig),
 	{NewRFIDConfig, NewProductConfig} = simdr_actor_contract:add_to_list_data(
 		RFIDConfig, {{scanned,product}, {ProductConfig}}, 
 		ProductConfig, {{was,scanned,by},{RFIDConfig}}),

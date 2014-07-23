@@ -4,9 +4,12 @@
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
-	
+
+
 -export([
-	answer/2]).
+	answer/2,
+	basic_work_time_method/1
+	]).
 
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
@@ -215,6 +218,9 @@ actor_sumup({Actor}) when is_record(Actor, actor) ->
 	 simdr_actor_contract:get_state(Actor)};
 actor_sumup(Actor) ->
 	Actor.
+
+basic_work_time_method(Actor) ->
+	simdr_actor_contract:get_work_time(Actor).
 
 
 %% ===================================================================

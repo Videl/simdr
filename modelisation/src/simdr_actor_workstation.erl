@@ -38,7 +38,7 @@ create(Name, {Quality, Luck}) ->
 	Ac2.
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
-	simdr_actor_contract:work(simdr_actor_contract:get_work_time(WSConfig)),
+	simdr_actor_contract:work(WSConfig),
 	%%% Product transformation
 	{NewProductConfig, Quality} = change_product(WSConfig, ProductConfig),
 	%%% List data fillers
@@ -49,7 +49,6 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Quality}, 
 	simdr_actor_contract:get_out(NewWSConfig)};
-	
 answer(WSConfig, Request) ->
 	simdr_actor_default:answer(WSConfig, Request).
 

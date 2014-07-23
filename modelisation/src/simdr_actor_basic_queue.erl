@@ -11,15 +11,21 @@
 
 -export([
 	create/0,
-	create/1,
-	answer/2]).
+	answer/2
+	]).
+
+%% User functions export
+
+-export([
+	create/1
+	]).
 
 %% Behavior implementation
 
 create() ->
 	create(simdr_actor_contract:random_id()).
 
-create(Name ) ->
+create(Name) ->
 	simdr_actor_contract:create(?MODULE, Name, [], off, 1, []).
 
 
@@ -27,7 +33,7 @@ create(Name ) ->
 answer(BasicQueueConfig, {actor_product, ProductConfig}) ->
 	%% Work time here means 'deplacement time' of the product, when the queue
 	%% is used as a conveyor
-	simdr_actor_contract:work(simdr_actor_contract:get_work_time(BasicQueueConfig)),
+	simdr_actor_contract:work(BasicQueueConfig),
 	{NewBasicQueueConfig, NewProductConfig} = simdr_actor_contract:add_to_list_data(
 		BasicQueueConfig, {{product,entered,queue},{ProductConfig}}, 
 		ProductConfig, {{entered,queue},{BasicQueueConfig}}),

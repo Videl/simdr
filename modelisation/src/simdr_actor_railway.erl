@@ -11,9 +11,21 @@
 %% simdr_Actor Contract Behaviors Callbacks
 
 -export([
-	create/1,
 	create/0,
-	answer/2, send_scanner/2]).
+	answer/2
+	]).
+
+%% User functions exports
+
+-export([
+	create/1
+	]).
+
+%% Spawn exports
+
+-export([
+	send_scanner/2
+	]).
 
 %% Behavior implementation
 
@@ -26,7 +38,6 @@ create(Name) ->
 answer(RailwayConfig, {actor_product, ProductConfig}) ->
 	Supervisor = simdr_actor_contract:get_option(RailwayConfig, supervisor) ,
 	spawn(?MODULE, send_scanner, [RailwayConfig, ProductConfig]),
-
 %%	io:format (" Nombre de sorties : ~w~n", [simdr_actor_contract:list_size(simdr_actor_contract:get_out(RailwayConfig))]),
 	{RailwayConf, ProductConf} = simdr_actor_contract:add_to_list_data(
 		RailwayConfig, 
@@ -34,11 +45,11 @@ answer(RailwayConfig, {actor_product, ProductConfig}) ->
 		ProductConfig, 
 		{{entered,railway}, {RailwayConfig}}),
 	MesOut = case simdr_actor_contract:list_size(simdr_actor_contract:get_out(RailwayConfig)) of 
-		1 ->
-			{no_prob_out, simdr_actor_contract:get_out(RailwayConfig)}; 
-		_ ->
-			{prob_out, Supervisor}
-		end,
+				1 ->
+					{no_prob_out, simdr_actor_contract:get_out(RailwayConfig)}; 
+				_ ->
+					{prob_out, Supervisor}
+			 end,
 
 	{InfoProb, Dest} = MesOut,
 
@@ -49,33 +60,36 @@ answer(RailwayConfig, {actor_product, ProductConfig}) ->
 			%{In, _Out}= simdr_actor_contract: get_in_out(RailwayConfig),
 			{RailwayConf, {actor_product, ProductConf, InfoProb}, Dest}
 	end;
-
 answer(RailwayConfig, {prob_out, ProductConfig, Decision}) ->
 	{In, Out} = simdr_actor_contract:get_in_out(RailwayConfig),
 	NewOut = Decision,
 	%%% List data fillers
 	{ActorConfig, Prod} = simdr_actor_contract:add_to_list_data(
 		RailwayConfig, 
-		{{going,into,position,{In, NewOut},for},ProductConfig}, 
+		{{going, into, position, {In, NewOut}, for}, ProductConfig}, 
 		ProductConfig, 
-		{{railway,went,into,position,{In, NewOut}},RailwayConfig}),
+		{{railway, went, into, position, {In, NewOut}}, RailwayConfig}),
 	%%% Answer
 	case Decision =/= Out of
 		true ->	
 			RailwayConf = simdr_actor_contract:set_in_out(ActorConfig, {In, NewOut}),
-			simdr_actor_contract:work(simdr_actor_contract:get_work_time(RailwayConf)),
-			{RailwayConf,{actor_product, Prod,switched}, NewOut};
+			simdr_actor_contract:work(RailwayConf),
+			{RailwayConf, {actor_product, Prod, switched}, NewOut};
 		false -> 
-			Time = simdr_actor_contract:get_work_time(RailwayConfig)/3,
-			simdr_actor_contract:work(Time),
-			{ActorConfig,{actor_product, Prod,switched}, NewOut}
+			Time = simdr_actor_contract:get_work_time(ActorConfig)/3,
+			simdr_actor_contract:work(
+				Time,
+				simdr_actor_contract:get_mode(ActorConfig)
+				),
+			{ActorConfig, {actor_product, Prod, switched}, NewOut}
 	end;
-	
 answer(RailwayConfig, Request) ->
 	simdr_actor_default:answer(RailwayConfig, Request).
 
+%% Internal API
+
 send_scanner(Conf, ProdConf) ->
- io:format(" option : ~w ~n", [simdr_actor_contract:get_option(Conf, scanner)]),
+	io:format(" option : ~w ~n", [simdr_actor_contract:get_option(Conf, scanner)]),
 	case simdr_actor_contract:get_option(Conf, scanner) of 
 		[SCANNER] -> SCANNER ! {self(), {actor_product, ProdConf}};
 		_ -> {nothing}
