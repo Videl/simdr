@@ -13,5 +13,10 @@ All rights reserved. This is the property of the CRAN research laboratory.
 Authors
 -------
 
+The code that manage events in discrete/real time was made by:
+ * Paul Valckenaers (K.U.Leuven Association, Belgium), 
+ * Matias Novias    (Intec, Argentina)  
+
+We built the software that can make up scenarios of simulation and actors, and then we adapted the two codes.
  * Marion LY marion.ly@telecomnancy.net
  * Thibaut SMITH thibaut.smith@telecomnancy.net
