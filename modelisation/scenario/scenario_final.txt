@@ -29,7 +29,7 @@ RA6 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RA6')]).
 CA11 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA11')]).
 CB1 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CB1')]).
 RB1 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RB1')]).
-S = spawn(simdr_actor_container, idling, [simdr_actor_scanner:create('S')]).
+SB1 = spawn(simdr_actor_container, idling, [simdr_actor_scanner:create('SB1')]).
 CB2 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CB2')]).
 CC1 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC1')]).
 BQC1 = spawn(simdr_actor_container, idling, [simdr_actor_basic_queue:create('BQC1')]).
@@ -59,7 +59,7 @@ So9 = spawn(simdr_supervisor_container, idling, [simdr_supervisor_end:create()])
 
 
 CA1 ! RA1 ! CA2 ! RA2 ! CA3 ! BQA1 ! WSA1 ! CA4 ! CA5 ! RA3 ! CA6 ! RA4 ! CA7 ! RA5 ! 
-CA8 ! BQA2 ! WSA2 ! CA9 ! CA10 ! RA6 ! CA11 ! CB1 ! RB1 ! S ! CB2 ! CC1 ! BQC1 !
+CA8 ! BQA2 ! WSA2 ! CA9 ! CA10 ! RA6 ! CA11 ! CB1 ! RB1 ! SB1 ! CB2 ! CC1 ! BQC1 !
  WSC1 ! CC2 ! RC1 ! CC3 ! BQC2 ! WSC2 ! CC4 ! 
 %RC2 ! CC5 ! BQC3! WSC3 ! CC6 ! CC7 ! SC !
 So1 ! %So2 ! So3 ! So4 ! So5 ! So6 ! So7 ! So8 ! So9 !
@@ -92,7 +92,7 @@ CA11 ! {self(), {add, out, RA1}}.
 
 RA4 ! {self(), {add, out, CB1}}.
 CB1 ! {self(), {add, out, RB1}}.
-RB1 ! {self(), {add, option, {scanner, S}}}.
+RB1 ! {self(), {add, option, {scanner, SB1}}}.
 RB1 ! {self(), {add, out, CB2}}.
 RB1 ! {self(), {add, out, CC1}}.
 CB2 ! {self(), {add, out, RA4}}.
