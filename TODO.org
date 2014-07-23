@@ -2,7 +2,9 @@
   - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
   
-  ** TODO [9/17]
+  ** TODO [10/18]
+   - [X] Find a name for the software
+   - [X] Discrete time mode
    - [X] New workstation actor for zone D
    - [X] finish Workstation takes care quality product to improve its quality
    - [ ] UML Documents
@@ -47,12 +49,10 @@
        - [ ] Dump Option table
        - [ ] Nice command for pretty dump with actor information, option,
              data
-  **  LATER [0/1]
-   - [ ] Discrete time mode
+  **  LATER [1/4]
    - [ ] Add general ETS table for list_data of everyone
    - [ ] Tool to make up a scenario
    - [ ] Need to use the *states*!
-   - [ ] Find a name for the software
   
  ** Tests [3/11]
   - [ ] Extensively test Config record in Actor Contract
