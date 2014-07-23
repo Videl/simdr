@@ -27,11 +27,11 @@ create() ->
 	RandomQuality = random(),
 	create(RandomQuality).
 
-create(Quality) ->
-	create(simdr_actor_contract:random_id(), Quality).
+create(Name) ->
+	create(Name, random()).
 
 create(Name, Quality) ->
-	simdr_actor_contract:create(?MODULE, Name, [{initial_quality, random()}, {quality_required, Quality}], raw, 0, []).
+	simdr_actor_contract:create(?MODULE, Name, [{initial_quality, Quality}], raw, 0, []).
 
 answer(ProdConfig, {change, Data,_}) ->
 	{ProdConfig, Data, no_change};
