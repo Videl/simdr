@@ -56,14 +56,30 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 							'Q1';
 						['Q2'] ->
 							simdr_actor_contract:work(WSConfig),
-							simdr_actor_contract:set_option(ProductConfig, quality, {'Q1', pastille}),
-							{'Q1', pastille};
+							simdr_actor_contract:set_option(
+								ProductConfig, 
+								quality, 
+								'Q1'),
+							%%% Set chip so we know it has been enhanced
+							simdr_actor_contract:set_option(
+								ProductConfig,
+								chip,
+								true),
+							{'Q1', with_chip};
 						['Q3'] ->
 							simdr_actor_contract:work(WSConfig),
-							simdr_actor_contract:set_option(ProductConfig, quality, {'Q2', pastille}),
-							{'Q2', pastille};
+							simdr_actor_contract:set_option(
+								ProductConfig, 
+								quality, 
+								'Q2'),
+							%%% Set Pastille
+							simdr_actor_contract:set_option(
+								ProductConfig,
+								chip,
+								true),
+							{'Q2', with_chip};
 						_ ->
-							{pastille}
+						weird_state
 					 end;
 		false -> 
 			Finish = Quality
@@ -87,26 +103,18 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 answer(WSConfig, Request) ->
 	simdr_actor_default:answer(WSConfig, Request).
 
-improve (Q1, Q2) ->
-	case Q1 of 
-		'Q1' -> 
-			case Q2 of 
-				['Q1']-> false;
-				['Q2']-> true;
-				['Q3']-> true;
-				_ -> false
-			end;
-		'Q2' -> 
-			case Q2 of 
-				['Q1']-> false;
-				['Q2']-> false;
-				['Q3']-> true;
-				_ -> false
-			end;
-		'Q3' -> 
-			false;
-		_ -> false
-	end.
+improve('Q1', 'Q1') ->
+	false;
+improve('Q1', _) -> %%% Q1 is the best.
+	true;
+improve('Q2', 'Q1') ->
+	false;
+improve('Q2', 'Q2') ->
+	false;
+improve('Q2', _) ->
+	true;
+improve('Q3', _) -> %%% Q3 is lowest, so if we want it, anything will be fine.
+	false.
 
 % ===================================================================
 % Tests
