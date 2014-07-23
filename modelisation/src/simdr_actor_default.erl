@@ -14,6 +14,14 @@
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
+answer(ActorConfig, {change, mode, discrete}) ->
+	Conf = simdr_actor_contract:set_mode(ActorConfig, discrete),
+	{Conf, {mode, discrete, changed}, supervisor};
+
+answer(ActorConfig, {change, mode, _}) ->
+	Conf = simdr_actor_contract:set_mode(ActorConfig, rt),
+	{Conf, {mode, rt, changed}, supervisor};
+
 answer(ActorConfig, {change, work_time, N}) ->
 	NewConfig = simdr_actor_contract:set_work_time(ActorConfig, N),
 	{NewConfig, {work_time, N, changed}, supervisor};
@@ -171,6 +179,7 @@ answer(ActorConfig, {csv_export, debug}) ->
 answer(_, Request) ->
 	io:format(">>>UNKNOWN ANSWER<<< (~w) (~w:~w)~n", [Request, ?MODULE, ?LINE]),
 	exit(unknown_request).
+
 %% ===================================================================
 %% Internal API
 %% ===================================================================

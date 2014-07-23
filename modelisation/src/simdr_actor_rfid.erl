@@ -32,7 +32,7 @@ answer(RFIDConfig, {actor_product, ProductConfig}) ->
 	{actor_product, NewProductConfig, simdr_actor_contract:get_name(NewProductConfig)}, 
 	supervisor};
 answer(RFIDConfig, Request) ->
-	simdr_actor_defaullt:answer(RFIDConfig, Request).
+	simdr_actor_default:answer(RFIDConfig, Request).
 
 %% Tests
 -ifdef(TEST).

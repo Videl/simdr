@@ -42,6 +42,7 @@
 		 get_state/1,
 		 get_mode/1,
 		 get_list_data/1, 
+		 set_mode/2,
 		 set_pid/2,
 		 set_work_time/2,
 		 set_name/2,
@@ -265,6 +266,10 @@ get_work_time(Actor) ->
 get_mode(Actor) ->
 	A = get_option(Actor, mode),
 	get_mode_helper(A).
+
+set_mode(Actor, Mode) ->
+	A = set_option(Actor, mode, Mode),
+	A.
 
 %%% @doc Get state field of an Actor.
 %%% @spec (Actor) -> string()

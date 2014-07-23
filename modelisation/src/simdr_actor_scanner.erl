@@ -58,7 +58,7 @@ answer(ScannerConfig, {actor_product, ProductConfig}) ->
 	supervisor};
 
 answer(ScannerConfig, Request) ->
-	simdr_actor_contract:answer(ScannerConfig, Request).
+	simdr_actor_default:answer(ScannerConfig, Request).
 
 
 %% ===================================================================
