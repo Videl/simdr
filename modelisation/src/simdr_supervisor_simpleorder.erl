@@ -19,7 +19,7 @@
 	]).
 
 create() ->
-    create(random_id(simdr_actor_contract:random_id()), {'Q3',{1,0,1,0}}).
+    create(simdr_actor_contract:random_id(), {'Q1',{1,0,1,0}}).
 
 create(Name, Order) ->
     Ac1 = simdr_supervisor_contract:create(?MODULE, Name),
@@ -53,7 +53,7 @@ action_on_request(Config, Sender, {out, Out, added})->
 	Config3 = simdr_supervisor_contract:set_option(Config2, Sender, ToSaveFlat),
 	Config3;
 
-action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_out}}) ->
+action_on_request(Config, _Sender, {ActorConfig, {actor_product, Product, prob_out}}) ->
 
 	Order = get_first_order(Config),
 	{Quality, _Assembly} = Order,
@@ -61,7 +61,7 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	[Out1|R]=Outputs,
 	[Out2|_R2]=R, 
 	ProductState =simdr_actor_contract:get_state(Product),
-	QualityProduct = simdr_actor_contract:get_option(Product, quality),
+	[QualityProduct] = simdr_actor_contract:get_option(Product, quality),
 	 %%processed, assembled or finished
 	Decision = case ProductState of
 		raw -> { WS1, _Time1} = lookup_module(Config, Out1, simdr_actor_workstation),
@@ -74,8 +74,8 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	 							false -> Out2
 	 						end;
 	 				false -> case difference_quality(Q1, Quality)<difference_quality(Q2, Quality) of 
-			 					true -> Out2;
-			 					false -> Out1
+			 					true -> Out1;
+			 					false -> Out2
 			 				end
 	 			end;
 
@@ -111,11 +111,11 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 						 							Out1
 					 					end
 			 		end;
-	 	_ -> Out1
+	 	_ -> Out2
 	 end,
- 
- 	Sender ! {self(), {prob_out, Product, Decision}},
- 	Config;
+ 	Decision;
+ 	% Sender ! {self(), {prob_out, Product, Decision}},
+ 	% Config;
 
 action_on_request(Config, Sender, {ActorConfig, prob_in}) ->
  	[Head|_Rest] = simdr_actor_contract:get_in(ActorConfig),
@@ -187,23 +187,23 @@ difference_quality(Q1,Q2) ->
 	case Q1 of 
 		'Q1' -> 
 			case Q2 of 
-				['Q1']-> 0;
-				['Q2']-> 1;
-				['Q3']-> 2;
-				_ -> -2
+				'Q1'-> 0;
+				'Q2'-> -1;
+				'Q3'-> -2;
+				_ -> -3
 			end;
 		'Q2' -> 
 			case Q2 of 
-				['Q1']-> -1;
-				['Q2']-> 0;
-				['Q3']-> 1;
-				_ -> -2
+				'Q1'-> 1;
+				'Q2'-> 0;
+				'Q3'-> -1;
+				_ -> -3
 			end;
 		'Q3' -> case Q2 of
-				['Q1']-> -2;
-				['Q2']-> -1;
-				['Q3']-> 0;
-				_ -> -2
+				'Q1'-> 2;
+				'Q2'-> 1;
+				'Q3'-> 0;
+				_ -> -3
 			end;
 		_ -> 0
 	end.
@@ -284,8 +284,6 @@ difference_quality(Q1,Q2) ->
 
 	 	Outputs = simdr_actor_contract:get_out(C11bis),
 				 [H|_Rest] = Outputs,
-		%Actor2= simdr_supervisor_contract:get_actor(Config, H),
-		% lookup_module_helper(Config, Actor2, Module, simdr_actor_contract:get_work_time(Actor))
 	 	[
 	 	?_assertMatch(C11bis,
 	 	simdr_supervisor_contract:get_actor(Sup7, PidC11)),
@@ -303,6 +301,58 @@ difference_quality(Q1,Q2) ->
 	 		{WS422, 2.0 },lookup_module(Sup13, PidC41, simdr_actor_workstation)),
 		 ?_assertMatch(
 	 		{WS422, 2.0 },lookup_module(Sup15, PidC41, simdr_actor_workstation))
+	 	].
+
+	 action_on_request_test_() ->
+	 	Sup = create('S', {'Q1',{1,0,0,1}}),
+	 	Product= simdr_actor_product:create(),
+	 	R = simdr_actor_railway:create(),
+	 	C11 =  simdr_actor_conveyor:create('C11'),
+	 	C12 =  simdr_actor_conveyor:create('C12'),
+	 	WS1 = simdr_actor_workstation:create({'Q2', 33}),
+	 	C21 =  simdr_actor_conveyor:create('C21'),
+	 	C22 =  simdr_actor_conveyor:create('C22'),
+	 	C23 =  simdr_actor_conveyor:create('C23'),
+	 	WS2 = simdr_actor_workstation:create({'Q1', 33}),
+
+
+
+	 	PidC11 = simdr_actor_contract:get_pid(C11),
+		PidC12 = simdr_actor_contract:get_pid(C12),
+		PidWS1 = simdr_actor_contract:get_pid(WS1),
+		PidC21 = simdr_actor_contract:get_pid(C21),
+		PidC22 = simdr_actor_contract:get_pid(C22),
+		PidC23 = simdr_actor_contract:get_pid(C23),
+		PidWS2 = simdr_actor_contract:get_pid(WS2),
+
+		C11bis = simdr_actor_contract:add_out(C11, PidC12),
+	 	C12bis = simdr_actor_contract:add_out(C12, PidWS1),
+	 	C21bis = simdr_actor_contract:add_out(C21, PidC22),
+	 	C22bis = simdr_actor_contract:add_out(C22, PidC23),
+	 	C23bis = simdr_actor_contract:add_out(C23, PidWS2),
+	 	Rb = simdr_actor_contract:add_out(R, PidC11),
+	 	Rbis = simdr_actor_contract:add_out(Rb, PidC21),
+
+	 	Sup1 = simdr_supervisor_contract:add_actor(Sup, {PidC11, C11bis}),
+	 	Sup2 = simdr_supervisor_contract:add_actor(Sup1, {PidC12, C12bis}),
+	 	Sup3 = simdr_supervisor_contract:add_actor(Sup2, {PidWS1, WS1}),
+	 	Sup4 = simdr_supervisor_contract:add_actor(Sup3, {PidWS2, WS2}),
+	 	Sup5 = simdr_supervisor_contract:add_actor(Sup4, {PidC21, C21bis}),
+	 	Sup6 = simdr_supervisor_contract:add_actor(Sup5, {PidC22, C22bis}),
+ 		Sup7 = simdr_supervisor_contract:add_actor(Sup6, {PidC23, C23bis}),
+
+ 		[{Q1, Luck1}] = simdr_actor_contract:get_option(WS1, workstation_luck),
+	 	[{Q2, Luck2}] = simdr_actor_contract:get_option(WS2, workstation_luck),
+	 	Quality= 'Q1',
+ 		[
+ 		?_assertMatch({ WS1, _Time1},lookup_module(Sup7, PidC11, simdr_actor_workstation)),
+ 		?_assertMatch({ WS2, _Time2},lookup_module(Sup7, PidC21, simdr_actor_workstation)),
+ 		?_assertMatch(raw, simdr_actor_contract:get_state(Product)),
+ 		?_assertMatch(0,difference_quality(Q2, Quality)),
+ 		?_assertMatch([PidC11, PidC21], simdr_actor_contract:get_out(Rbis)),
+ 		?_assertMatch(C11bis, simdr_supervisor_contract:get_actor(Sup7, PidC11)),
+	 	?_assertMatch(PidC21, action_on_request(Sup7, simdr_actor_contract:get_pid(R), {Rbis, {actor_product, Product, prob_out}}))
+
 	 	].
 
 	-endif. 
