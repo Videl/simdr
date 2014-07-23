@@ -133,7 +133,7 @@ loop( E, T, Count, Time, Clock ) ->
 	%%         the simulation calendar. There still is at least one event that needs processing. 
 	%%  To Do: Receive event postings, token returns, handle time and token requests
 		true ->
-			io:format("CASE4: RT MODE (Tokens: ~w)~n", [Count]),
+			io:format("CASE4: RT MODE (Tokens: ~w, Timeout: ~w)~n", [Count, NET-Time]),
 			receive 
 					stop -> void;	 %% to stop the testing run;	
 					{ post__incr_event, Delay, NotifyPid, Load } -> 
@@ -155,7 +155,7 @@ loop( E, T, Count, Time, Clock ) ->
 						ets:insert_new(T, {Tok3, OwnerPid3}),
 						ResponsePid3 ! {CurrentTime, Tok3},
 						?MODULE:loop(E, T , (Count + 1), CurrentTime, Clock)											
-			after 1000 ->%(NET - Time) ->   
+			after (NET - Time) ->   
 				%% @TODO: add a speed-up/slow-down factor
 				%% @TODO: Sometimes it bugs because value is weird (NET - Time)
 				?MODULE:loop(E, T, Count, adaptTime(Clock), Clock)

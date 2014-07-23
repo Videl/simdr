@@ -394,12 +394,32 @@ set_options(Actor, Key, List) ->
 %%% @spec (N :: non_neg_integer()) -> ok
 %%% @end
 work(N) ->
+	work(N, discrete).
+
+work(N, discrete) ->
 	Time = N*1000,
-	tc51eventmgr:postincr(Time, self(), {time, delayer}),
+	tc51eventmgr:postincr(100, self(), {work_beginner}),
 	receive
-		{notify, _SimuTime, Token, {time, delayer}} ->
-			timer:sleep(round(N*1000)),
-			tc51eventmgr:returntoken(Token, self())
+		{notify, _SimuTime, BeginningWorkToken, {work_beginner}} ->
+			tc51eventmgr:postincr(Time, self(), {work_ender}),
+			receive
+				{notify, _AnotherSimuTime, EndWorkToken, {work_ender}} ->
+					%%% Work is done
+					%%% Time to send back all tokens
+					tc51eventmgr:returntoken(EndWorkToken, self()),
+					tc51eventmgr:returntoken(BeginningWorkToken, self()),
+					io:format("<io><io> Sent all tokens (D). <oi><oi>~n")
+			end
+	end;
+work(N, _) ->
+	Time = N*1000,
+	tc51eventmgr:postincr(Time, self(), {work_ender}),
+	receive
+		{notify, _AnotherSimuTime, EndWorkToken, {work_ender}} ->
+			%%% Work is done
+			%%% Time to send back all tokens
+			tc51eventmgr:returntoken(EndWorkToken, self()),
+			io:format("<io><io> Sent all tokens (RT). <oi><oi>~n")
 	end.
 
 
