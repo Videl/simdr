@@ -164,7 +164,7 @@ loop( E, T, Count, Time, Clock ) ->
 				%% In other words, notification happens within the blink of an eye. 
 		end
 			
-	end. 
+	end.
 
 %% Compute simulation time while in real time mode, starting from latest entry
 %% into real time mode. 	

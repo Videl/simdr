@@ -30,6 +30,7 @@
               simdr_supervisor_onedirection,
               simdr_supervisor_purposeless,
               simdr_supervisor_start,
-              simdr_tools]}
+              simdr_tools,
+              simdr_timemachine]}
   ]
 }.

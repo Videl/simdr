@@ -221,7 +221,7 @@ get_module(Actor) ->
 %%% @end
 add_data(Actor, X) ->
 	{Info, Destination}=X,
-	Data = {erlang:now(), erlang:localtime(), Actor, Info, Destination},
+	Data = {erlang:now(), simdr_timemachine:get_time(), Actor, Info, Destination},
 	ETSData = Actor#actor.list_data,
 	?DLOG(
 		simdr_actor_contract:get_name(Actor),
@@ -409,16 +409,26 @@ set_options(Actor, Key, List) ->
 %%% @doc Shortcut for work/2.
 %%% @see work/2
 %%% @end
-work(N) when is_record(N, actor) ->
-	Mode = get_mode(N),
-	Time = get_work_time(N),
+work(Actor) when is_record(Actor, actor) ->
+	Time = get_work_time(Actor),
+	Mode = get_mode(Actor),
 	work(Time, Mode).
+
+work(TimeToWork, rt) ->
+	%%% Real time mode. Nothing to do.
+	event_dispatcher(TimeToWork, rt);
+work(TimeToWork, Value) ->
+	%%% Discrete time mode. Need to forward time.
+	event_dispatcher(TimeToWork, Value),
+	%%% Forward time here of `TimeToWork' seconds from here.
+	simdr_timemachine:forward_time(TimeToWork).
+
 
 %%% @doc Sleep for the specified time (in seconds).
 %%% 	 It is aware of the mode: discrete/real-time.
 %%% @spec (N :: non_neg_integer(), Mode :: atom()) -> ok
 %%% @end
-work(N, rt) ->
+event_dispatcher(N, rt) ->
 	Time = N*1000,
 	tc51eventmgr:postincr(100, self(), {work_beginner}),
 	receive
@@ -433,7 +443,7 @@ work(N, rt) ->
 					io:format("<io><io> Sent all tokens (RT). <oi><oi>~n")
 			end
 	end;
-work(N, _) ->
+event_dispatcher(N, _) ->
 	Time = N*1000,
 	tc51eventmgr:postincr(Time, self(), {work_ender}),
 	receive
