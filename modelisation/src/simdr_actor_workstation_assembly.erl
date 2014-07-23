@@ -31,12 +31,15 @@ create(Name, {Stop, Manip, Evac}) ->
 	simdr_actor_contract:set_option(Ac1, manipulation, Manip),
 	simdr_actor_contract:set_option(Ac1, evacuation, Evac),
 	Ac2 =simdr_actor_contract:set_work_time(Ac1, Stop+Manip+Evac),
-	Ac3 = simdr_actor_contract:add_option(Ac2, order, {'Q1',{1,0,1,0}}),
-	Ac3.
+%	Ac3 = simdr_actor_contract:add_option(Ac2, order, {'Q1',{1,0,1,0}}),
+	Ac2.
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
 	simdr_actor_contract:work(simdr_actor_contract:get_work_time(WSConfig)),
-	[Transfo] = simdr_actor_contract:get_option(WSConfig, order),
+	case simdr_actor_contract:get_option(WSConfig, order) of 
+		unknown_option -> Transfo = {'Q1',{1,0,1,0}};
+		_ -> [Transfo] = simdr_actor_contract:get_option(WSConfig, order)
+	end,	
 	{_Quality, Assembly} = Transfo,
 	simdr_actor_contract:set_option(ProductConfig, assembled, Assembly),
 	NewProductConfig = simdr_actor_contract:set_state(ProductConfig, assembled),

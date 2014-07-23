@@ -19,8 +19,7 @@
 	]).
 
 create() ->
-    Ac1 = simdr_supervisor_contract:create(?MODULE),
-    Ac1.
+    create(random_id(simdr_actor_contract:random_id()), {'Q3',{1,0,1,0}}).
 
 create(Name, Order) ->
     Ac1 = simdr_supervisor_contract:create(?MODULE, Name),
@@ -65,8 +64,8 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	QualityProduct = simdr_actor_contract:get_option(Product, quality),
 	 %%processed, assembled or finished
 	Decision = case ProductState of
-		raw -> { WS1, Time1} = lookup_module(Config, Out1, simdr_actor_workstation),
-	 			{ WS2, Time2} = lookup_module(Config, Out2, simdr_actor_workstation), 
+		raw -> { WS1, _Time1} = lookup_module(Config, Out1, simdr_actor_workstation),
+	 			{ WS2, _Time2} = lookup_module(Config, Out2, simdr_actor_workstation), 
 	 			[{Q1, Luck1}] = simdr_actor_contract:get_option(WS1, workstation_luck),
 	 			[{Q2, Luck2}] = simdr_actor_contract:get_option(WS2, workstation_luck),
 	 			case Q1 =:= Q2 of 
@@ -82,26 +81,34 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 
 	 	processed -> { _Actor1, Time1} = lookup_module(Config, Out1, simdr_actor_workstation_assembly),
 	 				{ _Actor2, Time2} = lookup_module(Config, Out2, simdr_actor_workstation_assembly), 
-	 				case difference_quality(QualityProduct, Quality)>1 of 
+	 				case abs(difference_quality(QualityProduct, Quality))<2 of 
 			 				true ->  case Time1<Time2 of 
-						 					true -> Out1;
-						 					false -> Out2
+						 					true -> Out1 ! {add, option, {order, Order}},
+						 							Out1;
+						 					false -> Out2 ! {add, option, {order, Order}},
+						 							Out2
 					 					end;
 					 		false -> case Time1<Time2 of 
-						 					true -> Out2;
-						 					false -> Out1
+						 					true -> Out2 ! {add, option, {order, Order}},
+						 							Out2;
+						 					false -> Out1 ! {add, option, {order, Order}},
+						 							Out1 
 					 					end
 			 		end;
 	 	assembled -> { _Actor1, Time1} = lookup_module(Config, Out1, simdr_actor_workstation_finish),
 	 				{ _Actor2, Time2} = lookup_module(Config, Out2, simdr_actor_workstation_finish), 
-	 				case difference_quality(QualityProduct, Quality)<3 of 
+	 				case difference_quality(QualityProduct, Quality)<0 of 
 			 				true ->  case Time1<Time2 of 
-						 					true -> Out1;
-						 					false -> Out2
+						 					true -> Out1 ! {add, option, {order, Order}},
+						 							Out1;
+						 					false -> Out2 ! {add, option, {order, Order}},
+						 							Out2
 					 					end;
 					 		false -> case Time1<Time2 of 
-						 					true -> Out2;
-						 					false -> Out1
+						 					true -> Out2 ! {add, option, {order, Order}},
+						 							Out2;
+						 					false -> Out1 ! {add, option, {order, Order}},
+						 							Out1
 					 					end
 			 		end;
 	 	_ -> Out1
@@ -157,7 +164,7 @@ lookup_module_helper(Config, Actor, Module, Time) ->
 
 loop(ListOut, 2, Config, Module, Time)->
 [H| Rest] =ListOut,
-[H2|Rest2] = Rest,
+[H2|_Rest2] = Rest,
 {Ac, Time} = lookup_module_helper(Config, H, Module, Time),
 {Ac2, Time2} = lookup_module_helper(Config, H2, Module, Time),
 	case Time<Time2 of 
@@ -180,23 +187,23 @@ difference_quality(Q1,Q2) ->
 	case Q1 of 
 		'Q1' -> 
 			case Q2 of 
-				['Q1']-> 3;
-				['Q2']-> 2;
-				['Q3']-> 1;
-				_ -> 0
+				['Q1']-> 0;
+				['Q2']-> 1;
+				['Q3']-> 2;
+				_ -> -2
 			end;
 		'Q2' -> 
 			case Q2 of 
-				['Q1']-> 2;
-				['Q2']-> 3;
-				['Q3']-> 2;
-				_ -> 0
+				['Q1']-> -1;
+				['Q2']-> 0;
+				['Q3']-> 1;
+				_ -> -2
 			end;
 		'Q3' -> case Q2 of
-				['Q1']-> 1;
-				['Q2']-> 2;
-				['Q3']-> 3;
-				_ -> 0
+				['Q1']-> -2;
+				['Q2']-> -1;
+				['Q3']-> 0;
+				_ -> -2
 			end;
 		_ -> 0
 	end.
@@ -268,7 +275,7 @@ difference_quality(Q1,Q2) ->
 	 	Sup8 = simdr_supervisor_contract:add_actor(Sup7, {PidC31, C31bis}),
 	 	Sup9 = simdr_supervisor_contract:add_actor(Sup8, {PidC32, C32}),
 	 	Sup10 = simdr_supervisor_contract:add_actor(Sup9, {PidC41, C41bis}),
-		Sup11 = simdr_supervisor_contract:add_actor(Sup10, {PidC421, C421}),
+		Sup11 = simdr_supervisor_contract:add_actor(Sup10, {PidC421, C421bis}),
 		Sup12 = simdr_supervisor_contract:add_actor(Sup11, {PidC422, C422bis}),
 		Sup13 = simdr_supervisor_contract:add_actor(Sup12, {PidWS422, WS422}),
 		Sup14 = simdr_supervisor_contract:add_actor(Sup13, {PidC4212, C4212bis}),
