@@ -141,7 +141,7 @@ delete_actor_helper(Actors, Result, Pid) ->
 	end.
 
 get_actor_helper([], _Pid) ->
-	[];
+	unknown_actor;
 
 get_actor_helper(Actors, Pid) -> 
 	[Head| Rest] = Actors,
@@ -176,6 +176,11 @@ delete_actor_test_() ->
 		)
 	].
 
+	get_actor_test_() ->
+	Sup = create(mod),
+	[
+	?_assertEqual(unknown_actor,get_actor(Sup, 3))
+	].
 
 
 -endif.

@@ -110,18 +110,20 @@ lookup_module(Config, Out, Module)->
 	Actor = simdr_supervisor_contract:get_actor(Config, Out),
 	case simdr_actor_contract:get_module(Actor) of
 			Module -> {Actor, 0};
-			_ -> Outputs = simdr_actor_contract:get_out(Actor),
-				 [H|_Rest] = Outputs,
-				Actor2= simdr_supervisor_contract:get_actor(Config, H),
-				lookup_module_helper(Config, Actor2, Module, simdr_actor_contract:get_work_time(Actor))
+			 _ -> Outputs = simdr_actor_contract:get_out(Actor),
+			 	 [H|_Rest] = Outputs,
+			 	Actor2= simdr_supervisor_contract:get_actor(Config, H),
+			 	lookup_module_helper(Config, Actor2, Module, simdr_actor_contract:get_work_time(Actor))
 	end.
-
+lookup_module_helper(_Config, unknown_actor, _Module, _Time) ->
+{unknown_actor, 9999};
 
 lookup_module_helper(Config, Actor, Module, Time) ->
 	case simdr_actor_contract:get_module(Actor) of
 			Module -> {Actor, Time};
 			_ -> Outputs = simdr_actor_contract:get_out(Actor),
 				case   simdr_supervisor_contract:list_size(Outputs) of
+					0 -> lookup_module_helper(Config, unknown_actor, Module, Time);
 					1 ->[H|_Rest] = Outputs,
 					Actor2= simdr_supervisor_contract:get_actor(Config, H),
 					lookup_module_helper(Config, Actor2, Module, Time+simdr_actor_contract:get_work_time(Actor));
@@ -168,7 +170,11 @@ loop(ListOut, _Size, Config, Module, Time) ->
 
 	 	C31 =  simdr_actor_conveyor:create('C31'),
 	 	C32 =  simdr_actor_conveyor:create('C32'),
-	 	C33 =  simdr_actor_conveyor:create('C33'),
+
+	 	C41 =  simdr_actor_conveyor:create('C41'),
+	 	C421 =  simdr_actor_conveyor:create('C421'),	
+	 	C422=  simdr_actor_conveyor:create('C422'),
+	 	WS422 = simdr_actor_workstation:create('WS422'),
 
 		PidC11 = simdr_actor_contract:get_pid(C11),
 		PidC12 = simdr_actor_contract:get_pid(C12),
@@ -177,6 +183,12 @@ loop(ListOut, _Size, Config, Module, Time) ->
 		PidC22 = simdr_actor_contract:get_pid(C22),
 		PidC23 = simdr_actor_contract:get_pid(C23),
 		PidWS2 = simdr_actor_contract:get_pid(WS2),
+		PidC31 = simdr_actor_contract:get_pid(C31),
+		PidC32 = simdr_actor_contract:get_pid(C32),
+		PidC41 = simdr_actor_contract:get_pid(C41),
+		PidC421 = simdr_actor_contract:get_pid(C421),
+		PidC422= simdr_actor_contract:get_pid(C422),
+		PidWS422 = simdr_actor_contract:get_pid(WS422),
 
 	 	C11bis = simdr_actor_contract:add_out(C11, PidC12),
 	 	C12bis = simdr_actor_contract:add_out(C12, PidWS1),
@@ -185,7 +197,11 @@ loop(ListOut, _Size, Config, Module, Time) ->
 	 	C22bis = simdr_actor_contract:add_out(C22, PidC23),
 	 	C23bis = simdr_actor_contract:add_out(C23, PidWS2),
 
+	 	C31bis=  simdr_actor_contract:add_out(C31, PidC32),
 
+	 	C41b = simdr_actor_contract:add_out(C41, PidC421),
+	 	C41bis = simdr_actor_contract:add_out(C41b, PidC422),
+	 	C422bis = simdr_actor_contract:add_out(C422, PidWS422),
 
 	 	Sup1 = simdr_supervisor_contract:add_actor(Sup, {PidC11, C11bis}),
 	 	Sup2 = simdr_supervisor_contract:add_actor(Sup1, {PidC12, C12bis}),
@@ -194,6 +210,13 @@ loop(ListOut, _Size, Config, Module, Time) ->
 	 	Sup5 = simdr_supervisor_contract:add_actor(Sup4, {PidC21, C21bis}),
 	 	Sup6 = simdr_supervisor_contract:add_actor(Sup5, {PidC22, C22bis}),
 	 	Sup7 = simdr_supervisor_contract:add_actor(Sup6, {PidC23, C23bis}),
+	 	Sup8 = simdr_supervisor_contract:add_actor(Sup7, {PidC31, C31bis}),
+	 	Sup9 = simdr_supervisor_contract:add_actor(Sup8, {PidC32, C32}),
+	 	Sup10 = simdr_supervisor_contract:add_actor(Sup9, {PidC41, C41bis}),
+		Sup11 = simdr_supervisor_contract:add_actor(Sup10, {PidC421, C421}),
+		Sup12 = simdr_supervisor_contract:add_actor(Sup11, {PidC422, C422bis}),
+		Sup13 = simdr_supervisor_contract:add_actor(Sup12, {PidWS422, WS422}),
+
 
 	 	Outputs = simdr_actor_contract:get_out(C11bis),
 				 [H|_Rest] = Outputs,
@@ -209,9 +232,11 @@ loop(ListOut, _Size, Config, Module, Time) ->
 	 	?_assertMatch(
 	 		{WS1, 2.0 },lookup_module(Sup7, PidC11, simdr_actor_workstation)), 
 		?_assertMatch(
-	 		{WS2, 3.0 },lookup_module(Sup7, PidC21, simdr_actor_workstation))%,
-		% ?_assertMatch(
-	 % 		{[], 999},lookup_module(Sup7, simdr_actor_contact:get_pid(C31bis), simdr_actor_workstation))
+	 		{WS2, 3.0 },lookup_module(Sup7, PidC21, simdr_actor_workstation)),
+		 ?_assertMatch(
+	  		{unknown_actor, 9999},lookup_module(Sup9, PidC31, simdr_actor_workstation)),
+		 ?_assertMatch(
+	 		{WS422, 2.0 },lookup_module(Sup13, PidC41, simdr_actor_workstation))
 	 	].
 
 	-endif. 
