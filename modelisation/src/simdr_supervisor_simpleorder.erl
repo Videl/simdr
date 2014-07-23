@@ -53,7 +53,7 @@ action_on_request(Config, Sender, {out, Out, added})->
 	Config3 = simdr_supervisor_contract:set_option(Config2, Sender, ToSaveFlat),
 	Config3;
 
-action_on_request(Config, _Sender, {ActorConfig, {actor_product, Product, prob_out}}) ->
+action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_out}}) ->
 
 	Order = get_first_order(Config),
 	{Quality, _Assembly} = Order,
@@ -61,24 +61,10 @@ action_on_request(Config, _Sender, {ActorConfig, {actor_product, Product, prob_o
 	[Out1|R]=Outputs,
 	[Out2|_R2]=R, 
 	ProductState =simdr_actor_contract:get_state(Product),
-	[QualityProduct] = simdr_actor_contract:get_option(Product, quality),
+	QualityProduct = simdr_actor_contract:get_option(Product, quality),
 	 %%processed, assembled or finished
 	Decision = case ProductState of
-		raw -> { WS1, _Time1} = lookup_module(Config, Out1, simdr_actor_workstation),
-	 			{ WS2, _Time2} = lookup_module(Config, Out2, simdr_actor_workstation), 
-	 			[{Q1, Luck1}] = simdr_actor_contract:get_option(WS1, workstation_luck),
-	 			[{Q2, Luck2}] = simdr_actor_contract:get_option(WS2, workstation_luck),
-	 			case Q1 =:= Q2 of 
-	 				true -> case Luck1>Luck2 of 
-	 							true -> Out1;
-	 							false -> Out2
-	 						end;
-	 				false -> case difference_quality(Q1, Quality)<difference_quality(Q2, Quality) of 
-			 					true -> Out1;
-			 					false -> Out2
-			 				end
-	 			end;
-
+		raw -> out_raw(Config, Out1, Out2, Quality);
 	 	processed -> { _Actor1, Time1} = lookup_module(Config, Out1, simdr_actor_workstation_assembly),
 	 				{ _Actor2, Time2} = lookup_module(Config, Out2, simdr_actor_workstation_assembly), 
 	 				case abs(difference_quality(QualityProduct, Quality))<2 of 
@@ -113,9 +99,9 @@ action_on_request(Config, _Sender, {ActorConfig, {actor_product, Product, prob_o
 			 		end;
 	 	_ -> Out2
 	 end,
- 	Decision;
- 	% Sender ! {self(), {prob_out, Product, Decision}},
- 	% Config;
+ 	
+ 	 Sender ! {self(), {prob_out, Product, Decision}},
+ 	 Config;
 
 action_on_request(Config, Sender, {ActorConfig, prob_in}) ->
  	[Head|_Rest] = simdr_actor_contract:get_in(ActorConfig),
@@ -183,6 +169,30 @@ loop(ListOut, _Size, Config, Module, Time) ->
 		 false-> loop(Rest, simdr_supervisor_contract:list_size(Rest), Config, Module, Time2)
 	end.
 
+difference_quality(Q1,Q2) when is_list(Q1) ->
+	case Q1 of 
+		['Q1'] -> 
+			case Q2 of 
+				'Q1'-> 0;
+				'Q2'-> -1;
+				'Q3'-> -2;
+				_ -> -3
+			end;
+		['Q2'] -> 
+			case Q2 of 
+				'Q1'-> 1;
+				'Q2'-> 0;
+				'Q3'-> -1;
+				_ -> -3
+			end;
+		['Q3'] -> case Q2 of
+				'Q1'-> 2;
+				'Q2'-> 1;
+				'Q3'-> 0;
+				_ -> -3
+			end;
+		_ -> 0
+	end; 
 difference_quality(Q1,Q2) ->
 	case Q1 of 
 		'Q1' -> 
@@ -208,6 +218,21 @@ difference_quality(Q1,Q2) ->
 		_ -> 0
 	end.
 
+out_raw(Config, Out1, Out2, Quality)->
+				{WS1, _Time1} = lookup_module(Config, Out1, simdr_actor_workstation),
+	 			{WS2, _Time2} = lookup_module(Config, Out2, simdr_actor_workstation), 
+	 			[{Q1, Luck1}] = simdr_actor_contract:get_option(WS1, workstation_luck),
+	 			[{Q2, Luck2}] = simdr_actor_contract:get_option(WS2, workstation_luck),
+	 			case Q1 =:= Q2 of 
+	 				true -> case Luck1>Luck2 of 
+	 							true -> Out1;
+	 							false -> Out2
+	 						end;
+	 				false -> case difference_quality(Q1, Quality)<difference_quality(Q2, Quality) of 
+			 					true -> Out1;
+			 					false -> Out2
+			 				end
+	 			end.
 
 
 %% ===================================================================
@@ -341,17 +366,23 @@ difference_quality(Q1,Q2) ->
 	 	Sup6 = simdr_supervisor_contract:add_actor(Sup5, {PidC22, C22bis}),
  		Sup7 = simdr_supervisor_contract:add_actor(Sup6, {PidC23, C23bis}),
 
- 		[{Q1, Luck1}] = simdr_actor_contract:get_option(WS1, workstation_luck),
-	 	[{Q2, Luck2}] = simdr_actor_contract:get_option(WS2, workstation_luck),
-	 	Quality= 'Q1',
+ 		[{_Q1, _Luck1}] = simdr_actor_contract:get_option(WS1, workstation_luck),
+	 	[{Q2, _Luck2}] = simdr_actor_contract:get_option(WS2, workstation_luck),
+
+		Order = get_first_order(Sup7),
+		{Quality, _Assembly} = Order,
+		Outputs = simdr_actor_contract:get_out(Rbis),
+		[Out1,Out2]=Outputs,
+ 
  		[
  		?_assertMatch({ WS1, _Time1},lookup_module(Sup7, PidC11, simdr_actor_workstation)),
  		?_assertMatch({ WS2, _Time2},lookup_module(Sup7, PidC21, simdr_actor_workstation)),
  		?_assertMatch(raw, simdr_actor_contract:get_state(Product)),
  		?_assertMatch(0,difference_quality(Q2, Quality)),
- 		?_assertMatch([PidC11, PidC21], simdr_actor_contract:get_out(Rbis)),
+ 		?_assertMatch([PidC21, PidC11], simdr_actor_contract:get_out(Rbis)),
  		?_assertMatch(C11bis, simdr_supervisor_contract:get_actor(Sup7, PidC11)),
-	 	?_assertMatch(PidC21, action_on_request(Sup7, simdr_actor_contract:get_pid(R), {Rbis, {actor_product, Product, prob_out}}))
+ 		?_assertMatch(C11bis,simdr_supervisor_contract:get_actor(Sup7, Out2)),
+	 	?_assertMatch(PidC21, out_raw(Sup7, Out1, Out2, Quality))
 
 	 	].
 
