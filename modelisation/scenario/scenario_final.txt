@@ -144,6 +144,11 @@ WSC2 ! {self(), {add, option, {supervisor, So1}}}.
 CC4 ! {self(), {add, out, So9}}.
 
 
+<<<<<<< HEAD
+=======
+SB1 ! {self(), {change, mode, rt}}.
+WSTC2 ! {self(), {change, mode, rt}}.
+>>>>>>> Add: SB1 and WSTC2 in real time.
 
 P1 = simdr_actor_product:create().
 P2 = simdr_actor_product:create().
