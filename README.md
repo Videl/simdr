@@ -27,9 +27,15 @@ Authors
 -------
 
 The code that manage events in discrete/real time was made by:
- * Paul Valckenaers (K.U.Leuven Association, Belgium), 
- * Matias Novias    (Intec, Argentina)  
+ * Paul Valckenaers (K.U.Leuven Association, Belgium)
+ * Matias Novias    (Intec, Argentina)
+ * jphilips
+
+The [CRAN laboratory](http://www.cran.uhp-nancy.fr/) wanted this software, and as such, it's their software. If you want to do anything with it, ask them first:
+ * André THOMAS andre.thomas@univ-lorraine.fr
+ * [Hind BRIL EL HAOUZI](https://github.com/HindBRIL) hind.el-haouzi@univ-lorraine.fr
+ * [Arnould GUIDAT](https://github.com/ArnouldGuidat) arnould.guidat@univ-lorraine.fr
 
 We built the software that can make up scenarios of simulation and actors, and then we adapted the two codes.
- * Marion LY marion.ly@telecomnancy.net
- * Videl SMITH videl@protonmail.ch
+ * [Marion LY](https://github.com/MarionLy) marion.ly@telecomnancy.net
+ * [Videl SMITH](https://github.com/Videl) videl@protonmail.ch
