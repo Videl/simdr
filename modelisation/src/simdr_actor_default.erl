@@ -14,13 +14,10 @@
 answer(ActorConfig, {supervisor, ping}) ->
 	{ActorConfig, {supervisor, pong}};
 
-answer(ActorConfig, {change, mode, discrete}) ->
-	Conf = simdr_actor_contract:set_mode(ActorConfig, discrete),
-	{Conf, {mode, discrete, changed}, supervisor};
-
-answer(ActorConfig, {change, mode, _}) ->
-	Conf = simdr_actor_contract:set_mode(ActorConfig, rt),
-	{Conf, {mode, rt, changed}, supervisor};
+answer(ActorConfig, {change, mode, NewMode}) ->
+	PreviousMode = simdr_actor_contract:get_mode(ActorConfig),
+	{Actor, Mode} = helper_answer_mode_change(ActorConfig, PreviousMode, NewMode),
+	{Actor, {mode, Mode, changed}, supervisor};
 
 answer(ActorConfig, {change, work_time, N}) ->
 	NewConfig = simdr_actor_contract:set_work_time(ActorConfig, N),
@@ -183,6 +180,23 @@ answer(_, Request) ->
 %% ===================================================================
 %% Internal API
 %% ===================================================================
+
+helper_answer_mode_change(ActorConfig, discrete, discrete) ->
+	io:format("Warning: mode change to ~w is *redundant* " ++
+		"because same as previous mode..~n", [discrete]),
+	Conf = simdr_actor_contract:set_mode(ActorConfig, discrete),
+	{Conf, discrete};
+helper_answer_mode_change(ActorConfig, rt, rt) ->
+	io:format("Warning: mode change to ~w is *redundant* " ++
+		"because same as previous mode.~n", [discrete]),
+	Conf = simdr_actor_contract:set_mode(ActorConfig, rt),
+	{Conf, rt};
+helper_answer_mode_change(ActorConfig, _, rt) ->
+	Conf = simdr_actor_contract:set_mode(ActorConfig, rt),
+	{Conf, rt};
+helper_answer_mode_change(ActorConfig, _, discrete) ->
+	Conf = simdr_actor_contract:set_mode(ActorConfig, discrete),
+	{Conf, discrete}.
 
 export_to(file) ->
 	fun(X, FileDescriptor) -> 
