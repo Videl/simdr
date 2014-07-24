@@ -49,6 +49,7 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	end,
 	{Quality, _Assembly} = Order,
 	QualityAct = simdr_actor_contract:get_option(ProductConfig, quality),
+	?DFORMAT("Upgrade Workstation: ordre ~w, quality ~w ~n", [Quality,QualityAct]),
 	case improve(Quality, QualityAct) of 
 		true -> 
 			Finish = case QualityAct of 

@@ -77,7 +77,6 @@ loop({MegaSecs, Secs, MicroSecs}, IniDiff) ->
 	  erlang:trunc(MicroSecs)},
 	receive
 		{Pid, time} ->
-			?DFORMAT("TIMEMACHINE > ~w~n", [Time]),
 			Pid ! {simdr_timemachine, Pid, calendar:now_to_local_time(Time)},
 			loop(Time, IniDiff);
 		{_Pid, forward, Value} ->

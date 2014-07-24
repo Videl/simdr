@@ -89,7 +89,7 @@ answer(RailwayConfig, Request) ->
 %% Internal API
 
 send_scanner(Conf, ProdConf) ->
-	io:format(" option : ~w ~n", [simdr_actor_contract:get_option(Conf, scanner)]),
+	?DFORMAT("Railway: option : ~w ~n", [simdr_actor_contract:get_option(Conf, scanner)]),
 	case simdr_actor_contract:get_option(Conf, scanner) of 
 		[SCANNER] -> SCANNER ! {self(), {actor_product, ProdConf}};
 		_ -> {nothing}

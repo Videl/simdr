@@ -59,7 +59,8 @@
 		 different_sender/1,
 		 random_id/0,
 		 first/1,
-		 delete_option/2]).
+		 delete_option/2,
+	 	 actor_sumup/1]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -221,11 +222,13 @@ get_module(Actor) ->
 %%% @end
 add_data(Actor, X) ->
 	{Info, Destination}=X,
-	Data = {erlang:now(), simdr_timemachine:get_time(), Actor, Info, Destination},
+	Time = simdr_timemachine:get_time(),
+	Data = {erlang:now(), Time, Actor, Info, Destination},
 	ETSData = Actor#actor.list_data,
 	?DLOG(
 		simdr_actor_contract:get_name(Actor),
 		{lists:concat(["Inserting data to", ETSData]), Data}),
+	?MFORMAT(Actor, "~w `~w from ~w`~n", [actor_sumup(Actor), Info, actor_sumup(Destination)]),
 	simdr_tools:add_data_in_ets(ETSData, Data),
 %%	(ets:insert(ETSData, Data)=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
@@ -412,6 +415,7 @@ set_options(Actor, Key, List) ->
 work(Actor) when is_record(Actor, actor) ->
 	Time = get_work_time(Actor),
 	Mode = get_mode(Actor),
+	?MFORMAT(Actor, "~w working for ~w seconds.~n", [actor_sumup(Actor), Time]),
 	work(Time, Mode).
 
 work(TimeToWork, rt) ->
@@ -512,6 +516,20 @@ different_sender(Awaiting)->
 random_id() ->
 	random:uniform(1000).
 
+%%% @doc Furnish a smaller format of the Actor record.
+%%% @spec (Actor) -> Actor | {atom(), term(), atom()}
+%%% @end
+actor_sumup(Actor) when is_record(Actor, actor) ->
+	{simdr_actor_contract:get_module(Actor), 
+	 simdr_actor_contract:get_name(Actor),
+	 simdr_actor_contract:get_state(Actor)};
+actor_sumup({Actor}) when is_record(Actor, actor) ->
+	{simdr_actor_contract:get_module(Actor), 
+	 simdr_actor_contract:get_name(Actor),
+	 simdr_actor_contract:get_state(Actor)};
+actor_sumup(Actor) ->
+	Actor.
+
 
 %% ===================================================================
 %% Internal API
@@ -521,13 +539,15 @@ get_mode_helper(discrete) ->
 	discrete;
 get_mode_helper([discrete]) ->
 	discrete;
+get_mode_helper(unknown_option) -> %%% Default case
+	discrete;
 get_mode_helper(rt) ->
 	rt;
 get_mode_helper([rt]) ->
 	rt;
 get_mode_helper(V) ->
-	?DFORMAT("<><><> WEIRD MODE: ~w~n", [V]),
-	rt.
+	?DFORMAT("Warning: Unknown mode `~w`. Setting to discrete.~n", [V]),
+	discrete.
 
 add_datas_helper(Actor, []) ->
 	Actor;

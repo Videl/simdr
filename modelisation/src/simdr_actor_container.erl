@@ -212,6 +212,7 @@ manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 %%% @end
 manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 	?DFORMAT("~w receive request of product~n~n", [simdr_actor_contract:get_name(Config)]),
+	?MFORMAT(Config, "~w receive request of product~n", [simdr_actor_contract:actor_sumup(Config)]),
 	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	ListEntry = ets:match_object(
 					TablePid, {product, awaiting_sending, '$1'}
@@ -241,7 +242,9 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 %%% @end
 manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 	Capacity= simdr_actor_contract:get_capacity(Config),
-	?DFORMAT(" ~w < ~w ~n", [NbWorkers, Capacity]),
+	?DFORMAT("~w Capacity: ~w < ~w (current < max)  ~n", [simdr_actor_contract:actor_sumup(Config), 
+							   NbWorkers, 
+							   Capacity]),
 	%[Awaiting] = simdr_actor_contract:get_option(Config, awaiting),
 	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	ets:insert(TablePid, {awaiting, {Sender, erlang:now()}}),
@@ -319,7 +322,7 @@ get_destination(_Config, Dest) when is_pid(Dest) ->
 	Dest;
 get_destination(_Config, WeirdDestination) ->
 	%% @TODO: choose destination
-	io:format("~w COULDN'T send  message to ~w because of BAD FORMAT. " ++ 
+	io:format("Warning: ~w COULDN'T send  message to ~w because of BAD FORMAT. " ++ 
 		"Message not sent.~n~n", [self(), WeirdDestination]),
 	supervisor.
 

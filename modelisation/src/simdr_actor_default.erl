@@ -211,8 +211,8 @@ export_to(csv) ->
 		%%% Value decomposition
 		% R = io_lib:format("~w\n", [X]),
 		 {_Now, {YearMonthDate, HourMinSecs}, Source, Message, Dest} = X,
-		 ShortSource = actor_sumup(Source),
-		 ShortDest = actor_sumup(Dest),
+		 ShortSource = simdr_actor_contract:actor_sumup(Source),
+		 ShortDest = simdr_actor_contract:actor_sumup(Dest),
 		 R = io_lib:format("~w;~w;~w;~w;~w\n",[YearMonthDate, 
 										   HourMinSecs, 
 										   ShortSource, 
@@ -231,16 +231,6 @@ export_to(_) ->
 		io:format("~w~n", [R]), Y
 	end.
 
-actor_sumup(Actor) when is_record(Actor, actor) ->
-	{simdr_actor_contract:get_module(Actor), 
-	 simdr_actor_contract:get_name(Actor),
-	 simdr_actor_contract:get_state(Actor)};
-actor_sumup({Actor}) when is_record(Actor, actor) ->
-	{simdr_actor_contract:get_module(Actor), 
-	 simdr_actor_contract:get_name(Actor),
-	 simdr_actor_contract:get_state(Actor)};
-actor_sumup(Actor) ->
-	Actor.
 
 basic_work_time_method(Actor) ->
 	simdr_actor_contract:get_work_time(Actor).
