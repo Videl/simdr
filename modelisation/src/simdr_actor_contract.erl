@@ -440,7 +440,7 @@ event_dispatcher(N, rt) ->
 					%%% Time to send back all tokens
 					tc51eventmgr:returntoken(EndWorkToken, self()),
 					tc51eventmgr:returntoken(BeginningWorkToken, self()),
-					io:format("<io><io> Sent all tokens (RT). <oi><oi>~n")
+					?DFORMAT("<io><io> Sent all tokens (RT). <oi><oi>~n")
 			end
 	end;
 event_dispatcher(N, _) ->
@@ -451,7 +451,7 @@ event_dispatcher(N, _) ->
 			%%% Work is done
 			%%% Time to send back all tokens
 			tc51eventmgr:returntoken(EndWorkToken, self()),
-			io:format("<io><io> Sent all tokens (D). <oi><oi>~n")
+			?DFORMAT("<io><io> Sent all tokens (D). <oi><oi>~n")
 	end.
 
 
@@ -526,7 +526,7 @@ get_mode_helper(rt) ->
 get_mode_helper([rt]) ->
 	rt;
 get_mode_helper(V) ->
-	io:format("<><><> WEIRD MODE: ~w~n", [V]),
+	?DFORMAT("<><><> WEIRD MODE: ~w~n", [V]),
 	rt.
 
 add_datas_helper(Actor, []) ->

@@ -74,7 +74,7 @@ processing(Config, NbWorkers) ->
 			processing(NewConfig, NewNbWorkers);
 
 		V ->
-			io:format(">>>UNKNOWN REQUEST<<< (~w)~n", [V]),
+			?DFORMAT(">>>UNKNOWN REQUEST<<< (~w)~n", [V]),
 			?MODULE:processing(Config, NbWorkers)
 	end.
 
@@ -119,7 +119,7 @@ end_of_physical_work(
 	?DLOG(
 		simdr_actor_contract:get_module(Config), 
 		{work,done,on,product,ProductConfig}),
-	% io:format("~w >>> Work is done on product id ~p.\n", 
+	% ?DFORMAT("~w >>> Work is done on product id ~p.\n", 
 	% 	[simdr_actor_contract:get_module(NewConfig), simdr_actor_contract:get_name(ProductConfig)]),
 	simdr_actor_contract:add_data(
 		NewConfig, 
@@ -127,7 +127,7 @@ end_of_physical_work(
 	simdr_actor_contract:add_data(
 		ProductConfig, 
 		{{processing,done,by},{NewConfig}}),
-	io:format(" ~w, ~w finish to work product : ~w ~n ~n",
+	?DFORMAT(" ~w, ~w finish to work product : ~w ~n ~n",
 		[simdr_actor_contract:get_module(NewConfig), 
 		 simdr_actor_contract:get_name(NewConfig), 
 		 simdr_actor_contract:get_name(ProductConfig)]),
@@ -149,7 +149,7 @@ end_of_physical_work(
 							send_message(Config, {Config, prob_in}, supervisor);
 						false -> 
 							[H|_Rest] = Awaiting,
-							io:format("same sender~n"),
+							?DFORMAT("same sender~n"),
 							{awaiting, {S, _Date}} = H,
 							Workers = NbWorkers+1,
 							S ! {self(), {control, ok}}
@@ -181,13 +181,13 @@ end_of_logical_work({_Config, NbWorkers},
 %%% @todo: have a way to program a request to be 'physical' or not.
 %%% @end
 manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
-	io:format("~w receive product ~w ~n~n", 
+	?DFORMAT("~w receive product ~w ~n~n", 
 		[simdr_actor_contract:get_name(Config), 
 		 simdr_actor_contract:get_name(ProdConf)]),
 	?DLOG(
 		simdr_actor_contract:get_module(Config), 
 		{starting,to,work,on,product,ProdConf}),
-	% io:format("~w >>> Work is starting on product id ~p.\n", [simdr_actor_contract:get_module(NewConfig), simdr_actor_contract:get_name(ProdConf)]),
+	% ?DFORMAT("~w >>> Work is starting on product id ~p.\n", [simdr_actor_contract:get_module(NewConfig), simdr_actor_contract:get_name(ProdConf)]),
 	simdr_actor_contract:add_data(Config, {{new,product,has,arrived}, {ProdConf}}), 
 	simdr_actor_contract:add_data(ProdConf, {{processing,started,by},Config}),
 	%%% Decrement the number of products waiting for us.
@@ -211,14 +211,14 @@ manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 %%% is sent.
 %%% @end
 manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
-	io:format("~w receive request of product~n~n", [simdr_actor_contract:get_name(Config)]),
+	?DFORMAT("~w receive request of product~n~n", [simdr_actor_contract:get_name(Config)]),
 	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	ListEntry = ets:match_object(
 					TablePid, {product, awaiting_sending, '$1'}
 				),
 	case simdr_actor_contract:list_size(ListEntry) > 0 of
 		true ->
-			%io:format("Sending product..~n"),
+			%?DFORMAT("Sending product..~n"),
 			FirstEntry = simdr_actor_contract:first(ListEntry),
 			{product, awaiting_sending, Prod} = FirstEntry,
 			simdr_actor_contract:add_data(Config, {{sending, product}, {Prod}}), 
@@ -226,7 +226,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			send_message(Config, {actor_product, Prod}, Sender),
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
-			%io:format("End of sending product..~n"),
+			%?DFORMAT("End of sending product..~n"),
 			NewConfig = simdr_actor_contract:set_state(Config, on),
 			NewNbWorkers = NbWorkers-1;
 
@@ -241,7 +241,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 %%% @end
 manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 	Capacity= simdr_actor_contract:get_capacity(Config),
-	io:format(" ~w < ~w ~n", [NbWorkers, Capacity]),
+	?DFORMAT(" ~w < ~w ~n", [NbWorkers, Capacity]),
 	%[Awaiting] = simdr_actor_contract:get_option(Config, awaiting),
 	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	ets:insert(TablePid, {awaiting, {Sender, erlang:now()}}),
@@ -324,9 +324,9 @@ get_destination(_Config, WeirdDestination) ->
 	supervisor.
 
 sender(Ans, supervisor) ->
-	io:format("~w send ~w to ~w.~n~n", [self(), Ans, supervisor]);
+	?DFORMAT("~w send ~w to ~w.~n~n", [self(), Ans, supervisor]);
 sender(Ans, Dest) ->
-	io:format("~w send ~w to ~w.~n~n", [self(), Ans, Dest]),
+	?DFORMAT("~w send ~w to ~w.~n~n", [self(), Ans, Dest]),
 	Dest ! {self(), Ans}.
 
 
@@ -338,7 +338,7 @@ wait(Pid, Wait_time, {Ans, Dest}) when is_pid(Dest)->
 	Dest ! {Pid, {Ans}};
 wait(Pid, Wait_time, {Ans, Dest}) ->
 	simdr_actor_contract:work(Wait_time),
-	io:format(" ~w send ~w to ~w.~n~n", [Pid, Ans, Dest]).
+	?DFORMAT(" ~w send ~w to ~w.~n~n", [Pid, Ans, Dest]).
 
 
 %% ===================================================================

@@ -1,5 +1,6 @@
 -module(tc51phylnk). %% ports linking phyres. 
--include("debug.hrl").
+-include("app_configuration.hrl").
+
 -export([create/2, get_from/1, get_to/1, set_from_port/2, set_to_port/2]).
 -export([loop/4]). %% for internal use - spawn - only. 
 

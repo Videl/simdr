@@ -4,6 +4,11 @@
 %%% 	 every second.
 %%% @end
 -module(simdr_timemachine).
+-include("app_configuration.hrl").
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
 
 %% User functions export
 
@@ -72,7 +77,7 @@ loop({MegaSecs, Secs, MicroSecs}, IniDiff) ->
 	  erlang:trunc(MicroSecs)},
 	receive
 		{Pid, time} ->
-			io:format("TIMEMACHINE > ~w~n", [Time]),
+			?DFORMAT("TIMEMACHINE > ~w~n", [Time]),
 			Pid ! {simdr_timemachine, Pid, calendar:now_to_local_time(Time)},
 			loop(Time, IniDiff);
 		{_Pid, forward, Value} ->

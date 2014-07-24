@@ -3,7 +3,8 @@
 %%          Matias Novias    (Intec, Argentina) 
 -module(tc51etstb).
 -include("tc51eventrecord.hrl").   %% -record (tc51event, {time_ref, notifyPid, load})
--include("debug.hrl").
+-include("app_configuration.hrl").
+
 -export([init/0, init/1, insert/2, first/1, nextEventTime/1, removefirst/1]). 
 
 init() ->

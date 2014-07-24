@@ -1,6 +1,7 @@
 -module(tc51phyres). %% physical resource non-aggregated/non-composite. 
 -include("tc51eventrecord.hrl").
--include("debug.hrl").
+-include("app_configuration.hrl").
+
 %% -record (tc51event, {time_ref, notifyPid, load}). 
 %% time_ref = {time, reference} where the reference ensures uniqueness 
 -import(tc51eventmgr, [post/3, postincr/3, returntoken/2, gettime/0, gettoken/1]). 

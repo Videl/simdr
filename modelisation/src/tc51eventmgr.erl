@@ -4,7 +4,8 @@
 
 -module(tc51eventmgr).
 -include("tc51eventrecord.hrl").
--include("debug.hrl").
+-include("app_configuration.hrl").
+
 %% -record (tc51event, {time_ref, notifyPid, load}). 
 %% time_ref = {time, reference} where the reference ensures uniqueness 
 
@@ -87,7 +88,7 @@ loop( E, T, Count, Time, Clock ) ->
 	%% Case 1: Simulation time has caught up with the earliest "post".
 	%%  To Do: Notify the "posting process" and remove event from calendar.
 		NET =< Time ->
-			io:format("CASE1: UP TO DATE (Tokens: ~w)~n", [Count]),
+			?DFORMAT("CASE1: UP TO DATE (Tokens: ~w)~n", [Count]),
 			#tc51event{notifyPid = NotifyPid, load = Load } = tc51etstb:first(E),
 			Token = make_ref(), ets:insert_new(T, {Token, NotifyPid}),
 			NotifyPid ! {notify, Time, Token, Load}, tc51etstb:removefirst(E),
@@ -97,7 +98,7 @@ loop( E, T, Count, Time, Clock ) ->
 	%%  To Do: Receive event postings, token returns, 
 	%%         handle time and token requests
 		NET =:= infinity -> 
-			io:format("CASE2: EMPTY (Tokens: ~w)~n", [Count]),
+			?DFORMAT("CASE2: EMPTY (Tokens: ~w)~n", [Count]),
 			receive 
 				{ post__incr_event, Delay, NotifyPid, Load } -> 
 					CurrentTime = adaptTime(Clock),
@@ -126,14 +127,14 @@ loop( E, T, Count, Time, Clock ) ->
 	%%  To Do: Move simulation time forward until the time of the earliest event in the calendar.
 	%%         Resynchronise simulation time, which becomes NET, with computer's clock (i.e. now). 
 		Count =< 0 -> %% all tokens have been returned, so jump to the next event
-			io:format("CASE3: ALL TOKENS HAVE BEEN RETURNED (Tokens: ~w)~n", [Count]),
+			?DFORMAT("CASE3: ALL TOKENS HAVE BEEN RETURNED (Tokens: ~w)~n", [Count]),
 			?MODULE:loop(E, T, Count, NET, {NET, now()}); %% count ought to be zero, not negative. 
 			
 	%% Case 4: In real time mode, waiting until the time catches up with the earliest event in
 	%%         the simulation calendar. There still is at least one event that needs processing. 
 	%%  To Do: Receive event postings, token returns, handle time and token requests
 		true ->
-			io:format("CASE4: RT MODE (Tokens: ~w, Timeout:~w)~n", [Count, NET-Time]),
+			?DFORMAT("CASE4: RT MODE (Tokens: ~w, Timeout:~w)~n", [Count, NET-Time]),
 			receive 
 					stop -> void;	 %% to stop the testing run;	
 					{ post__incr_event, Delay, NotifyPid, Load } -> 
