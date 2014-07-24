@@ -209,15 +209,15 @@ out_processed(Config, Out1, Out2, Quality, QualityProduct, Order)->
 	 	{ _Actor2, Time2} = lookup_module(Config, Out2, simdr_actor_workstation_assembly), 
 	 	case abs(difference_quality(QualityProduct, Quality))<2 of 
 			 true ->  case Time1<Time2 of 
-						 	true -> Out1 ! {add, option, {order, Order}},
+						 	true -> send_message({add, option, {order, Order}}, Out1),
 						 			Out1;
-						 	false ->% Out2 ! {add, option, {order, Order}},
+						 	false -> send_message({add, option, {order, Order}}, Out2),
 						 			Out2
 					 end;
 			 false -> case Time1<Time2 of 
-						 	true -> Out2 ! {add, option, {order, Order}},
+						 	true -> send_message({add, option, {order, Order}}, Out2),
 						 			Out2;
-						 	false -> %Out1 ! {add, option, {order, Order}},
+						 	false -> send_message({add, option, {order, Order}}, Out1),
 						 			Out1 
 					end
 		end.
@@ -240,6 +240,12 @@ out_assembled(Config, Out1, Out2, Quality, QualityProduct, Order)->
 					 					end
 			 		end.
 
+
+send_message(LittleAnswer, Destination) when is_pid(Destination)->
+	Destination ! {self(), LittleAnswer};
+send_message(LittleAnswer, Destination)->
+	io:format("~w COULDN'T send  message to ~w because of BAD FORMAT. " ++ 
+		"Message not sent.~n~n", [self(), Destination]).
 
 %% ===================================================================
 %% Tests
