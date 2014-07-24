@@ -29,11 +29,11 @@ create() ->
 create({Quality, Luck}) ->
 	create(simdr_actor_contract:random_id(),{Quality, Luck});
 
-create(Name ) ->
+create(Name) ->
 	create(Name,{'Q1', 33}).
 
 create(Name, {Quality, Luck}) ->
-	Ac1 = 	simdr_actor_contract:create(?MODULE, Name, [], off, 1, []),
+	Ac1 = simdr_actor_contract:create(?MODULE, Name, [], off, 1, []),
 	Ac2 = simdr_actor_contract:set_option(Ac1, workstation_luck, {Quality, Luck}),
 	Ac2.
 
