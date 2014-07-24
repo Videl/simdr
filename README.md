@@ -15,7 +15,7 @@ A few dumb supervisors are also here, which can control the flow of products by 
 
 How to begin
 ------------
-Please go check the [[wiki|https://github.com/Videl/simdr/wiki]], hopefully everything is written there.
+Please go check the [wiki](https://github.com/Videl/simdr/wiki), hopefully everything is written there.
 If you have trouble to use the software, don't hesitate to contact us.
 
 License
