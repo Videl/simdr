@@ -15,11 +15,15 @@
 	]).
 
 -export([
+	create/1,
 	create/2
 	]).
 
 create() ->
-    create(simdr_actor_contract:random_id(), {'Q1',{1,0,1,0}}).
+    create(simdr_actor_contract:random_id()).
+ 
+create(Name) ->
+	create(Name, {'Q1',{1,0,1,0}}).
 
 create(Name, Order) ->
     Ac1 = simdr_supervisor_contract:create(?MODULE, Name),
@@ -101,8 +105,11 @@ lookup_module(Config, Out, Module)->
 			 	Actor2= simdr_supervisor_contract:get_actor(Config, H),
 			 	lookup_module_helper(Config, Actor2, Module, simdr_actor_contract:get_work_time(Actor))
 	end.
+
+lookup_module_helper(_Config, _Act, _Module, Time) when (Time>20)->
+{unknown_actor, 999};
 lookup_module_helper(_Config, unknown_actor, _Module, _Time) ->
-{unknown_actor, 9999};
+{unknown_actor, 999};
 
 lookup_module_helper(Config, Actor, Module, Time) ->
 	case simdr_actor_contract:get_module(Actor) of
@@ -121,21 +128,25 @@ lookup_module_helper(Config, Actor, Module, Time) ->
 loop(ListOut, 2, Config, Module, Time)->
 [H| Rest] =ListOut,
 [H2|_Rest2] = Rest,
-{Ac, Time} = lookup_module_helper(Config, H, Module, Time),
-{Ac2, Time2} = lookup_module_helper(Config, H2, Module, Time),
-	case Time<Time2 of 
-		 true -> {Ac, Time};
+A1 = simdr_supervisor_contract:get_actor(Config, H),
+A2 = simdr_supervisor_contract:get_actor(Config, H2),
+{Ac, Time1} = lookup_module_helper(Config, A1, Module, Time),
+{Ac2, Time2} = lookup_module_helper(Config, A2, Module, Time),
+	case Time1<Time2 of 
+		 true -> {Ac, Time1};
 		 false -> {Ac2, Time2}
 	end;
 
 loop(ListOut, _Size, Config, Module, Time) ->
 [H| Rest] =ListOut,
 [H2|Rest2] = Rest,
-{_Ac, Time} = lookup_module_helper(Config, H, Module, Time),
-{_Ac2, Time2} = lookup_module_helper(Config, H2, Module, Time),
-	case Time<Time2 of 
+A1 = simdr_supervisor_contract:get_actor(Config, H),
+A2 = simdr_supervisor_contract:get_actor(Config, H2),
+{_Ac, Time1} = lookup_module_helper(Config, A1, Module, Time),
+{_Ac2, Time2} = lookup_module_helper(Config, A2, Module, Time),
+	case Time1<Time2 of 
 		 true -> NewList = [H]++Rest2,
-		 	loop(NewList, simdr_supervisor_contract:list_size(NewList), Config, Module, Time);
+		 	loop(NewList, simdr_supervisor_contract:list_size(NewList), Config, Module, Time1);
 		 false-> loop(Rest, simdr_supervisor_contract:list_size(Rest), Config, Module, Time2)
 	end.
 

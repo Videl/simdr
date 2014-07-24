@@ -24,8 +24,7 @@
 %% Behavior implementation
 
 create() ->
-	RandomQuality = random(),
-	create(RandomQuality).
+	create(simdr_actor_contract:random_id()).
 
 create(Name) ->
 	create(Name, random()).
