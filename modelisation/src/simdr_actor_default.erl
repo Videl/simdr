@@ -174,7 +174,7 @@ answer(ActorConfig, {csv_export, debug}) ->
 	supervisor};
 
 answer(_, Request) ->
-	io:format(">>>UNKNOWN ANSWER<<< (~w) (~w:~w)~n", [Request, ?MODULE, ?LINE]),
+	io:format(">>>UNKNOWN ANSWER. EXITING.<<< (~w) (~w:~w)~n", [Request, ?MODULE, ?LINE]),
 	exit(unknown_request).
 
 %% ===================================================================
