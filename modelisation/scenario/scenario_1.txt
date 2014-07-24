@@ -11,9 +11,12 @@ BQ1 ! WST1 ! {start}.
 
 BQ1 ! {self(), {add, out, WST1}}.
 WST1 ! {self(), {add, out, self()}}.
+BQ1 ! {self(), {change, work_time, 3}}.
 WST1 ! {self(), {change, capacity, 2}}.
-BQ1 ! {self(), {change, work_time, 10}}.
+WST1 ! {self(), {change, work_time, 10}}.
 
+WST1 ! {self(), {change, mode, rt}}.
+%BQ1 ! {self(), {change, mode, rt}}.
 
 P1 = simdr_actor_product:create().
 P2 = simdr_actor_product:create().
