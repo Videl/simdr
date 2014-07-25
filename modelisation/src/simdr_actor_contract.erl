@@ -27,6 +27,7 @@
 		 add_in/2,
 		 add_out/2,
 		 add_option/3,
+		 set_options/3,
 		 add_to_list_data/4,
 		 get_data/1,
 		 get_pid/1,
@@ -383,6 +384,22 @@ add_option(Actor, Key, Value) ->
 	simdr_actor_contract:add_data(Actor, {{option,added}, {{Key, Value}}}),
 	%%(ets:insert(Table, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
+
+set_options(Actor, Key, List) ->
+	Table = Actor#actor.opt,
+	simdr_tools:delete_option_in_ets(Table, Key),
+	set_options_helper(Table,Key, List),
+	Actor.
+	
+set_options_helper(_Table,_Key, []) ->
+	ok;
+
+set_options_helper(Table,Key, List) ->
+	[Value|R]=List,
+	simdr_tools:add_option_in_ets(Table, Key, Value),
+	set_options_helper(Table,Key, R).
+
+
 
 %%% @doc Sleep for the specified time (in seconds).
 %%% @spec (N :: non_neg_integer()) -> ok

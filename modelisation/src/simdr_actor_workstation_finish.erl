@@ -36,13 +36,14 @@ create(Name, {Stop, Manip, Evac}) ->
 	Ac2.
 
 answer(WSConfig, {actor_product, ProductConfig}) ->
+
 	case simdr_actor_contract:get_option(WSConfig, order) of 
-		unknown_option -> Order = {'Q1',{1,0,1,0}};
-		 [Order|_R] ->simdr_actor_contract:get_option(WSConfig, order)
+		unknown_option -> Order = {'Q1',{1,0,1,0}},
+						R=[];
+		 [Order|R] ->simdr_actor_contract:get_option(WSConfig, order)
 	end,
 	{Quality, _Assembly} = Order,
 	QualityAct = simdr_actor_contract:get_option(ProductConfig, quality),
-	 io : format( " ordre ~w, quality ~w ~n", [Quality,QualityAct] ),
 	case improve(Quality, QualityAct) of 
 		true -> 
 			Finish = case QualityAct of 
@@ -68,10 +69,14 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewWSConfig, NewProductConfigBis} = simdr_actor_contract:add_to_list_data(
 		WSConfig, {{finish, for, Finish, 'of',product}, {ProductConfig}}, 
 		NewProductConfig, {{quality,became,Finish,because,'of'},{WSConfig}}),
-	 io : format( " nouvelle qualité ~w ~n", [Finish] ),
-	 io:format("Order avant delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
-	simdr_actor_contract:delete_option(WSConfig, Order),
-	io:format("Order après delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
+	  io:format("Order avant delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
+	 case simdr_actor_contract:get_option(WSConfig, order) of 
+	 	 unknown_option -> nothing;
+	 	 _-> simdr_actor_contract:set_options(WSConfig, order, R)
+	end,
+	 io:format("Order apres delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
+	% end,
+	% io:format("Order après delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
 	%%% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Finish}, 

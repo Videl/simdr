@@ -16,6 +16,7 @@
 	 add_actor/2,
 	 get_option/2,
 	 set_option/3,
+	 set_options/3,
 	 update_actor/3,
 	 delete_option/2,
 	 add_option/3,
@@ -121,6 +122,21 @@ set_option(Supervisor, Key, Value) ->
 	true = simdr_tools:set_option_in_ets(Table, Key, Value),
 	Supervisor.
 	
+
+set_options(Sup, Key, List) ->
+	Table = Sup#supervisor.options,
+	simdr_tools:delete_option_in_ets(Table, Key),
+	set_options_helper(Table,Key, List),
+	Sup.
+	
+set_options_helper(_Table,_Key, []) ->
+	ok;
+
+set_options_helper(Table,Key, List) ->
+	[Value|R]=List,
+	simdr_tools:add_option_in_ets(Table, Key, Value),
+	set_options_helper(Table,Key, R).
+
 delete_option(Supervisor, Key) ->
 	Table = Supervisor#supervisor.options,
 	simdr_tools:delete_option_in_ets(Table, Key),
