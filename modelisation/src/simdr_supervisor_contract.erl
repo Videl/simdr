@@ -8,7 +8,8 @@
 -export([
 	 create/1,
 	 create/2,
-	 contain_decision/2,
+	% contain_decision/2,
+	 get_destination/2,
 	 add_decision/2,
 	 get_actors/1,
 	 get_actor/2,
@@ -70,12 +71,20 @@ add_decision(Supervisor, Decision) ->
 	Data = {erlang:now(), erlang:localtime(), Decision},
 	simdr_tools:add_data_in_ets(Table, Data).
 
-contain_decision(Supervisor, Decision)->
+% contain_decision(Supervisor, Prod)->
+% 	Table = Supervisor#supervisor.decisions_history,
+% 	List = ets:match_object(Table, {'_','_', {Prod, '$1','_'}}),
+% 	case List of 
+% 		[] -> false;
+% 		_-> true
+% 	end.
+get_destination(Supervisor, Prod)->
 	Table = Supervisor#supervisor.decisions_history,
-	List = ets:match_object(Table, {'_','$1', Decision}),
+	List = ets:match_object(Table, {'_','_', {Prod, '_','$1'}}),
 	case List of 
-		[] -> false;
-		_-> true
+		[] -> {nothing, nothing, {nothing, nothing, nothing}};
+		_-> [H]=List,
+			H
 	end.
 
 add_data(_Supervisor, _Message, _Object) ->
