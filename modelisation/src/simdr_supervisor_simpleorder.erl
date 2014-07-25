@@ -25,6 +25,11 @@ create() ->
 create(Name) ->
 	create(Name, {'Q1',{1,0,1,0}}).
 
+create(Name, Orders) when is_list(Orders)->
+    Ac1 = simdr_supervisor_contract:create(?MODULE, Name),
+    Ac2 = simdr_supervisor_contract:set_options(Ac1, order, Orders),
+    Ac2;
+
 create(Name, Order) ->
     Ac1 = simdr_supervisor_contract:create(?MODULE, Name),
     Ac2 = simdr_supervisor_contract:set_option(Ac1, order, Order),
@@ -59,17 +64,33 @@ action_on_request(Config, Sender, {out, Out, added})->
 
 action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_out}}) ->
 
-	Order = get_first_order(Config),
-	{Quality, _Assembly} = Order,
+
 	Outputs = simdr_actor_contract:get_out(ActorConfig),
-	[Out1|R]=Outputs,
-	[Out2|_R2]=R, 
+	[Out1|R1]=Outputs,
+	[Out2|_R2]=R1, 
 	ProductState =simdr_actor_contract:get_state(Product),
+	io:format("premier ordre : ~w ~n", [simdr_supervisor_contract:get_option(Config, order)]),	
 	 %%processed, assembled or finished
 	Decision = case ProductState of
-		raw -> out_raw(Config, Out1, Out2, Quality);
-	 	processed -> out_processed (Config, Out1, Out2, Quality, Product, Order);
-	 	assembled -> out_assembled(Config, Out1, Out2, Quality, Product, Order);
+		raw -> [Order|R] = simdr_supervisor_contract:get_option(Config, order),
+			io:format("premier ordre : ~w ~n", [Order]),
+			{Quality, _Assembly} = Order,
+			simdr_supervisor_contract:set_options(Config, order, R),
+			simdr_supervisor_contract:add_option(Config, order_process, Order),
+			out_raw(Config, Out1, Out2, Quality);
+
+	 	processed -> [Order|R] = simdr_supervisor_contract:get_option(Config, order_process),
+					io:format("premier ordre process : ~w ~n", [Order]),
+					{Quality, _Assembly} = Order,	 				
+	 				simdr_supervisor_contract:set_options(Config, order_process, R),
+					simdr_supervisor_contract:add_option(Config, order_assembly, Order),
+					out_processed (Config, Out1, Out2, Quality, Product, Order);
+
+	 	assembled -> [Order|R] = simdr_supervisor_contract:get_option(Config, order_assembly),
+					io:format("premier ordre process : ~w ~n", [Order]),
+					{Quality, _Assembly} = Order,
+	 				simdr_supervisor_contract:set_options(Config, order_assembly, R),
+	 				out_assembled(Config, Out1, Out2, Quality, Product, Order);
 	 	_ -> Out2
 	 end,
  	
