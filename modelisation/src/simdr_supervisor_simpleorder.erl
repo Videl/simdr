@@ -143,12 +143,12 @@ lookup_module_helper(Config, Actor, Module, Time) ->
 					1 ->[H|_Rest] = Outputs,
 					Actor2= simdr_supervisor_contract:get_actor(Config, H),
 					lookup_module_helper(Config, Actor2, Module, Time+simdr_actor_contract:get_work_time(Actor));
-					_-> loop(Outputs, simdr_supervisor_contract:list_size(Outputs), Config, Module, Time)
+					_-> loop_module(Outputs, simdr_supervisor_contract:list_size(Outputs), Config, Module, Time)
 				end
 	end.
 
 
-loop(ListOut, 2, Config, Module, Time)->
+loop_module(ListOut, 2, Config, Module, Time)->
 [H| Rest] =ListOut,
 [H2|_Rest2] = Rest,
 A1 = simdr_supervisor_contract:get_actor(Config, H),
@@ -160,7 +160,7 @@ A2 = simdr_supervisor_contract:get_actor(Config, H2),
 		 false -> {Ac2, Time2}
 	end;
 
-loop(ListOut, _Size, Config, Module, Time) ->
+loop_module(ListOut, _Size, Config, Module, Time) ->
 [H| Rest] =ListOut,
 [H2|Rest2] = Rest,
 A1 = simdr_supervisor_contract:get_actor(Config, H),
@@ -169,10 +169,63 @@ A2 = simdr_supervisor_contract:get_actor(Config, H2),
 {_Ac2, Time2} = lookup_module_helper(Config, A2, Module, Time),
 	case Time1<Time2 of 
 		 true -> NewList = [H]++Rest2,
-		 	loop(NewList, simdr_supervisor_contract:list_size(NewList), Config, Module, Time1);
-		 false-> loop(Rest, simdr_supervisor_contract:list_size(Rest), Config, Module, Time2)
+		 	loop_module(NewList, simdr_supervisor_contract:list_size(NewList), Config, Module, Time1);
+		 false-> loop_module(Rest, simdr_supervisor_contract:list_size(Rest), Config, Module, Time2)
 	end.
 
+lookup_actor(Config, Out, DestActor)->
+	Actor = simdr_supervisor_contract:get_actor(Config, Out),
+	case simdr_actor_contract:get_module(Actor) of
+			DestActor-> {Actor, 0};
+			 _ -> Outputs = simdr_actor_contract:get_out(Actor),
+			 	 [H|_Rest] = Outputs,
+			 	Actor2= simdr_supervisor_contract:get_actor(Config, H),
+			 	lookup_actor_helper(Config, Actor2, DestActor, simdr_actor_contract:get_work_time(Actor))
+	end.
+
+lookup_actor_helper(_Config, _Act, _DestActor, Time) when (Time>40)->
+{unknown_actor, 999};
+lookup_actor_helper(_Config, unknown_actor, _Actor, _Time) ->
+{unknown_actor, 998};
+
+lookup_actor_helper(Config, Actor, DestActor, Time) ->
+	case Actor of
+			DestActor -> {Actor, Time};
+			_ -> Outputs = simdr_actor_contract:get_out(Actor),
+				case   simdr_supervisor_contract:list_size(Outputs) of
+					0 -> lookup_actor_helper(Config, unknown_actor, Actor, Time);
+					1 ->[H|_Rest] = Outputs,
+					Actor2= simdr_supervisor_contract:get_actor(Config, H),
+					lookup_actor_helper(Config, Actor2, DestActor, Time+simdr_actor_contract:get_work_time(Actor));
+					_-> loop_actor(Outputs, simdr_supervisor_contract:list_size(Outputs), Config, DestActor, Time)
+				end
+	end.
+
+
+loop_actor(ListOut, 2, Config, DestActor, Time)->
+[H| Rest] =ListOut,
+[H2|_Rest2] = Rest,
+A1 = simdr_supervisor_contract:get_actor(Config, H),
+A2 = simdr_supervisor_contract:get_actor(Config, H2),
+{Ac, Time1} = lookup_actor_helper(Config, A1, DestActor, Time),
+{Ac2, Time2} = lookup_actor_helper(Config, A2, DestActor, Time),
+	case Time1<Time2 of 
+		 true -> {Ac, Time1};
+		 false -> {Ac2, Time2}
+	end;
+
+loop_actor(ListOut, _Size, Config, DestActor, Time) ->
+[H| Rest] =ListOut,
+[H2|Rest2] = Rest,
+A1 = simdr_supervisor_contract:get_actor(Config, H),
+A2 = simdr_supervisor_contract:get_actor(Config, H2),
+{_Ac, Time1} = lookup_module_helper(Config, A1, DestActor, Time),
+{_Ac2, Time2} = lookup_module_helper(Config, A2, DestActor, Time),
+	case Time1<Time2 of 
+		 true -> NewList = [H]++Rest2,
+		 	loop_actor(NewList, simdr_supervisor_contract:list_size(NewList), Config, DestActor, Time1);
+		 false-> loop_actor(Rest, simdr_supervisor_contract:list_size(Rest), Config,DestActor, Time2)
+	end.
 difference_quality(Q1,Q2) when is_list(Q1) ->
 	case Q1 of 
 		['Q1'] -> 
