@@ -38,7 +38,7 @@ create(Name, {Stop, Manip, Evac}) ->
 answer(WSConfig, {actor_product, ProductConfig}) ->
 	case simdr_actor_contract:get_option(WSConfig, order) of 
 		unknown_option -> Order = {'Q1',{1,0,1,0}};
-		_ -> [Order] = simdr_actor_contract:get_option(WSConfig, order)
+		 [Order|_R] ->simdr_actor_contract:get_option(WSConfig, order)
 	end,
 	{Quality, _Assembly} = Order,
 	QualityAct = simdr_actor_contract:get_option(ProductConfig, quality),
@@ -69,6 +69,9 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 		WSConfig, {{finish, for, Finish, 'of',product}, {ProductConfig}}, 
 		NewProductConfig, {{quality,became,Finish,because,'of'},{WSConfig}}),
 	 io : format( " nouvelle qualité ~w ~n", [Finish] ),
+	 io:format("Order avant delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
+	simdr_actor_contract:delete_option(WSConfig, Order),
+	io:format("Order après delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
 	%%% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Finish}, 

@@ -38,7 +38,7 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	simdr_actor_contract:work(simdr_actor_contract:get_work_time(WSConfig)),
 	case simdr_actor_contract:get_option(WSConfig, order) of 
 		unknown_option -> Transfo = {'Q1',{1,0,1,0}};
-		_ -> [Transfo] = simdr_actor_contract:get_option(WSConfig, order)
+		 [Transfo|_R] -> simdr_actor_contract:get_option(WSConfig, order)
 	end,	
 	{_Quality, Assembly} = Transfo,
 	simdr_actor_contract:set_option(ProductConfig, assembled, Assembly),
@@ -47,6 +47,9 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewWSConfig, NewProductConfigBis} = simdr_actor_contract:add_to_list_data(
 		WSConfig, {{changed,assembly,for, Assembly,'of',product}, {ProductConfig}}, 
 		NewProductConfig, {{assembly,became,Assembly,because,'of'},{WSConfig}}),
+	io:format("Order avant delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
+	simdr_actor_contract:delete_option(WSConfig, Transfo),
+	io:format("Order après delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
 	%%% Answer
 	{NewWSConfig, 
 	{actor_product, NewProductConfigBis, Assembly}, 

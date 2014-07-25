@@ -65,12 +65,11 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	[Out1|R]=Outputs,
 	[Out2|_R2]=R, 
 	ProductState =simdr_actor_contract:get_state(Product),
-	QualityProduct = simdr_actor_contract:get_option(Product, quality),
 	 %%processed, assembled or finished
 	Decision = case ProductState of
 		raw -> out_raw(Config, Out1, Out2, Quality);
-	 	processed -> out_processed (Config, Out1, Out2, Quality, QualityProduct, Order);
-	 	assembled -> out_assembled(Config, Out1, Out2, Quality, QualityProduct, Order);
+	 	processed -> out_processed (Config, Out1, Out2, Quality, Product, Order);
+	 	assembled -> out_assembled(Config, Out1, Out2, Quality, Product, Order);
 	 	_ -> Out2
 	 end,
  	
@@ -88,7 +87,10 @@ action_on_request(Config, Sender, Request) ->
 
 get_first_order(Config) -> 
 	Orders = simdr_supervisor_contract:get_option(Config, order),
-	first(Orders).
+	case Orders of 
+		{_Q,_A} ->first(Orders);
+		_ -> {'Q1',{1,0,1,0}}
+	end.
 
 first([]) -> 
 	[];
@@ -106,10 +108,10 @@ lookup_module(Config, Out, Module)->
 			 	lookup_module_helper(Config, Actor2, Module, simdr_actor_contract:get_work_time(Actor))
 	end.
 
-lookup_module_helper(_Config, _Act, _Module, Time) when (Time>20)->
+lookup_module_helper(_Config, _Act, _Module, Time) when (Time>40)->
 {unknown_actor, 999};
 lookup_module_helper(_Config, unknown_actor, _Module, _Time) ->
-{unknown_actor, 999};
+{unknown_actor, 998};
 
 lookup_module_helper(Config, Actor, Module, Time) ->
 	case simdr_actor_contract:get_module(Actor) of
@@ -215,39 +217,75 @@ out_raw(Config, Out1, Out2, Quality)->
 			 				end
 	 	end.
 
-out_processed(Config, Out1, Out2, Quality, QualityProduct, Order)->
-		{ _Actor1, Time1} = lookup_module(Config, Out1, simdr_actor_workstation_assembly),
-	 	{ _Actor2, Time2} = lookup_module(Config, Out2, simdr_actor_workstation_assembly), 
+out_processed(Config, Out1, Out2, Quality, Product, Order)->
+		IdProduct = simdr_actor_contract:get_name(Product),
+		QualityProduct = simdr_actor_contract:get_option(Product, quality),
+		{ Actor1, Time1} = lookup_module(Config, Out1, simdr_actor_workstation_assembly),
+	 	{ Actor2, Time2} = lookup_module(Config, Out2, simdr_actor_workstation_assembly), 
 	 	case abs(difference_quality(QualityProduct, Quality))<2 of 
 			 true ->  case Time1<Time2 of 
-						 	true -> send_message({add, option, {order, Order}}, Out1),
+						 	true -> case simdr_supervisor_contract:contain_decision(Config, {IdProduct, Order,Actor1}) of 
+						 			false -> send_message({add, option, {order, Order}}, simdr_actor_contract:get_pid(Actor1)),
+						 					simdr_supervisor_contract:add_decision(Config,{IdProduct, Order,Actor1});
+						 			true -> ok
+						 			end,
 						 			Out1;
-						 	false -> send_message({add, option, {order, Order}}, Out2),
+						 	false -> case simdr_supervisor_contract:contain_decision(Config, {IdProduct, Order,Actor2}) of 
+						 			false -> send_message({add, option, {order, Order}}, simdr_actor_contract:get_pid(Actor2)),
+						 					simdr_supervisor_contract:add_decision(Config,{IdProduct, Order,Actor2});
+						 			true-> ok
+						 			end,
 						 			Out2
 					 end;
 			 false -> case Time1<Time2 of 
-						 	true -> send_message({add, option, {order, Order}}, Out2),
+						 	true -> case simdr_supervisor_contract:contain_decision(Config, {IdProduct, Order,Actor2}) of 
+						 			false -> send_message({add, option, {order, Order}}, simdr_actor_contract:get_pid(Actor2)),
+						 					simdr_supervisor_contract:add_decision(Config,{IdProduct, Order,Actor2});
+						 			true -> ok
+						 			end,
 						 			Out2;
-						 	false -> send_message({add, option, {order, Order}}, Out1),
+						 	false ->  case simdr_supervisor_contract:contain_decision(Config, {IdProduct, Order,Actor1}) of 
+						 			false -> send_message({add, option, {order, Order}}, simdr_actor_contract:get_pid(Actor1)),
+						 					simdr_supervisor_contract:add_decision(Config,{IdProduct, Order,Actor1});
+						 			true -> ok
+						 			end,
 						 			Out1 
 					end
 		end.
 
-out_assembled(Config, Out1, Out2, Quality, QualityProduct, Order)->
-			{ _Actor1, Time1} = lookup_module(Config, Out1, simdr_actor_workstation_finish),
-	 		{ _Actor2, Time2} = lookup_module(Config, Out2, simdr_actor_workstation_finish), 
+out_assembled(Config, Out1, Out2, Quality, Product, Order)->
+			IdProduct = simdr_actor_contract:get_name(Product),
+			QualityProduct = simdr_actor_contract:get_option(Product, quality),
+			{ Actor1, Time1} = lookup_module(Config, Out1, simdr_actor_workstation_finish),
+	 		{ Actor2, Time2} = lookup_module(Config, Out2, simdr_actor_workstation_finish), 
 	 				case difference_quality(QualityProduct, Quality)>0 of 
 			 				true ->  case Time1<Time2 of 
-						 					true -> send_message({add, option, {order, Order}}, Out1),
-						 							Out1;
-						 					false -> send_message({add, option, {order, Order}}, Out2),
-						 							Out2
+						 					true -> case simdr_supervisor_contract:contain_decision(Config, {IdProduct, Order,Actor1}) of 
+												 			false -> send_message({add, option, {order, Order}}, simdr_actor_contract:get_pid(Actor1)),
+												 					simdr_supervisor_contract:add_decision(Config,{IdProduct, Order,Actor1});
+												 			true -> ok
+												 			end,
+												 			Out1 ;
+						 					false -> case simdr_supervisor_contract:contain_decision(Config, {IdProduct, Order,Actor2}) of 
+												 			false -> send_message({add, option, {order, Order}}, simdr_actor_contract:get_pid(Actor2)),
+												 					simdr_supervisor_contract:add_decision(Config,{IdProduct, Order,Actor2});
+												 			true -> ok
+												 			end,
+												 			Out2
 					 					end;
 					 		false -> case Time1<Time2 of 
-						 					true -> send_message({add, option, {order, Order}}, Out2),
-						 							Out2;
-						 					false -> send_message({add, option, {order, Order}}, Out1),
-						 							Out1
+						 					true -> case simdr_supervisor_contract:contain_decision(Config,{IdProduct, Order,Actor2}) of 
+												 			false -> send_message({add, option, {order, Order}}, simdr_actor_contract:get_pid(Actor2)),
+												 					simdr_supervisor_contract:add_decision(Config,{IdProduct, Order,Actor2});
+												 			true -> ok
+												 			end,
+												 			Out2;
+						 					false -> case simdr_supervisor_contract:contain_decision(Config, {IdProduct, Order,Actor1}) of 
+												 			false -> send_message({add, option, {order, Order}}, simdr_actor_contract:get_pid(Actor1)),
+												 					simdr_supervisor_contract:add_decision(Config,{IdProduct, Order,Actor1});
+												 			true -> ok
+												 			end,
+												 			Out1 
 					 					end
 			 		end.
 
@@ -344,7 +382,7 @@ send_message(_LittleAnswer, Destination)->
 		?_assertMatch(
 	 		{WS2, 3.0 },lookup_module(Sup7, PidC21, simdr_actor_workstation)),
 		 ?_assertMatch(
-	  		{unknown_actor, 9999},lookup_module(Sup9, PidC31, simdr_actor_workstation)),
+	  		{unknown_actor, 998},lookup_module(Sup9, PidC31, simdr_actor_workstation)),
 		 ?_assertMatch(
 	 		{WS422, 2.0 },lookup_module(Sup13, PidC41, simdr_actor_workstation)),
 		 ?_assertMatch(
@@ -449,17 +487,19 @@ send_message(_LittleAnswer, Destination)->
 		{Quality, _Assembly} = Order,
 		Outputs = simdr_actor_contract:get_out(Rbis),
 		[Out1,Out2]=Outputs,
-		QualityProduct = 'Q2',
-		QualityProduct2 = 'Q3',
- 
+		Prod = simdr_actor_product:create(),
+		Product=simdr_actor_contract:add_option(Prod, quality, 'Q2'),
+		Prod2= simdr_actor_product:create(),
+ 		Product2=simdr_actor_contract:add_option(Prod2, quality, 'Q3'),
+
  		[
  		?_assertMatch({ WS1, _Time1},lookup_module(Sup7, PidC11, simdr_actor_workstation_assembly)),
  		?_assertMatch({ unknown_actor, _Time2},lookup_module(Sup7, PidC21, simdr_actor_workstation_assembly)),
  		?_assertMatch([PidC21, PidC11], simdr_actor_contract:get_out(Rbis)),
  		?_assertMatch(C11bis, simdr_supervisor_contract:get_actor(Sup7, PidC11)),
  		?_assertMatch(C11bis,simdr_supervisor_contract:get_actor(Sup7, Out2)),
-	 	?_assertMatch(PidC11, out_processed(Sup7, Out1, Out2, Quality, QualityProduct, Order)),
-	 	?_assertMatch(PidC21, out_processed(Sup7, Out1, Out2, Quality, QualityProduct2, Order))
+	 	?_assertMatch(PidC11, out_processed(Sup7, Out1, Out2, Quality, Product, Order)),
+	 	?_assertMatch(PidC21, out_processed(Sup7, Out1, Out2, Quality, Product2, Order))
 
 	 	].
 
@@ -503,16 +543,18 @@ send_message(_LittleAnswer, Destination)->
 		{Quality, _Assembly} = Order,
 		Outputs = simdr_actor_contract:get_out(Rbis),
 		[Out1,Out2]=Outputs,
-		QualityProduct = 'Q2',
-		QualityProduct2 = 'Q1',
+		Prod = simdr_actor_product:create(),
+		Product=simdr_actor_contract:add_option(Prod, quality, 'Q2'),
+		Prod2= simdr_actor_product:create(),
+ 		Product2=simdr_actor_contract:add_option(Prod2, quality, 'Q1'),
  
  		[
  	
  		?_assertMatch([PidC21, PidC11], simdr_actor_contract:get_out(Rbis)),
  		?_assertMatch(C11bis, simdr_supervisor_contract:get_actor(Sup7, PidC11)),
  		?_assertMatch(C11bis,simdr_supervisor_contract:get_actor(Sup7, Out2)),
-	 	?_assertMatch(PidC11, out_assembled(Sup7, Out1, Out2, Quality, QualityProduct, Order)),
-	 	?_assertMatch(PidC21, out_assembled(Sup7, Out1, Out2, Quality, QualityProduct2, Order))
+	 	?_assertMatch(PidC11, out_assembled(Sup7, Out1, Out2, Quality, Product, Order)),
+	 	?_assertMatch(PidC21, out_assembled(Sup7, Out1, Out2, Quality, Product2, Order))
 
 	 	].
 

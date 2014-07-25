@@ -137,12 +137,14 @@ BQC1 ! {self(), {add, option, {supervisor, So1}}}.
 WSC1! {self(), {add, option, {supervisor, So1}}}.
 RC1 ! {self(), {add, option, {supervisor, So1}}}.
 CC3 ! {self(), {add, option, {supervisor, So1}}}.
-BQC3 ! {self(), {add, option, {supervisor, So1}}}.
+BQC2 ! {self(), {add, option, {supervisor, So1}}}.
 WSC2 ! {self(), {add, option, {supervisor, So1}}}.
 CC4 ! {self(), {add, out, So9}}.
 
 
 P1 = simdr_actor_product:create().
+
+CA1 ! {self(), {actor_product, P1}}.
 P2 = simdr_actor_product:create().
 P3 = simdr_actor_product:create().
 P4 = simdr_actor_product:create().
@@ -153,7 +155,6 @@ P8 = simdr_actor_product:create().
 P9 = simdr_actor_product:create().
 P10 = simdr_actor_product:create().
 
-CA1 ! {self(), {actor_product, P1}}.
 CA1 ! {self(), {actor_product, P2}}.
 CA1 ! {self(), {actor_product, P3}}.
 CA1 ! {self(), {actor_product, P4}}.
