@@ -158,6 +158,10 @@ list_size_helper(unknown_option, 0) ->
 	0;
 list_size_helper([_H|T], Acc) ->
 	list_size_helper(T, Acc+1).
+	
+%% ===================================================================
+%% Internal API
+%% ===================================================================
 
 delete_actor_helper([], Result, _Pid) ->
 	Result;
