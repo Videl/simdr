@@ -5,11 +5,17 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--export([wait/3,
+-export([init/1,
 		 idling/1,
 		 processing/2,
 		 physical_work/3,
 		 logical_work/3]).
+
+init(Config) ->
+	?CREATE_DEBUG_TABLE,
+	process_flag(trap_exit, true),
+	idling(Config).
+
 
 %% ===================================================================
 %% Loops functions
@@ -22,7 +28,6 @@
 %%% @see processing/2
 %%% @end
 idling(Config) ->
-	?CREATE_DEBUG_TABLE,
 	receive
 		{start} ->
 			?DLOG(
@@ -72,6 +77,10 @@ processing(Config, NbWorkers) ->
 				Request),
 			?DLOG({configuration,has,changed,{NewConfig}}),
 			processing(NewConfig, NewNbWorkers);
+
+		{'EXIT', Pid, Reason} ->
+			io:format("An actor died (~w). His reason was: ~w.~n", [Pid, Reason]),
+			exit(Reason);
 
 		V ->
 			?DFORMAT(">>>UNKNOWN REQUEST<<< (~w)~n", [V]),
@@ -262,6 +271,7 @@ manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
 %%% @end
 manage_request({Config, NbWorkers, _Sender}, {add, out, Out}) ->
  	Out ! {self(), {add, in, self()}},
+ 	link(Out),
 	%%% Normal request, it does not change NbWorkers value
 	%spawn(?MODULE, logical_work, [self(), Config, {add, out, Out}]),
 	FullAnswer = 
@@ -322,27 +332,17 @@ get_destination(_Config, Dest) when is_pid(Dest) ->
 	Dest;
 get_destination(_Config, WeirdDestination) ->
 	%% @TODO: choose destination
-	io:format("Warning: ~w COULDN'T send  message to ~w because of BAD FORMAT. " ++ 
-		"Message not sent.~n~n", [self(), WeirdDestination]),
-	supervisor.
+	io:format("Warning: ~w COULDN'T send message to ~w because of BAD FORMAT. " ++ 
+		"Message not sent.~n", [self(), WeirdDestination]),
+	broken.
 
+sender(Ans, broken) ->
+	io:format("Warning: ~w Message was: ~w.~n", [self(), Ans]);
 sender(Ans, supervisor) ->
 	?DFORMAT("~w send ~w to ~w.~n~n", [self(), Ans, supervisor]);
 sender(Ans, Dest) ->
 	?DFORMAT("~w send ~w to ~w.~n~n", [self(), Ans, Dest]),
 	Dest ! {self(), Ans}.
-
-
-wait(Pid, Wait_time, {Ans, [Dest]}) when is_pid(Dest)->
-	simdr_actor_contract:work(Wait_time),
-	Dest ! {Pid, {Ans}};
-wait(Pid, Wait_time, {Ans, Dest}) when is_pid(Dest)->
-	simdr_actor_contract:work(Wait_time),
-	Dest ! {Pid, {Ans}};
-wait(Pid, Wait_time, {Ans, Dest}) ->
-	simdr_actor_contract:work(Wait_time),
-	?DFORMAT(" ~w send ~w to ~w.~n~n", [Pid, Ans, Dest]).
-
 
 %% ===================================================================
 %% Tests

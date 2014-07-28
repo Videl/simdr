@@ -5,11 +5,13 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--export([
+-export([init/1,
 		 idling/1,
 		 processing/1
 		]).
 
+init(Config) ->
+	idling(Config).
 
 %% ===================================================================
 %% Loops functions
