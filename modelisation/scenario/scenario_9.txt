@@ -1,6 +1,9 @@
-CA1 = spawn(container, idling, [actor_conveyor:create('CA1')]).
-RA1 = spawn(container, idling, [actor_railway:create('RA1')]).
-So1 = spawn(supervisor_container, idling, [supervisor_purposeless:create()]).
+Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+tc51eventmgr:start().
+
+CA1 = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create('CA1')]).
+RA1 = spawn(simdr_actor_container, init, [simdr_actor_railway:create('RA1')]).
+So1 = spawn(simdr_supervisor_container, init, [simdr_supervisor_purposeless:create()]).
 
 CA1 ! RA1 !So1 ! {start}.
 

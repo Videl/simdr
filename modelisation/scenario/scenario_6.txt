@@ -1,10 +1,13 @@
-C1 = spawn(container, idling, [actor_conveyor:create()]).
+Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+tc51eventmgr:start().
 
-R1 = spawn(container, idling, [actor_railway:create()]).
+C1 = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create()]).
 
-C2 = spawn(container, idling, [actor_conveyor:create()]).
+R1 = spawn(simdr_actor_container, init, [simdr_actor_railway:create()]).
 
-C3 = spawn(container, idling, [actor_conveyor:create()]).
+C2 = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create()]).
+
+C3 = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create()]).
 
 C1 ! R1 ! C2 ! C3! {start}.
 
@@ -16,14 +19,14 @@ R1 ! {self(), {add, out, C3}}.
 R1 ! {self(), {change, capacity, 1}}.
 R1 ! {self(), {change, work_time, 10}}.
 
-C1 ! {self(),{actor_product, actor_product:create()}}.
-C1 ! {self(),{actor_product, actor_product:create()}}.
-C1 ! {self(),{actor_product, actor_product:create()}}.
-C2 ! {self(),{actor_product, actor_product:create()}}.
-C2 ! {self(),{actor_product, actor_product:create()}}.
+C1 ! {self(),{actor_product, simdr_actor_product:create()}}.
+C1 ! {self(),{actor_product, simdr_actor_product:create()}}.
+C1 ! {self(),{actor_product, simdr_actor_product:create()}}.
+C2 ! {self(),{actor_product, simdr_actor_product:create()}}.
+C2 ! {self(),{actor_product, simdr_actor_product:create()}}.
 
-C2 ! {self(),{actor_product, actor_product:create()}}.
-C2 ! {self(),{actor_product, actor_product:create()}}.
+C2 ! {self(),{actor_product, simdr_actor_product:create()}}.
+C2 ! {self(),{actor_product, simdr_actor_product:create()}}.
 
 R1 ! {self(), {prob_in, C1}}.
 

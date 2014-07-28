@@ -1,13 +1,15 @@
+Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+tc51eventmgr:start().
 
-N_SCANNER = spawn(container, idling, [actor_scanner:create()]).
-WS= spawn(container, idling, [actor_workstation:create()]).
-R = spawn(container, idling, [actor_railway:create()]).
+N_SCANNER = spawn(simdr_actor_container, init, [simdr_actor_scanner:create()]).
+WS = spawn(simdr_actor_container, init, [simdr_actor_workstation:create()]).
+R = spawn(simdr_actor_container, init, [simdr_actor_railway:create()]).
 
-WS! R! N_SCANNER ! {start}.
+WS ! R ! N_SCANNER ! {start}.
 
 R ! {self(), {add, option, {scanner, N_SCANNER}}}.
 WS ! {self(), {add, out, R}}.
 
 
-P1 = actor_product:create().
+P1 = simdr_actor_product:create().
 WS ! {self(), {actor_product, P1}}.

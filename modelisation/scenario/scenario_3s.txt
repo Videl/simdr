@@ -4,14 +4,13 @@
 %%% With 'one way only' supervisor (SO1) for the railway.
 %%%
 
-
 Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+tc51eventmgr:start().
 
+R1 = spawn(simdr_actor_container, init, [simdr_actor_railway:create()]).
+C1 = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create()]).
 
-R1 = spawn(container, idling, [actor_railway:create()]).
-C1 = spawn(container, idling, [actor_conveyor:create()]).
-
-SO1 = spawn(supervisor_container, idling, [supervisor_onedirection:create(R1)]).
+SO1 = spawn(simdr_supervisor_container, init, [simdr_supervisor_onedirection:create(R1)]).
 R1 ! C1 ! SO1 ! {start}.
 
 C1 ! {self(), {add, out, self()}}.
@@ -19,5 +18,5 @@ R1 ! {self(), {add, out, self()}}.
 R1 ! {self(), {add, out, C1}}.
 R1 ! {self(), {add, option, {supervisor, SO1}}}.
 
-P = actor_product:create().
+P = simdr_actor_product:create().
 R1 ! {self(), {actor_product, P}}.

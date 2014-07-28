@@ -4,16 +4,20 @@
 %%% its Workstation (WST1).
 %%%
 
+Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+tc51eventmgr:start().
+
 %% V2
-C1 = spawn(container, idling, [actor_conveyor:create()]).
-BQ1 = spawn(container, idling, [actor_basic_queue:create()]).
-WST1 = spawn(container, idling, [actor_workstation:create()]).
-RF1 = spawn(container, idling, [actor_rfid:create()]).
+C1 = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create()]).
+BQ1 = spawn(simdr_actor_container, init, [simdr_actor_basic_queue:create()]).
+WST1 = spawn(simdr_actor_container, init, [simdr_actor_workstation:create()]).
+RF1 = spawn(simdr_actor_container, init, [simdr_actor_rfid:create()]).
 C1 ! BQ1 ! WST1 ! RF1 ! {start}.
 
 C1 ! {self(), {add, out, BQ1}}.
 C1 ! {self(), {add,option, {rfid, RF1}}}.
 BQ1 ! {self(), {add, out, WST1}}.
 
+WST1 ! {self(), {change, mode, rt}}.
 
-C1 ! {self(), {actor_product, actor_product:create()}}.
+C1 ! {self(), {actor_product, simdr_actor_product:create()}}.

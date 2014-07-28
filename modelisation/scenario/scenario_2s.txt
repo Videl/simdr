@@ -4,14 +4,17 @@
 %%% With product creation supervisor (SO1)
 %%%
 
-C1 = spawn(container, idling, [actor_conveyor:create()]).
-C2 = spawn(container, idling, [actor_conveyor:create()]).
+Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+tc51eventmgr:start().
+
+C1 = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create()]).
+C2 = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create()]).
 C1 ! C2 ! {start}.
 
 C1 ! {self(), {add, out, C2}}.
 C2 ! {self(), {add, out, self()}}.
 
-SO1 = spawn(supervisor_container, idling, [supervisor_start:create(C1)]).
+SO1 = spawn(simdr_supervisor_container, init, [simdr_supervisor_start:create(C1)]).
 SO1 ! {start}.
 =======
 
@@ -30,12 +33,12 @@ SO1 ! {start}.
 %%% C2 ! {self(), {file_export, debug}}.
 %%% C2 ! {self(), {csv_export, debug}}.
 %%%
-%%% actor_contract:answer(P1, {csv_export, list_data}).
-%%% actor_contract:answer(P2, {csv_export, list_data}).
-%%% actor_contract:answer(P3, {csv_export, list_data}).
-%%% actor_contract:answer(P4, {csv_export, list_data}).
+%%% simdr_actor_contract:answer(P1, {csv_export, list_data}).
+%%% simdr_actor_contract:answer(P2, {csv_export, list_data}).
+%%% simdr_actor_contract:answer(P3, {csv_export, list_data}).
+%%% simdr_actor_contract:answer(P4, {csv_export, list_data}).
 
 
 C1 ! {self(), {file_export, list_data}}.
 C2 ! {self(), {file_export, list_data}}.
-actor_contract:answer(P1, {csv_export, list_data}).
+simdr_actor_contract:answer(P1, {csv_export, list_data}).

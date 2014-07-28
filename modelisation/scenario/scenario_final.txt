@@ -61,7 +61,8 @@ CA1 ! RA1 ! CA2 ! RA2 ! CA3 ! BQA1 ! WSTA1 ! CA4 ! CA5 ! RA3 ! CA6 ! RA4 ! CA7 !
 CA8 ! BQA2 ! WSTA2 ! CA9 ! CA10 ! RA6 ! CA11 ! CB1 ! RB1 ! SB1 ! CB2 ! CC1 ! BQC1 !
 WSTC1 ! CC2 ! RC1 ! CC3 ! BQC2 ! WSTC2 ! CC4 ! 
 %RC2 ! CC5 ! BQC3! WSTC3 ! CC6 ! CC7 ! SC !
-So1 ! So2 ! So3 ! So4 ! So5 ! So6 ! So7 ! So8 ! So9 !
+So1 ! So9 !
+%So2 ! So3 ! So4 ! So5 ! So6 ! So7 ! So8 ! 
 {start}.
 
 CA1 ! {self(), {add, out, RA1}}.
@@ -115,7 +116,7 @@ CA2 ! {self(), {add, option, {supervisor, So1}}}.
 RA2 ! {self(), {add, option, {supervisor, So1}}}.
 CA4 ! {self(), {add, option, {supervisor, So1}}}.
 BQA1 ! {self(), {add, option, {supervisor, So1}}}.
-WSA1 ! {self(), {add, option, {supervisor, So1}}}.
+WSTA1 ! {self(), {add, option, {supervisor, So1}}}.
 CA5 ! {self(), {add, option, {supervisor, So1}}}.
 CA3 ! {self(), {add, option, {supervisor, So1}}}.
 RA3 ! {self(), {add, option, {supervisor, So1}}}.
@@ -126,7 +127,7 @@ RA5 ! {self(), {add, option, {supervisor, So1}}}.
 CA9 ! {self(), {add, option, {supervisor, So1}}}.
 CA8 ! {self(), {add, option, {supervisor, So1}}}.
 BQA2 ! {self(), {add, option, {supervisor, So1}}}.
-WSA2 ! {self(), {add, option, {supervisor, So1}}}.
+WSTA2 ! {self(), {add, option, {supervisor, So1}}}.
 CA10 ! {self(), {add, option, {supervisor, So1}}}.
 RA6 ! {self(), {add, option, {supervisor, So1}}}.
 CA11 ! {self(), {add, option, {supervisor, So1}}}.
@@ -136,19 +137,15 @@ CB2 ! {self(), {add, option, {supervisor, So1}}}.
 CC1 ! {self(), {add, option, {supervisor, So1}}}.
 CC2 ! {self(), {add, option, {supervisor, So1}}}.
 BQC1 ! {self(), {add, option, {supervisor, So1}}}.
-WSC1! {self(), {add, option, {supervisor, So1}}}.
+WSTC1! {self(), {add, option, {supervisor, So1}}}.
 RC1 ! {self(), {add, option, {supervisor, So1}}}.
 CC3 ! {self(), {add, option, {supervisor, So1}}}.
 BQC2 ! {self(), {add, option, {supervisor, So1}}}.
-WSC2 ! {self(), {add, option, {supervisor, So1}}}.
+WSTC2 ! {self(), {add, option, {supervisor, So1}}}.
 CC4 ! {self(), {add, out, So9}}.
 
-
-<<<<<<< HEAD
-=======
 SB1 ! {self(), {change, mode, rt}}.
 WSTC2 ! {self(), {change, mode, rt}}.
->>>>>>> Add: SB1 and WSTC2 in real time.
 
 P1 = simdr_actor_product:create().
 P2 = simdr_actor_product:create().

@@ -12,17 +12,20 @@
 %%% Then a product is sent to the first conveyor, 
 %%% and the railway is guided manually by giving it a command.
 
-C1 = spawn(container, idling, [actor_conveyor:create()]).
-%RF1 = spawn(container, idling, [actor_rfid:create()]).
+Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+tc51eventmgr:start().
 
-R2 = spawn(container, idling, [actor_railway:create()]).
+C1 = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create()]).
+%RF1 = spawn(simdr_actor_container, init, [simdr_actor_rfid:create()]).
 
-C3a = spawn(container, idling, [actor_conveyor:create()]).
+R2 = spawn(simdr_actor_container, init, [simdr_actor_railway:create()]).
 
-C3b = spawn(container, idling, [actor_conveyor:create()]).
+C3a = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create()]).
 
-BQ4a = spawn(container, idling, [actor_basic_queue:create()]).
-WST5a = spawn(container, idling, [actor_workstation:create()]).
+C3b = spawn(simdr_actor_container, init, [simdr_actor_conveyor:create()]).
+
+BQ4a = spawn(simdr_actor_container, init, [simdr_actor_basic_queue:create()]).
+WST5a = spawn(simdr_actor_container, init, [simdr_actor_workstation:create()]).
 
 C1 ! R2 ! C3a ! BQ4a ! WST5a ! C3b ! {start}.
 
@@ -36,7 +39,7 @@ WST5a ! {self(), {add, out, self()}}.
 C3b ! {self(), {add, out, self()}}.
 
 
-P1 = actor_product:create().
+P1 = simdr_actor_product:create().
 
 C1 ! {self(), {actor_product, P1}}.
 

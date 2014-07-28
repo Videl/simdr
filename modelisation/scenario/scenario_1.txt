@@ -2,11 +2,12 @@
 %%% Scenario:
 %%% A Basic Queue (BQ1) followed by a Workstation (WST1).
 %%%
-tc51eventmgr:start().
-Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
 
-BQ1 = spawn(simdr_actor_container, idling, [simdr_actor_basic_queue:create()]).
-WST1 = spawn(simdr_actor_container, idling, [simdr_actor_workstation:create()]).
+Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+tc51eventmgr:start().
+
+BQ1 = spawn(simdr_actor_container, init, [simdr_actor_basic_queue:create()]).
+WST1 = spawn(simdr_actor_container, init, [simdr_actor_workstation:create()]).
 BQ1 ! WST1 ! {start}.
 
 BQ1 ! {self(), {add, out, WST1}}.
