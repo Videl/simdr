@@ -387,19 +387,8 @@ add_option(Actor, Key, Value) ->
 
 set_options(Actor, Key, List) ->
 	Table = Actor#actor.opt,
-	simdr_tools:delete_option_in_ets(Table, Key),
-	set_options_helper(Table,Key, List),
+	true = simdr_tools:set_options_in_ets(Table, Key, List),
 	Actor.
-	
-set_options_helper(_Table,_Key, []) ->
-	ok;
-
-set_options_helper(Table,Key, List) ->
-	[Value|R]=List,
-	simdr_tools:add_option_in_ets(Table, Key, Value),
-	set_options_helper(Table,Key, R).
-
-
 
 %%% @doc Sleep for the specified time (in seconds).
 %%% @spec (N :: non_neg_integer()) -> ok

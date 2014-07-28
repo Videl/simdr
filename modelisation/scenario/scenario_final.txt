@@ -2,6 +2,8 @@
 %%% arrives in the end, to us.
 Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
 
+Orders=[{'Q2',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q1',{1,0,1,0}},{'Q1',{1,0,1,0}},{'Q2',{1,0,1,0}},
+{'Q1',{1,0,1,0}},{'Q2',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q3',{1,0,1,0}}].
 
 CA1 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA1')]).
 RA1 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RA1')]).
@@ -35,7 +37,7 @@ CC2 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC2')])
 RC1 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RC1')]).
 CC3 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC3')]).
 BQC2 = spawn(simdr_actor_container, idling, [simdr_actor_basic_queue:create('BQC2')]).
-WSC2 = spawn(simdr_actor_container, idling, [simdr_actor_workstation_finish:create('WSC2')]).
+WSC2 = spawn(simdr_actor_container, idling, [simdr_actor_workstation_finish:create('WSC2', Orders)]).
 CC4 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC4')]).
 %RC2 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RC2')]).
 %CC5 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC5')]).
@@ -43,7 +45,6 @@ CC4 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC4')])
 %WSC3 = spawn(simdr_actor_container, idling, [simdr_actor_workstation:create('WSC3')]).
 %CC6 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC6')]).
 %CC7 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC7')]).
-Orders=[{'Q2',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q1',{1,0,1,0}},{'Q1',{1,0,1,0}},{'Q2',{1,0,1,0}},{'Q1',{1,0,1,0}}].
 %SC = spawn(simdr_actor_container, idling, [simdr_actor_scanner:create('SC')]).
 So1 = spawn(simdr_supervisor_container, idling, [simdr_supervisor_simpleorder:create('So1',Orders)]).
 %So2 = spawn(simdr_supervisor_container, idling, [simdr_supervisor_simpleorder:create('So2')]).
