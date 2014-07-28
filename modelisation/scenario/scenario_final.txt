@@ -3,8 +3,8 @@
 Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
 tc51eventmgr:start().
 
-Orders=[{'Q2',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q1',{1,0,1,0}},{'Q1',{1,0,1,0}},{'Q2',{1,0,1,0}},
-{'Q1',{1,0,1,0}},{'Q2',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q3',{1,0,1,0}}].
+Orders=[{'Q2',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q1',{0,0,1,0}},{'Q1',{1,0,0,0}},{'Q2',{0,0,1,0}},
+{'Q1',{1,0,1,0}},{'Q2',{1,1,1,0}},{'Q3',{1,0,1,0}},{'Q3',{1,0,1,1}},{'Q3',{1,0,1,0}}].
 
 CA1 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA1')]).
 RA1 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RA1')]).

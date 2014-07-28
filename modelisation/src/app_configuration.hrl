@@ -1,7 +1,7 @@
 
--ifndef(TEST).
--define(TEST, true).
--endif.
+%-ifndef(TEST).
+%-define(TEST, true).
+%-endif.
 
 %%% config record
 -include("recordactor.hrl").

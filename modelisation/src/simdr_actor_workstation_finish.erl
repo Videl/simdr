@@ -134,7 +134,7 @@ answer_test_() ->
 			assembled =/= simdr_actor_contract:get_state(ActorProductTwo)
 		),
 		?_assertEqual(
-			{'Q1', pastille},Quality
+			{'Q1', with_chip},Quality
 		)
 	].
 

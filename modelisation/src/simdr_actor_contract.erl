@@ -409,6 +409,13 @@ set_options(Actor, Key, List) ->
 	true = simdr_tools:set_options_in_ets(Table, Key, List),
 	Actor.
 
+-ifdef(TEST).
+
+
+work(_) ->
+	timer:sleep(1000).
+
+-else.
 %%% @doc Shortcut for work/2.
 %%% @see work/2
 %%% @end
@@ -417,6 +424,8 @@ work(Actor) when is_record(Actor, actor) ->
 	Mode = get_mode(Actor),
 	?MFORMAT(Actor, "~w working for ~w seconds.~n", [actor_sumup(Actor), Time]),
 	work(Time, Mode).
+
+-endif.
 
 work(TimeToWork, rt) ->
 	%%% Real time mode. Nothing to do.

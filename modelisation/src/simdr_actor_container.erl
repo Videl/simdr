@@ -214,7 +214,8 @@ manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 	end,
 	Request = {actor_product, ProdConf},
 	spawn(?MODULE, physical_work, [self(), Config, Request]),
-	{Config, NbWorkers};
+	NewConfig = simdr_actor_contract:set_state(Config, processing),
+	{NewConfig, NbWorkers};
 %%% @doc Taking care of request of a product from actor in `out'.
 %%% Consequence: one of my product in the waiting list
 %%% is sent.
@@ -237,7 +238,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
 			%?DFORMAT("End of sending product..~n"),
-			NewConfig = simdr_actor_contract:set_state(Config, on),
+			NewConfig = simdr_actor_contract:set_state(Config, awaiting),
 			NewNbWorkers = NbWorkers-1;
 
 		false ->
@@ -353,8 +354,8 @@ get_destination_test_() ->
 	[
 		?_assertEqual(self(), get_destination(void, [self()])),
 		?_assertEqual(self(), get_destination(void, self())),
-		?_assertEqual(supervisor, get_destination(void, [])),
-		?_assertEqual(supervisor, get_destination(void, [self(), self()]))
+		?_assertEqual(broken, get_destination(void, [])),
+		?_assertEqual(broken, get_destination(void, [self(), self()]))
 	].
 
 -endif.
