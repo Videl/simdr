@@ -58,7 +58,7 @@ action_on_request(Config, Sender, {out, Out, added})->
 			 end,
 	%%% 2)
 	ToSaveFlat = lists:flatten(ToSave),
-	io:format("~nNew list is: ~w.~n", [ToSaveFlat]),
+	?DFORMAT("~nNew list is: ~w.~n", [ToSaveFlat]),
 	Config3 = simdr_supervisor_contract:set_option(Config2, Sender, ToSaveFlat),
 	Config3;
 
@@ -70,7 +70,7 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	[Out2|_R2]=R1, 
 	ProductState =simdr_actor_contract:get_state(Product),
 	{_Id, _Date,{ _P, _Q, Destination}} = simdr_supervisor_contract:get_destination(Config, Product),
-	io:format("Destination ~w, Produit ~w ~n", [Destination, Product]),
+	?DFORMAT("Destination ~w, Produit ~w ~n", [Destination, Product]),
 	Decision = case Destination of
 	 %%processed, assembled or finished
 				nothing -> case ProductState of

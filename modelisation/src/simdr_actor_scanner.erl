@@ -36,9 +36,9 @@ answer(ScannerConfig, {actor_product, ProductConfig}) ->
 						FinalQuality);
 				_ ->
 					[{Quality, Luck}] = Transfo,
-					io:format("Qualite : ~w, Luck :~w ~n", [Quality, Luck]),
+					?DFORMAT("Qualite : ~w, Luck :~w ~n", [Quality, Luck]),
 					FinalQuality = random_weighted(Luck, Quality),
-					io:format("Qualite du produit : ~w ~n", [FinalQuality]),
+					?DFORMAT("Qualite du produit : ~w ~n", [FinalQuality]),
 					ProductConf = simdr_actor_contract:set_option(
 						ProductConfig, 
 						quality, 
