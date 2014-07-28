@@ -134,17 +134,8 @@ set_option(Supervisor, Key, Value) ->
 
 set_options(Sup, Key, List) ->
 	Table = Sup#supervisor.options,
-	simdr_tools:delete_option_in_ets(Table, Key),
-	set_options_helper(Table,Key, List),
+	true = simdr_tools:set_options_in_ets(Table, Key, List),
 	Sup.
-	
-set_options_helper(_Table,_Key, []) ->
-	ok;
-
-set_options_helper(Table,Key, List) ->
-	[Value|R]=List,
-	simdr_tools:add_option_in_ets(Table, Key, Value),
-	set_options_helper(Table,Key, R).
 
 delete_option(Supervisor, Key) ->
 	Table = Supervisor#supervisor.options,

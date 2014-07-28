@@ -9,6 +9,7 @@
 	get_option_from_ets/2,
 	add_data_in_ets/2,
 	set_option_in_ets/3,
+	set_options_in_ets/3,
 	delete_option_in_ets/2,
 	add_option_in_ets/3
 	]).
@@ -26,6 +27,10 @@ set_option_in_ets(Table, Key, Value) ->
 	delete_option_in_ets(Table, Key),
 	add_option_in_ets(Table, Key, Value).
 
+set_options_in_ets(Table, Key, List) ->
+	simdr_tools:delete_option_in_ets(Table, Key),
+	set_options_helper(Table,Key, List).
+
 delete_option_in_ets(Table, Key) ->
 	ets:delete(Table, Key).
 
@@ -35,6 +40,14 @@ add_option_in_ets(Table, Key, Value) ->
 %%
 %% Internal API
 %%
+
+set_options_helper(_Table,_Key, []) ->
+	true;
+
+set_options_helper(Table,Key, List) ->
+	[Value|R]=List,
+	simdr_tools:add_option_in_ets(Table, Key, Value),
+	set_options_helper(Table,Key, R).
 
 get_option_helper(AllOptions, Key) ->
 	get_option_helper_two(AllOptions, [], Key).

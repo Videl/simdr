@@ -26,6 +26,11 @@ create() ->
 create(Name) ->
 	create(Name, {3,8,1}).
 
+create(Name, Orders) when is_list(Orders)->
+    Ac1 = create(Name, {3,8,1}),
+    Ac2 = simdr_actor_contract:set_options(Ac1, order, Orders),
+    Ac2;
+
 create(Name, {Stop, Manip, Evac}) ->
 	Ac1 = simdr_actor_contract:create(?MODULE, Name, [], off, 1, []),
 	simdr_actor_contract:set_option(Ac1, stop, Stop),
@@ -69,12 +74,11 @@ answer(WSConfig, {actor_product, ProductConfig}) ->
 	{NewWSConfig, NewProductConfigBis} = simdr_actor_contract:add_to_list_data(
 		WSConfig, {{finish, for, Finish, 'of',product}, {ProductConfig}}, 
 		NewProductConfig, {{quality,became,Finish,because,'of'},{WSConfig}}),
-	  io:format("Order avant delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
+
 	 case simdr_actor_contract:get_option(WSConfig, order) of 
 	 	 unknown_option -> nothing;
 	 	 _-> simdr_actor_contract:set_options(WSConfig, order, R)
 	end,
-	 io:format("Order apres delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
 	% end,
 	% io:format("Order après delete: ~w ~n",[simdr_actor_contract:get_option(WSConfig, order)] ),
 	%%% Answer
