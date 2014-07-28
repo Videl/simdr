@@ -75,7 +75,6 @@ action_on_request(Config, Sender, {ActorConfig, {actor_product, Product, prob_ou
 	 %%processed, assembled or finished
 				nothing -> case ProductState of
 								raw -> [Order|R] = simdr_supervisor_contract:get_option(Config, order),
-									io:format("premier ordre ~w ~n",[Order]),
 									{Quality, _Assembly} = Order,
 									simdr_supervisor_contract:set_options(Config, order, R),
 									simdr_supervisor_contract:add_option(Config, order_process, Order),
@@ -287,7 +286,6 @@ out_raw(Config, Out1, Out2, Quality, Product, Order)->
 	 	{WS2, _Time2} = lookup_module(Config, Out2, simdr_actor_workstation), 
 	 	[{Q1, Luck1}] = simdr_actor_contract:get_option(WS1, workstation_luck),
 	 	[{Q2, Luck2}] = simdr_actor_contract:get_option(WS2, workstation_luck),
-	 	io:format("Workstation1 ~w, quality1 ~w, Workstation2 ~w, quality2 ~w, qualité demandé : ~w, Décision ~w ~n", [WS1, Q1,WS2, Q2, Quality, difference_quality(Q1, Quality)>difference_quality(Q2, Quality)]),
 	 	case Q1 =:= Q2 of 
 	 		true -> case Luck1>Luck2 of 
 	 							true -> simdr_supervisor_contract:add_decision(Config,{Product, Order,WS1}),
