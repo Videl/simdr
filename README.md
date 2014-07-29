@@ -18,6 +18,10 @@ How to begin
 Please go check the [wiki](https://github.com/Videl/simdr/wiki), hopefully everything is written there.
 If you have trouble to use the software, don't hesitate to contact us.
 
+Also, use the master branch because there is a bug on development: a massive race condition was solved, but Railways actors don't work anymore. So in master, you might stumble upon the race condition but at least it works. Here's the issue:
+
+In discrete mode, when sending a lot of product, they go so fast that they disregard the the Capacity field and bypass the check. So the actor might accept more products than the capacity field says it can.. This issue (issue #9) should not occur in real time though.
+
 License
 -------
 
