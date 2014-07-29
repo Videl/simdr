@@ -7,7 +7,7 @@
 
 -export([init/1,
 		 idling/1,
-		 processing/2,
+		 processing/1,
 		 physical_work/3,
 		 logical_work/3]).
 
@@ -34,7 +34,8 @@ idling(Config) ->
 				simdr_actor_contract:get_module(Config), 
 				"Entering processing state."),
 			NewConfig = simdr_actor_contract:set_pid(Config, self()),
-			processing(simdr_actor_contract:set_state(NewConfig, awaiting), 0);
+			NewConfig2 = simdr_actor_contract:set_option(NewConfig, workers, 0),
+			processing(simdr_actor_contract:set_state(NewConfig2, awaiting));
 		{Sender, actor_product, _, _} when is_pid(Sender) ->
 			Sender ! {state, simdr_actor_contract:get_state(Config)},
 			idling(Config);
@@ -47,36 +48,31 @@ idling(Config) ->
 %%%      Requests can be of two types: physical and logical.
 %%%      The function manage_request/2 makes the distinction.
 %%% @end
-processing(Config, NbWorkers) ->
+processing(Config) ->
 	receive
 		{_Sender, {prob_in, Decision}} ->
 			{_In, Out} = simdr_actor_contract:get_in_out(Config),
 			NewIn = Decision,
 			NewConfig = simdr_actor_contract:set_in_out(Config, {NewIn, Out}),
 			NewIn ! {self(), {control, ok}},
-			processing(NewConfig, NbWorkers);
+			processing(NewConfig);
 
 		{_Sender, {prob_out, Prod, Decision}} ->
 			spawn(?MODULE, physical_work, [self(), Config, {prob_out, Prod, Decision}]),
-			processing(Config, NbWorkers);
+			processing(Config);
 
 		{Sender, Request} ->
-			{NewConfig, NewWorkers} = 
-				manage_request({Config, NbWorkers, Sender}, Request),
-			processing(NewConfig, NewWorkers);
+			NewConfig = manage_request({Config, Sender}, Request),
+			processing(NewConfig);
 		
 		{_Worker, end_physical_work, Request} ->
-			{NewConfig, NewNbWorkers} = end_of_physical_work(
-				{Config, NbWorkers}, 
-				Request),
-			processing(NewConfig, NewNbWorkers);
+			NewConfig = end_of_physical_work(Config, Request),
+			processing(NewConfig);
 
 		{_Worker, end_logical_work, Request} ->
-			{NewConfig, NewNbWorkers} = end_of_logical_work(
-				{Config, NbWorkers}, 
-				Request),
+			NewConfig = end_of_logical_work(Config, Request),
 			?DLOG({configuration,has,changed,{NewConfig}}),
-			processing(NewConfig, NewNbWorkers);
+			processing(NewConfig);
 
 		{'EXIT', Pid, Reason} ->
 			io:format("An actor died (~w). His reason was: ~w.~n", [Pid, Reason]),
@@ -84,7 +80,7 @@ processing(Config, NbWorkers) ->
 
 		V ->
 			?DFORMAT(">>>UNKNOWN REQUEST<<< (~w)~n", [V]),
-			?MODULE:processing(Config, NbWorkers)
+			?MODULE:processing(Config)
 	end.
 
 
@@ -106,9 +102,9 @@ logical_work(Master, MasterConfig, Request) ->
 
 %%% If there is a problem of destinations, a specific messsage is sent to 
 %%% supervisor which take a decision.
-end_of_physical_work({_Config, NbWorkers},{NewConf, {actor_product, _ProductConf, prob_out}, Dest}) ->
-	send_message(NewConf, {NewConf,{actor_product, _ProductConf, prob_out}}, Dest),
-	{NewConf, NbWorkers};
+end_of_physical_work({_Config},{NewConf, {actor_product, Product, prob_out}, Dest}) ->
+	send_message(NewConf, {NewConf,{actor_product, Product, prob_out}}, Dest),
+	NewConf;
 %%% A worker node has ended.
 %%% Things we have to do:
 %%%  1) Add a debug line
@@ -119,9 +115,7 @@ end_of_physical_work({_Config, NbWorkers},{NewConf, {actor_product, _ProductConf
 %%%     or to the supervisor.
 %%%  5) Take its new configuration for us. (@TODO: why don't we remove this?)
 %%% @end
-end_of_physical_work(
-					 {Config, NbWorkers}, 
-					 {NewConfig, LittleAnswer, Destination}) ->
+end_of_physical_work(Config, {WorkConfig, LittleAnswer, Destination}) ->
 	[TablePid] = simdr_actor_contract:get_option(Config, ets), 
 	{actor_product, ProductConfig, _Detail} = LittleAnswer,
 	Awaiting = ets:match_object(TablePid, {awaiting, '$1'}),
@@ -129,53 +123,53 @@ end_of_physical_work(
 		simdr_actor_contract:get_module(Config), 
 		{work,done,on,product,ProductConfig}),
 	% ?DFORMAT("~w >>> Work is done on product id ~p.\n", 
-	% 	[simdr_actor_contract:get_module(NewConfig), simdr_actor_contract:get_name(ProductConfig)]),
+	% 	[simdr_actor_contract:get_module(WorkConfig), simdr_actor_contract:get_name(ProductConfig)]),
 	simdr_actor_contract:add_data(
-		NewConfig, 
+		WorkConfig, 
 		{{work,on,product,is,done},{ProductConfig}}), 
 	simdr_actor_contract:add_data(
 		ProductConfig, 
-		{{processing,done,by},{NewConfig}}),
+		{{processing,done,by},{WorkConfig}}),
 	?DFORMAT(" ~w, ~w finish to work product : ~w ~n ~n",
-		[simdr_actor_contract:get_module(NewConfig), 
-		 simdr_actor_contract:get_name(NewConfig), 
+		[simdr_actor_contract:get_module(WorkConfig), 
+		 simdr_actor_contract:get_name(WorkConfig), 
 		 simdr_actor_contract:get_name(ProductConfig)]),
 	ets:insert(TablePid, {product, awaiting_sending, ProductConfig}),
- 	send_message(Config, awaiting_product, Destination),
-	%[Awaiting] = simdr_actor_contract:get_option(NewConfig, awaiting),
-	case simdr_actor_contract:list_size(Awaiting) > 0 of
+ 	send_message(WorkConfig, awaiting_product, Destination),
+ 	LastConfig = case simdr_actor_contract:list_size(Awaiting) > 0 of
 		true -> 
-			case simdr_actor_contract:list_size(simdr_actor_contract:get_in(Config)) of 
+			case simdr_actor_contract:list_size(simdr_actor_contract:get_in(WorkConfig)) of 
 				1 ->
-					[InActor] = simdr_actor_contract:get_in(Config),
-					Workers = NbWorkers+1,
-					InActor ! {self(), {control, ok}};
+					[InActor] = simdr_actor_contract:get_in(WorkConfig),
+					InActor ! {self(), {control, ok}},
+					simdr_actor_contract:increment_workers(WorkConfig);
 				_ -> 
 					case simdr_actor_contract:different_sender(Awaiting) of 
-						%%% Sending messageder to supervisor 
+						%%% Sending message to supervisor 
 						true ->	
-							Workers = NbWorkers,
-							send_message(Config, {Config, prob_in}, supervisor);
+							%%% No chang in workers
+							send_message(WorkConfig, {WorkConfig, prob_in}, supervisor),
+							WorkConfig;
 						false -> 
 							[H|_Rest] = Awaiting,
 							?DFORMAT("same sender~n"),
 							{awaiting, {S, _Date}} = H,
-							Workers = NbWorkers+1,
-							S ! {self(), {control, ok}}
+							S ! {self(), {control, ok}},
+							simdr_actor_contract:increment_workers(WorkConfig)
 					end
 			end;
 		false -> 
-			Workers = NbWorkers,
 			%%% No new products incoming.
-			wait
+			%%% NbWorker not changed.
+			WorkConfig
 	end,
-	{simdr_actor_contract:set_state(NewConfig, awaiting), Workers}.
+	simdr_actor_contract:set_state(LastConfig, awaiting).
 
 
-end_of_logical_work({_Config, NbWorkers}, 
+end_of_logical_work(_Config, 
 					{NewConfig, LittleAnswer, Destination}) ->
 	send_message(NewConfig, LittleAnswer, Destination),
-	{NewConfig, NbWorkers}.
+	NewConfig.
 
 %%% @doc Taking care of request type actor_product
 %%% * Physical: There is a physical item passing between actors.
@@ -189,7 +183,7 @@ end_of_logical_work({_Config, NbWorkers},
 %%% Returns: {NewConfig, NewNbWorkers}
 %%% @todo: have a way to program a request to be 'physical' or not.
 %%% @end
-manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
+manage_request({Config, Sender}, {actor_product, ProdConf}) ->
 	?DFORMAT("~w receive product ~w ~n~n", 
 		[simdr_actor_contract:get_name(Config), 
 		 simdr_actor_contract:get_name(ProdConf)]),
@@ -203,7 +197,7 @@ manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	Awaiting = ets:match_object(
 					TablePid, {awaiting, '$1'}),
-	case  simdr_actor_contract:list_size(Awaiting) > 0 of 
+	case simdr_actor_contract:list_size(Awaiting) > 0 of 
 		true -> 
 			FirstAwaiting = simdr_actor_contract:first_key_awaiting(Awaiting,Sender),
 			ets:delete_object(TablePid, FirstAwaiting);
@@ -215,12 +209,13 @@ manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 	Request = {actor_product, ProdConf},
 	spawn(?MODULE, physical_work, [self(), Config, Request]),
 	NewConfig = simdr_actor_contract:set_state(Config, processing),
-	{NewConfig, NbWorkers};
+	Config;
+
 %%% @doc Taking care of request of a product from actor in `out'.
 %%% Consequence: one of my product in the waiting list
 %%% is sent.
 %%% @end
-manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
+manage_request({Config, Sender}, {control, ok}) ->
 	?DFORMAT("~w receive request of product~n~n", [simdr_actor_contract:get_name(Config)]),
 	?MFORMAT(Config, "~w receive request of product~n", [simdr_actor_contract:actor_sumup(Config)]),
 	[TablePid] = simdr_actor_contract:get_option(Config, ets),
@@ -238,39 +233,41 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
 			%?DFORMAT("End of sending product..~n"),
-			NewConfig = simdr_actor_contract:set_state(Config, awaiting),
-			NewNbWorkers = NbWorkers-1;
+			NewConfigBis = simdr_actor_contract:set_state(Config, awaiting),
+			NewConfig = simdr_actor_contract:decrement_workers(NewConfigBis);
 
 		false ->
-			%%% No change
-			NewConfig = Config,
-			NewNbWorkers = NbWorkers
+			%%% No change (even workers does not change)
+			NewConfig = Config
 	end,
-	{NewConfig, NewNbWorkers};
+	NewConfig;
 %%% @doc Taking care of request type notification from one of my actor in `in' 
 %%% actor record field that a product can be sent.
 %%% @end
 manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
-	Capacity= simdr_actor_contract:get_capacity(Config),
+	Capacity = simdr_actor_contract:get_capacity(Config),
+	[NbWorkers] = simdr_actor_contract:get_option(Config, workers),
 	?DFORMAT("~w Capacity: ~w < ~w (current < max)  ~n", [simdr_actor_contract:actor_sumup(Config), 
 							   NbWorkers, 
 							   Capacity]),
 	%[Awaiting] = simdr_actor_contract:get_option(Config, awaiting),
 	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	ets:insert(TablePid, {awaiting, {Sender, erlang:now()}}),
-	case NbWorkers < Capacity of
+	NewConfig = case NbWorkers < Capacity of
 		true -> 
 			Sender ! {self(), {control, ok}},
-			Workers = NbWorkers+1;
-		false -> 
-			Workers = NbWorkers
+			simdr_actor_contract:increment_workers(Config);
+
+		false ->
+			% nothing_to_do
+			Config
 	end,
-	{Config, Workers};
+	NewConfig;
 
 %%% @doc Automatic propagation of `in' configuration to next actor
 %%% when suplying the `out' option.
 %%% @end
-manage_request({Config, NbWorkers, _Sender}, {add, out, Out}) ->
+manage_request({Config, _Sender}, {add, out, Out}) ->
  	Out ! {self(), {add, in, self()}},
  	link(Out),
 	%%% Normal request, it does not change NbWorkers value
@@ -279,10 +276,10 @@ manage_request({Config, NbWorkers, _Sender}, {add, out, Out}) ->
 		(simdr_actor_contract:get_module(Config)):answer(Config, {add, out, Out}),
 	{NewConfig, LittleAnswer, Destination} = FullAnswer,
 	send_message(Config, LittleAnswer, Destination),
-	{NewConfig, NbWorkers};
+	NewConfig;
 %%% @doc Automatic register when receiving a supervisor.
 %%% @end
-manage_request({Config, NbWorkers, _Sender}, {add, option, {supervisor, V}}) ->
+manage_request({Config, _Sender}, {add, option, {supervisor, V}}) ->
 
 	%%% Normal request, it does not change NbWorkers value
 	%spawn(?MODULE, logical_work, [self(), Config, Request]),
@@ -291,20 +288,20 @@ manage_request({Config, NbWorkers, _Sender}, {add, option, {supervisor, V}}) ->
 	{NewConfig, _LittleAnswer, _Destination} = FullAnswer,
 	V ! {self(), {add, actor, Config}},
 	% send_message(Config, LittleAnswer, Destination),
-	{NewConfig, NbWorkers};
+	NewConfig;
 %%% @doc Taking care of normal request.
 %%% If the request is not about products, then it's not about a
 %%% physical stream... so we launch a 'logical' work, directed at the 
 %%% supervisor in the end.
 %%% @end
-manage_request({Config, NbWorkers, _Sender}, Request) ->
+manage_request({Config, _Sender}, Request) ->
 	%%% Normal request, it does not change NbWorkers value
 	%spawn(?MODULE, logical_work, [self(), Config, Request]),
 	FullAnswer = 
 		(simdr_actor_contract:get_module(Config)):answer(Config, Request),
 	{NewConfig, LittleAnswer, Destination} = FullAnswer,
 	send_message(Config, LittleAnswer, Destination),
-	{NewConfig, NbWorkers}.
+	NewConfig.
 
 %%% @doc Send specified message to destionation.
 %%% @spec (Actor, Ans, RawDest) -> tuple(pid(), Ans)
