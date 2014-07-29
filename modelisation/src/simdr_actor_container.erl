@@ -174,7 +174,7 @@ end_of_logical_work(_Config,
 %%% @doc Taking care of request type actor_product
 %%% * Physical: There is a physical item passing between actors.
 %%%             Here, it's a product (actor_product), but can be enhanced.
-%%% *Logical: Any other thing is a logical request.
+%%% * Logical: Any other thing is a logical request.
 %%%           The physical request are then being passed on to logical_work
 %%% Receiving a product
 %%% This function is called when we receive a product, and we receive a
@@ -244,12 +244,11 @@ manage_request({Config, Sender}, {control, ok}) ->
 %%% @doc Taking care of request type notification from one of my actor in `in' 
 %%% actor record field that a product can be sent.
 %%% @end
-manage_request({Config, NbWorkers, Sender}, awaiting_product) ->
+manage_request({Config, Sender}, awaiting_product) ->
 	Capacity = simdr_actor_contract:get_capacity(Config),
 	[NbWorkers] = simdr_actor_contract:get_option(Config, workers),
-	?DFORMAT("~w Capacity: ~w < ~w (current < max)  ~n", [simdr_actor_contract:actor_sumup(Config), 
-							   NbWorkers, 
-							   Capacity]),
+	?DFORMAT("~w Capacity: ~w < ~w (current < max)  ~n", 
+		[simdr_actor_contract:actor_sumup(Config), NbWorkers, Capacity]),
 	%[Awaiting] = simdr_actor_contract:get_option(Config, awaiting),
 	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	ets:insert(TablePid, {awaiting, {Sender, erlang:now()}}),

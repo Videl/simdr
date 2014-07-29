@@ -379,7 +379,7 @@ decrement_workers(Actor) ->
 	[Value] = get_option(Actor, workers),
 	case Value of
 		0 ->
-			exit(error_when_decrementing_workers);
+			Actor;%exit(error_when_decrementing_workers);
 		_ ->
 			set_option(Actor, workers, Value-1)
 	end.
@@ -576,7 +576,7 @@ get_mode_helper(rt) ->
 get_mode_helper([rt]) ->
 	rt;
 get_mode_helper(V) ->
-	?DFORMAT("Warning: Unknown mode `~w`. Setting to discrete.~n", [Value]),
+	?DFORMAT("Warning: Unknown mode `~w`. Setting to discrete.~n", [V]),
 	discrete.
 
 add_datas_helper(Actor, []) ->
