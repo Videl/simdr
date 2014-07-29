@@ -209,8 +209,8 @@ manage_request({Config, Sender}, {actor_product, ProdConf}) ->
 	Request = {actor_product, ProdConf},
 	spawn(?MODULE, physical_work, [self(), Config, Request]),
 	NewConfig = simdr_actor_contract:set_state(Config, processing),
-	Config;
-
+	NewConfig;
+	
 %%% @doc Taking care of request of a product from actor in `out'.
 %%% Consequence: one of my product in the waiting list
 %%% is sent.
