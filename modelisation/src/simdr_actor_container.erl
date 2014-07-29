@@ -108,53 +108,65 @@ end_of_physical_work({_Config},{NewConf, {actor_product, Product, prob_out}, Des
 %%% A worker node has ended.
 %%% Things we have to do:
 %%%  1) Add a debug line
-%%%  2) Add it in the list of products waiting to be sent.
-%%%  3) Send message to next actor to notify him.
+%%%  2) Add product in the list of products waiting to be sent.
+%%%  3) Send message to next actor to notify him that a product is ready.
 %%%  4) Check if I have been notified of new products ready for me
-%%%     If yes, send a message to actor in `in' if there are no problems,
-%%%     or to the supervisor.
+%%%     If yes, (4a) send a message to actor in `in' if there are no problems,
+%%%     or (4b) to the supervisor.
 %%%  5) Take its new configuration for us. (@TODO: why don't we remove this?)
 %%% @end
 end_of_physical_work(Config, {WorkConfig, LittleAnswer, Destination}) ->
 	[TablePid] = simdr_actor_contract:get_option(Config, ets), 
 	{actor_product, ProductConfig, _Detail} = LittleAnswer,
-	Awaiting = ets:match_object(TablePid, {awaiting, '$1'}),
+	Awaiting = ets:match_object(TablePid, {awaiting, '$1', '$2'}),
+	%%% 1)
 	?DLOG(
 		simdr_actor_contract:get_module(Config), 
 		{work,done,on,product,ProductConfig}),
-	% ?DFORMAT("~w >>> Work is done on product id ~p.\n", 
-	% 	[simdr_actor_contract:get_module(WorkConfig), simdr_actor_contract:get_name(ProductConfig)]),
 	simdr_actor_contract:add_data(
 		WorkConfig, 
 		{{work,on,product,is,done},{ProductConfig}}), 
 	simdr_actor_contract:add_data(
 		ProductConfig, 
 		{{processing,done,by},{WorkConfig}}),
-	?DFORMAT(" ~w, ~w finish to work product : ~w ~n ~n",
+	?DFORMAT(" ~w, ~w finished working on product : ~w ~n ~n",
 		[simdr_actor_contract:get_module(WorkConfig), 
 		 simdr_actor_contract:get_name(WorkConfig), 
 		 simdr_actor_contract:get_name(ProductConfig)]),
-	ets:insert(TablePid, {product, awaiting_sending, ProductConfig}),
- 	send_message(WorkConfig, awaiting_product, Destination),
+	%%% 2)
+	ProductName = simdr_actor_contract:get_name(ProductConfig),
+	ets:insert(TablePid, {product, awaiting_sending, {ProductName, ProductConfig}}),
+	%%% 3)
+ 	send_message(WorkConfig, {awaiting_product, ProductName}, Destination),
+ 	%%% 4)
  	LastConfig = case simdr_actor_contract:list_size(Awaiting) > 0 of
 		true -> 
+			%%% An issue occurs when there are more than one entry in `in'.
+			%%% In such case, the actor needs to ask its supervisor what to do.
 			case simdr_actor_contract:list_size(simdr_actor_contract:get_in(WorkConfig)) of 
 				1 ->
-					[InActor] = simdr_actor_contract:get_in(WorkConfig),
-					InActor ! {self(), {control, ok}},
+					%%% Only one actor in `in', so it's fine.
+					%%% 4a)
+					?DFORMAT("~n<.>>.>.>.>. ~w~n", [Awaiting]),
+					% Send request to the actor saved.
+					Data = simdr_actor_contract:first(Awaiting),
+					{awaiting, ProductReady, {SenderReady, _Time}} = Data,
+					SenderReady ! {self(), {send_product, ProductReady}},
+					?DFORMAT("<poi><poi> Asking product ~w.~n", [ProductReady]),
 					simdr_actor_contract:increment_workers(WorkConfig);
 				_ -> 
+					%%% 4b)
 					case simdr_actor_contract:different_sender(Awaiting) of 
 						%%% Sending message to supervisor 
 						true ->	
-							%%% No chang in workers
+							%%% No change in workers
 							send_message(WorkConfig, {WorkConfig, prob_in}, supervisor),
 							WorkConfig;
 						false -> 
 							[H|_Rest] = Awaiting,
 							?DFORMAT("same sender~n"),
-							{awaiting, {S, _Date}} = H,
-							S ! {self(), {control, ok}},
+							{awaiting, PName, {S, _Date}} = H,
+							S ! {self(), {send_product, PName}},
 							simdr_actor_contract:increment_workers(WorkConfig)
 					end
 			end;
@@ -183,7 +195,7 @@ end_of_logical_work(_Config,
 %%% Returns: {NewConfig, NewNbWorkers}
 %%% @todo: have a way to program a request to be 'physical' or not.
 %%% @end
-manage_request({Config, Sender}, {actor_product, ProdConf}) ->
+manage_request({Config, _Sender}, {actor_product, ProdConf}) ->
 	?DFORMAT("~w receive product ~w ~n~n", 
 		[simdr_actor_contract:get_name(Config), 
 		 simdr_actor_contract:get_name(ProdConf)]),
@@ -193,68 +205,76 @@ manage_request({Config, Sender}, {actor_product, ProdConf}) ->
 	% ?DFORMAT("~w >>> Work is starting on product id ~p.\n", [simdr_actor_contract:get_module(NewConfig), simdr_actor_contract:get_name(ProdConf)]),
 	simdr_actor_contract:add_data(Config, {{new,product,has,arrived}, {ProdConf}}), 
 	simdr_actor_contract:add_data(ProdConf, {{processing,started,by},Config}),
-	%%% Decrement the number of products waiting for us.
-	[TablePid] = simdr_actor_contract:get_option(Config, ets),
-	Awaiting = ets:match_object(
-					TablePid, {awaiting, '$1'}),
-	case simdr_actor_contract:list_size(Awaiting) > 0 of 
-		true -> 
-			FirstAwaiting = simdr_actor_contract:first_key_awaiting(Awaiting,Sender),
-			ets:delete_object(TablePid, FirstAwaiting);
-			% Awaiting2 = ets:match_object(
-			% 		TablePid, {awaiting, '$1'});
-		false ->
-			ok
-	end,
 	Request = {actor_product, ProdConf},
 	spawn(?MODULE, physical_work, [self(), Config, Request]),
+	%%% Deleting the entry corresponding to this product
+	ProductName = simdr_actor_contract:get_name(ProdConf),
+	[TablePid] = simdr_actor_contract:get_option(Config, ets),
+	Awaiting = ets:match_object(TablePid, {awaiting, ProductName, '$1'}),
+	%%% Need this check because in all scenarios, all products are sent like that..
+	case simdr_actor_contract:list_size(Awaiting) of 
+		1 ->
+			%%% Removing entry from ETS waiting list
+			?DFORMAT("Awaiting=~w~n", [Awaiting]),
+			[OnlyEntry] = Awaiting,
+			ets:delete_object(TablePid, OnlyEntry),
+			Awai2 = ets:match_object(TablePid, {awaiting, ProductName, '$1'}),
+			?DFORMAT("~w, Before: ~w ; After: ~w~n", [?LINE, Awaiting, Awai2]);
+			% Awaiting2 = ets:match_object(
+			% 		TablePid, {awaiting, '$1'});
+		_ ->
+			ok%exit(weird_number_of_product_awaiting)
+	end,
 	NewConfig = simdr_actor_contract:set_state(Config, processing),
 	NewConfig;
 	
 %%% @doc Taking care of request of a product from actor in `out'.
-%%% Consequence: one of my product in the waiting list
-%%% is sent.
+%%% Consequence: one of my product in the waiting list is sent.
 %%% @end
-manage_request({Config, Sender}, {control, ok}) ->
-	?DFORMAT("~w receive request of product~n~n", [simdr_actor_contract:get_name(Config)]),
-	?MFORMAT(Config, "~w receive request of product~n", [simdr_actor_contract:actor_sumup(Config)]),
+manage_request({Config, Sender}, {send_product, ProductName}) ->
+	?DFORMAT("~w receive request of product: ~w.~n~n", [simdr_actor_contract:get_name(Config), ProductName]),
+	?MFORMAT(Config, "~w receive request of product: ~w~n", [simdr_actor_contract:actor_sumup(Config), ProductName]),
 	[TablePid] = simdr_actor_contract:get_option(Config, ets),
 	ListEntry = ets:match_object(
-					TablePid, {product, awaiting_sending, '$1'}
+					TablePid, {product, awaiting_sending, {ProductName, '$1'}}
 				),
-	case simdr_actor_contract:list_size(ListEntry) > 0 of
-		true ->
-			%?DFORMAT("Sending product..~n"),
-			FirstEntry = simdr_actor_contract:first(ListEntry),
-			{product, awaiting_sending, Prod} = FirstEntry,
+	%?DFORMAT("Sending product..~n"),
+	?DFORMAT("~w ListEntry=~w, ProductName=~w~n", [simdr_actor_contract:actor_sumup(Config), ListEntry, ProductName]),
+	NewConfig = case ListEntry of
+		[] ->
+			%%% Maybe the product was already sent. This kind of thing happen 
+			%%% in discrete mode because it's fast.
+			Config;
+		[FirstEntry] ->
+			{product, awaiting_sending, {ProductName, Prod}} = FirstEntry,
 			simdr_actor_contract:add_data(Config, {{sending, product}, {Prod}}), 
 			simdr_actor_contract:add_data(Prod, {{being,sent,to, Sender, by},{Config}}), 
+			%%% Remove the product in the waiting list.
+			true = ets:delete_object(TablePid, FirstEntry),
 			send_message(Config, {actor_product, Prod}, Sender),
-			ets:delete_object(TablePid, FirstEntry),
 			ets:insert(TablePid, {product, sent, Prod}),
 			%?DFORMAT("End of sending product..~n"),
+			?DFORMAT("~w DONE receive request of product: ~w.~n~n", [simdr_actor_contract:get_name(Config), ProductName]),
 			NewConfigBis = simdr_actor_contract:set_state(Config, awaiting),
-			NewConfig = simdr_actor_contract:decrement_workers(NewConfigBis);
-
-		false ->
-			%%% No change (even workers does not change)
-			NewConfig = Config
+			simdr_actor_contract:decrement_workers(NewConfigBis);
+		_ ->
+			exit(received_weird_product_request)
 	end,
 	NewConfig;
 %%% @doc Taking care of request type notification from one of my actor in `in' 
 %%% actor record field that a product can be sent.
 %%% @end
-manage_request({Config, Sender}, awaiting_product) ->
+manage_request({Config, Sender}, {awaiting_product, ProductName}) ->
 	Capacity = simdr_actor_contract:get_capacity(Config),
 	[NbWorkers] = simdr_actor_contract:get_option(Config, workers),
 	?DFORMAT("~w Capacity: ~w < ~w (current < max)  ~n", 
 		[simdr_actor_contract:actor_sumup(Config), NbWorkers, Capacity]),
 	%[Awaiting] = simdr_actor_contract:get_option(Config, awaiting),
 	[TablePid] = simdr_actor_contract:get_option(Config, ets),
-	ets:insert(TablePid, {awaiting, {Sender, erlang:now()}}),
+	ets:insert(TablePid, {awaiting, ProductName, {Sender, erlang:now()}}),
 	NewConfig = case NbWorkers < Capacity of
 		true -> 
-			Sender ! {self(), {control, ok}},
+			Sender ! {self(), {send_product, ProductName}},
 			simdr_actor_contract:increment_workers(Config);
 
 		false ->

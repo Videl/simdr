@@ -1,6 +1,7 @@
 %%% Fun that can be used to check that the product
 %%% arrives in the end, to us.
 Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
+tc51eventmgr:start().
 
 Orders=[{'Q2',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q1',{1,0,1,0}},{'Q1',{1,0,1,0}},{'Q2',{1,0,1,0}},
 {'Q1',{1,0,1,0}},{'Q2',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q3',{1,0,1,0}}].

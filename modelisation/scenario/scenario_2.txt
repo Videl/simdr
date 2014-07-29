@@ -13,7 +13,7 @@ C1 ! C2 ! {start}.
 C1 ! {self(), {add, out, C2}}.
 C2 ! {self(), {add, out, self()}}.
 C2 ! {self(), {change, capacity, 2}}.
-C2 ! {self(), {change, mode, rt}}.
+%C2 ! {self(), {change, mode, rt}}.
 
 P1 = simdr_actor_product:create().
 P2 = simdr_actor_product:create().

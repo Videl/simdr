@@ -9,7 +9,7 @@
 %%% supervisor record
 -include("recordsupervisor.hrl").
 
--define(DEBUG, true). %% Comment out if you want to see all debug messages.
+%-define(DEBUG, true). %% Comment out if you want to see all debug messages.
 -define(MFORMAT(Z, X), 
 	simdr_actor_contract:get_mode(Z) =/= rt orelse io:format(X)).
 -define(MFORMAT(Z, X, Y), 
