@@ -60,7 +60,9 @@
 		 random_id/0,
 		 first/1,
 		 delete_option/2,
-	 	 actor_sumup/1]).
+	 	 actor_sumup/1,
+	 	 increment_workers/1,
+	 	 decrement_workers/1]).
 
 %% ===================================================================
 %% Contract for Actors
@@ -206,8 +208,9 @@ create(
 						public])},
 	Actor1     = add_options_helper(Actor, Opt),
 	Actor2	   = set_option(Actor1, mode, discrete),
+	Actor2b = simdr_actor_contract:set_option(Actor2, workers, 0),
 	TableQueue = ets:new(list_to_atom(lists:concat(["Queue_",Module, Name])), [duplicate_bag, public]),
-	Actor3     = simdr_actor_contract:set_option(Actor2, ets, TableQueue),
+	Actor3     = simdr_actor_contract:set_option(Actor2b, ets, TableQueue),
 	Actor4     = add_datas_helper(Actor3, List_data),
 	Actor4.
 
@@ -362,6 +365,24 @@ get_capacity(Actor) ->
 %%% @end
 set_capacity(Actor, Capacity) ->
 	Actor#actor{capacity = Capacity}.
+
+%%% @doc Increment value of 'workers' option in an Actor.
+%%% @end
+increment_workers(Actor) ->
+	[Value] = get_option(Actor, workers),
+	set_option(Actor, workers, Value+1).
+
+%%% @doc Decrement value of 'workers' option in an Actor.
+%%%      If the function decreases past 0, it exits because there is an error.
+%%% @end
+decrement_workers(Actor) ->
+	[Value] = get_option(Actor, workers),
+	case Value of
+		0 ->
+			exit(error_when_decrementing_workers);
+		_ ->
+			set_option(Actor, workers, Value-1)
+	end.
 
 %%% @doc Search an option using the Key.
 %%% 	 Uses the ETS table in field `opts'.
@@ -555,7 +576,7 @@ get_mode_helper(rt) ->
 get_mode_helper([rt]) ->
 	rt;
 get_mode_helper(V) ->
-	?DFORMAT("Warning: Unknown mode `~w`. Setting to discrete.~n", [V]),
+	?DFORMAT("Warning: Unknown mode `~w`. Setting to discrete.~n", [Value]),
 	discrete.
 
 add_datas_helper(Actor, []) ->
