@@ -1,5 +1,9 @@
 %%% @doc Actor Railway
 %%%
+%%% This module provides you with a Railway Actor. It mainly moves actor from an entry to an exit 
+%%% If there are several entries or exits, it request to its supervisor. Its only purpose is to direct a product.
+%%% 
+%%%
 %%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
 %%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
 %%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
