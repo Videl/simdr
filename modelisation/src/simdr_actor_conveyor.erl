@@ -1,3 +1,18 @@
+%%% @doc Actor Conveyor
+%%% 
+%%% This module provides you with a Conveyor Actor. It mainly moves actor
+%%% from two ends. Its only purpose is to delay a product in real-time.
+%%% 
+%%% Suitable options: capacity = infinity, only one actor entering in this actor,
+%%% only one other actor exiting this actor. (One actor in `in'/`out' field.)
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_conveyor).
 -include("app_configuration.hrl").
 

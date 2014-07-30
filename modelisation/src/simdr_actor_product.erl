@@ -1,3 +1,17 @@
+%%% @doc Actor Product
+%%% 
+%%% This module provides you with a Product. It is not supposed to work with
+%%% simdr_actor_container, and you can see that most answer/2 have been disabled.
+%%% It is a physical stream that travels between actors.
+%%% (You could launch one in a container, but it would probably be useless.)
+%%% 
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_product).
 -include("app_configuration.hrl").
 

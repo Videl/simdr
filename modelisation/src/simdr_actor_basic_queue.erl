@@ -1,3 +1,19 @@
+%%% @doc Actor Basic Queue
+%%% 
+%%% This module provides you with a queue Actor: it queues products it
+%%% receives then send them accordingly to the capacity of the actor in `out'
+%%% field.
+%%%
+%%% Suitable options: capacity = infinity, only one actor entering in this actor,
+%%% only one other actor exiting this actor.
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_basic_queue).
 -include("app_configuration.hrl").
 

@@ -1,3 +1,18 @@
+%%% @doc Module Container part of the behavior of Actor's contract
+%%% 
+%%% This module gives you the container of an Actor record (its configuration).
+%%% This node will answer requests, send requests, etc. It can deal with
+%%% problems like many `in' paths and many `out' paths.
+%%% It works almost like gen_fsm, and in the end, it might be good to
+%%% rewrite it using gen_fsm.
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_container).
 -include("app_configuration.hrl").
 
