@@ -280,7 +280,8 @@ set_mode(Actor, Mode) ->
 get_state(Actor) ->
 	Actor#actor.state.	
 
-%%% @doc
+%%% @doc Get list data of an Actor.
+%%% @spec (Actor) -> number()|atom()
 %%% @end
 get_list_data(Actor) ->
 	Actor#actor.list_data.
@@ -404,6 +405,9 @@ add_option(Actor, Key, Value) ->
 	%%(ets:insert(Table, {Key, Value})=:= true) orelse ?DLOG("Insertion failed"),
 	Actor.
 
+%%% @doc Set options with key and a value of the list
+%%% @spec (Actor, Key :: any(), List:: any()) -> Actor
+%%% @end
 set_options(Actor, Key, List) ->
 	Table = Actor#actor.opt,
 	true = simdr_tools:set_options_in_ets(Table, Key, List),
@@ -469,7 +473,6 @@ event_dispatcher(N, _) ->
 
 
 %%% @doc Size of a list.
-%%% @spec (List) -> non_neg_integer()
 %%% @end
 list_size(List) ->
 	list_size_helper(List, 0).
@@ -481,12 +484,13 @@ list_size(List) ->
 add_to_list_data(FirstActor, FirstData, SecondActor, SecondData) ->
 	{add_data(FirstActor, FirstData), add_data(SecondActor, SecondData)}.
 
-%%% @doc
+%%% @doc 
 %%% @end
 first_key_awaiting([], _Key) ->
 	{ nothing, nothing};
 
-%%% @doc
+%%% @doc Look up the first actor's answer of sending product 
+%%% @spec (List, Pid() ) -> tuple(Pid, erlang:now())
 %%% @end
 first_key_awaiting(List, Key) ->
 	[H|T] = List,
@@ -513,7 +517,8 @@ get_data(Actor) ->
 	?DLOG(lists:concat(["First element from ", ETS]), HeadData),
 	HeadData.
 
-%%% @doc
+%%% @doc Look up if there are differents senders in the awaiting
+%%% @spec (list()) -> atom()
 %%% @end
 different_sender(Awaiting)->
 	[H|T] = Awaiting, 

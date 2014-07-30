@@ -111,7 +111,9 @@ action_on_request(Config, Sender, {ActorConfig, prob_in}) ->
 action_on_request(Config, Sender, Request) ->
 	simdr_supervisor_default:action_on_request(Config, Sender, Request).
 
-
+%%% @doc Get the first order
+%%% @spec (Actor) -> tuple(any(), any())
+%%% @end
 get_first_order(Config) -> 
 	Orders = simdr_supervisor_contract:get_option(Config, order),
 	case Orders of 
@@ -119,12 +121,18 @@ get_first_order(Config) ->
 		_ -> {'Q1',{1,0,1,0}}
 	end.
 
+
 first([]) -> 
 	[];
-
+%%% @doc  Get the first of the list
+%%% @spec (List) -> atom()
+%%% @end
 first([H|_Rest]) ->
  	H.
 
+%%% @doc  Look up a module from an out of an actor/railway
+%%% @spec (Actor, Pid(), string()) -> tuple(Actor, non_neg_integer())
+%%% @end
 lookup_module(Config, Out, Module)->
 	Actor = simdr_supervisor_contract:get_actor(Config, Out),
 	case simdr_actor_contract:get_module(Actor) of
@@ -166,6 +174,9 @@ A2 = simdr_supervisor_contract:get_actor(Config, H2),
 		 false -> {Ac2, Time2}
 	end;
 
+%%% @doc  Look up a module from a list of out 
+%%% @spec (List(Pid), non_neg_integer() , Actor, string(), non_neg_integer()) -> tuple(Actor, non_neg_integer())
+%%% @end
 loop_module(ListOut, _Size, Config, Module, Time) ->
 [H| Rest] =ListOut,
 [H2|Rest2] = Rest,
@@ -179,6 +190,9 @@ A2 = simdr_supervisor_contract:get_actor(Config, H2),
 		 false-> loop_module(Rest, simdr_supervisor_contract:list_size(Rest), Config, Module, Time2)
 	end.
 
+%%% @doc  Look up an actor from an out of an actor/railway
+%%% @spec (Actor, Pid(), Actor) -> tuple(Actor, non_neg_integer())
+%%% @end
 lookup_actor(Config, Out, DestActor)->
 	Actor = simdr_supervisor_contract:get_actor(Config, Out),
 	case simdr_actor_contract:get_module(Actor) of
@@ -220,6 +234,9 @@ A2 = simdr_supervisor_contract:get_actor(Config, H2),
 		 false -> {Ac2, Time2}
 	end;
 
+%%% @doc  Look up an actor from a list of out 
+%%% @spec (List(Pid), non_neg_integer() , Actor, string(), non_neg_integer()) -> tuple(Actor, non_neg_integer())
+%%% @end
 loop_actor(ListOut, _Size, Config, DestActor, Time) ->
 [H| Rest] =ListOut,
 [H2|Rest2] = Rest,
@@ -232,6 +249,10 @@ A2 = simdr_supervisor_contract:get_actor(Config, H2),
 		 	loop_actor(NewList, simdr_supervisor_contract:list_size(NewList), Config, DestActor, Time1);
 		 false-> loop_actor(Rest, simdr_supervisor_contract:list_size(Rest), Config,DestActor, Time2)
 	end.
+
+%%% @doc  Get the difference between two qualities
+%%% @spec (List(string()), string()) -> integer()
+%%% @end
 difference_quality(Q1,Q2) when is_list(Q1) ->
 	case Q1 of 
 		['Q1'] -> 
@@ -256,6 +277,10 @@ difference_quality(Q1,Q2) when is_list(Q1) ->
 			end;
 		_ -> 0
 	end; 
+
+%%% @doc  Get the difference between two qualities
+%%% @spec (string(), string()) -> integer()
+%%% @end
 difference_quality(Q1,Q2) ->
 	case Q1 of 
 		'Q1' -> 
@@ -281,6 +306,9 @@ difference_quality(Q1,Q2) ->
 		_ -> 0
 	end.
 
+%%% @doc  Get the choosen out when a product is raw
+%%% @spec (Actor1, Out1 :: pid(), Out2 :: pid(), Quality :: string(), Actor2, tuple(any(), any())) -> integer()
+%%% @end
 out_raw(Config, Out1, Out2, Quality, Product, Order)->
 		{WS1, _Time1} = lookup_module(Config, Out1, simdr_actor_workstation),
 	 	{WS2, _Time2} = lookup_module(Config, Out2, simdr_actor_workstation), 
@@ -308,7 +336,9 @@ out_raw(Config, Out1, Out2, Quality, Product, Order)->
 			 				end
 			 		end
 	 	end.
-
+%%% @doc  Get the choosen out when a product is processed
+%%% @spec (Actor1, Out1 :: pid(), Out2 :: pid(), Quality :: string(), Actor2, tuple(any(), any())) -> integer()
+%%% @end
 out_processed(Config, Out1, Out2, Quality, Product, Order)->
 		QualityProduct = simdr_actor_contract:get_option(Product, quality),
 		{ Actor1, Time1} = lookup_module(Config, Out1, simdr_actor_workstation_assembly),
@@ -332,6 +362,9 @@ out_processed(Config, Out1, Out2, Quality, Product, Order)->
 					end
 		end.
 
+%%% @doc  Get the choosen out when a product is assembled
+%%% @spec (Actor1, Out1 :: pid(), Out2 :: pid(), Quality :: string(), Actor2, tuple(any(), any())) -> integer()
+%%% @end
 out_assembled(Config, Out1, Out2, Quality, Product, Order)->
 			QualityProduct = simdr_actor_contract:get_option(Product, quality),
 			{ Actor1, Time1} = lookup_module(Config, Out1, simdr_actor_workstation_finish),
