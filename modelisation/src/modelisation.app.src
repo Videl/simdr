@@ -1,4 +1,4 @@
-{application, modelisation,
+{application, simdr,
   [{description,  "Erlang program to run simulations of 
                    production scenarios in discrete/real time."},
    {vsn, "0.0.1"},
@@ -27,6 +27,7 @@
               simdr_supervisor_purposeless,
               simdr_supervisor_start,
               simdr_tools,
-              simdr_timemachine]}
+              simdr_timemachine]},
+    {registered, [tc51eventmgr, simdr_timemachine]}
   ]
 }.
