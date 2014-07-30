@@ -2,17 +2,12 @@
   --- 2014-06-25 12:07 ---
   
   ** TODO [13/19]
-   - [X] Find a name for the software
-   - [X] Discrete time mode
-   - [X] New workstation actor for zone D
-   - [X] finish Workstation takes care quality product to improve its quality
    - [ ] UML Documents
      - [X] Sequence diagram
      - [ ] Others?
-   - [X] ID of every actor can be manual
-   - [X] Clean DATA by separating information and actor
+   - [ ] Transform the container in a gen_fsm machine
    - [ ] How are people writing ETS table for easy reading?
-   - [X] Update supervisor's actor when ther is a change
+   - [ ] Central debug table to all actors (like ?DLOG but for history)
    - [ ] Dumb supervisors
      - [X] Mode 1: always giving one direction
      - [X] Mode 2: changing directions every time
@@ -51,6 +46,10 @@
   **  LATER [1/4]
    - [ ] Add general ETS table for list_data of everyone
    - [ ] Tool to make up a scenario
+     - [ ] Choose file format
+     - [ ] Manage to read Erlang term in file
+     - [ ] Fancy options to control product creation, solution checking
+   - [ ] Add functions instead of sending messages (hide the messages) for scenarios
    - [ ] Need to use the *states*!
   
  ** Tests [3/11]
@@ -60,15 +59,19 @@
   - [X] Ability to disable tests
   - [X] Scenario 1
   - [X] Scenario 2
-  - [ ] Scenario 3
-  - [ ] Scenario 4
+  - [X] Scenario 3
+  - [X] Scenario 4
   - [X] Scenario 5
-  - [ ] Scenario 6
-  - [ ] Container
-    - [ ] Physical Work
-    - [ ] Logical Work
+  - [X] Scenario 6
 
  * Archives
+   2014-07-30 17:20
+   - [X] Find a name for the software
+   - [X] Discrete time mode
+   - [X] ID of every actor can be manual
+   - [X] Clean DATA by separating information and actor
+   - [X] New workstation actor for zone D
+   - [X] finish Workstation takes care quality product to improve its quality
    2014-07-10 09:50
    - [X] Workstation: % of error
    - [X] Products: initial quality/state, objective quality
