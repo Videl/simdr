@@ -112,19 +112,6 @@ action_on_request(Config, Sender, Request) ->
 	simdr_supervisor_default:action_on_request(Config, Sender, Request).
 
 
-get_first_order(Config) -> 
-	Orders = simdr_supervisor_contract:get_option(Config, order),
-	case Orders of 
-		{_Q,_A} ->first(Orders);
-		_ -> {'Q1',{1,0,1,0}}
-	end.
-
-first([]) -> 
-	[];
-
-first([H|_Rest]) ->
- 	H.
-
 lookup_module(Config, Out, Module)->
 	Actor = simdr_supervisor_contract:get_actor(Config, Out),
 	case simdr_actor_contract:get_module(Actor) of

@@ -1,14 +1,13 @@
 * INTERNSHIP
-  - Start cmd [[cmd:/home/videl/Documents/Stage/ErlangInternship]]
   --- 2014-06-25 12:07 ---
   
-  ** TODO [10/18]
+  ** TODO [13/19]
    - [X] Find a name for the software
    - [X] Discrete time mode
    - [X] New workstation actor for zone D
    - [X] finish Workstation takes care quality product to improve its quality
    - [ ] UML Documents
-     - [ ] Sequence diagram
+     - [X] Sequence diagram
      - [ ] Others?
    - [X] ID of every actor can be manual
    - [X] Clean DATA by separating information and actor
@@ -20,7 +19,7 @@
      - [ ] Mode 3: random
      - [ ] Mode 4: round-robin
      - [ ] Mode 5: manual mode
-     - [ ] Mode 6: product driven (quality first on first product)
+     - [X] Mode 6: product driven (quality first on first product)
      - [ ] Mode 7: team-mode
    - [ ] Prettier CVS data
      - [X] Add data on RFID
@@ -34,9 +33,9 @@
    - [ ] Conveyor: products that are waiting have a transportation time before
                    being available again WHEN the first product leave
    - [X] Railway: time of transportation when in position =/= already in position
-   - [ ] Client's order
+   - [X] Client's order
    - [X] New actor/supervisor/module for item making
-   - [ ] New actor for item erasing (mostly stats and table-handling)
+   - [X] New actor for item erasing (mostly stats and table-handling)
    - [X] A scanner actor 
    - [ ] Easier debug
      - [ ] DLOG in interesting places
