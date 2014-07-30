@@ -353,6 +353,19 @@ send_message(_LittleAnswer, Destination)->
 	io:format("~w COULDN'T send  message to ~w because of BAD FORMAT. " ++ 
 		"Message not sent.~n~n", [self(), Destination]).
 
+get_first_order(Config) -> 
+	Orders = simdr_supervisor_contract:get_option(Config, order),
+	case Orders of 
+		{_Q,_A} ->first(Orders);
+		_ -> {'Q1',{1,0,1,0}}
+	end.
+
+first([]) -> 
+	[];
+
+first([H|_Rest]) ->
+ 	H.
+
 %% ===================================================================
 %% Tests
 %% ===================================================================

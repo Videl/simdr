@@ -11,6 +11,9 @@
 		 physical_work/3,
 		 logical_work/3]).
 
+%%% @doc Init the node (trap exits of other Actors).
+%%% Trapping exits allow for detection when an error dies.
+%%% @end
 init(Config) ->
 	?CREATE_DEBUG_TABLE,
 	process_flag(trap_exit, true),
