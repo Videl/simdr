@@ -121,7 +121,6 @@ get_first_order(Config) ->
 		_ -> {'Q1',{1,0,1,0}}
 	end.
 
-
 first([]) -> 
 	[];
 %%% @doc  Get the first of the list
@@ -133,6 +132,7 @@ first([H|_Rest]) ->
 %%% @doc  Look up a module from an out of an actor/railway
 %%% @spec (Actor, Pid(), string()) -> tuple(Actor, non_neg_integer())
 %%% @end
+
 lookup_module(Config, Out, Module)->
 	Actor = simdr_supervisor_contract:get_actor(Config, Out),
 	case simdr_actor_contract:get_module(Actor) of

@@ -1,3 +1,18 @@
+%%% @doc Default answers for actors
+%%%
+%%% This is not a default actor you can use!
+%%% This module provides basic answer/2 requests that allows us to
+%%% control an actor node during its life.
+%%% If you want to add another live command to all actors, 
+%%% this is the place to be.
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_default).
 -include("app_configuration.hrl").
 

@@ -1,16 +1,11 @@
-{application, modelisation,
-  [{description,  "Erlang program to run simulations of 
-                   production scenarios in discrete/real time."},
+{application, simdr,
+  [{description,  "Erlang program to run simulations of production scenarios in discrete/real time."},
    {vsn, "0.0.1"},
    {modules, [
-              tc51phyres,
-              tc51phylnk,
               tc51eventrecord,
               tc51etstb,
               tc51eventmgr,
               tc51debug,
-              distr,
-              tc51testmodule,
               simdr_actor_basic_queue,
               simdr_actor_container,
               simdr_actor_conveyor,
@@ -31,6 +26,7 @@
               simdr_supervisor_purposeless,
               simdr_supervisor_start,
               simdr_tools,
-              simdr_timemachine]}
+              simdr_timemachine]},
+    {registered, [tc51eventmgr, simdr_timemachine]}
   ]
 }.

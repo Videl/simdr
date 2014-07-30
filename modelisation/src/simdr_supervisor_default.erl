@@ -56,7 +56,7 @@ action_on_request(Config, Sender, {work_time, N, changed})->
  	
 
 action_on_request(Config, Sender, Request) ->
-	io:format("SUPERVISOR <><> UNKNOWN REQUEST ~w (from ~w).~n", [Request, Sender]),
+	?DFORMAT("SUPERVISOR <><> UNKNOWN REQUEST ~w (from ~w).~n", [Request, Sender]),
 	Config.
 
 %% ===================================================================

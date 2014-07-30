@@ -1,3 +1,18 @@
+%%% @doc Module Container part of the behavior of Actor's contract
+%%% 
+%%% This module gives you the container of an Actor record (its configuration).
+%%% This node will answer requests, send requests, etc. It can deal with
+%%% problems like many `in' paths and many `out' paths.
+%%% It works almost like gen_fsm, and in the end, it might be good to
+%%% rewrite it using gen_fsm.
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_container).
 -include("app_configuration.hrl").
 
@@ -11,6 +26,9 @@
 		 physical_work/3,
 		 logical_work/3]).
 
+%%% @doc Init the node (trap exits of other Actors).
+%%% Trapping exits allow for detection when an error dies.
+%%% @end
 init(Config) ->
 	?CREATE_DEBUG_TABLE,
 	process_flag(trap_exit, true),
@@ -87,13 +105,17 @@ processing(Config, NbWorkers) ->
 			?MODULE:processing(Config, NbWorkers)
 	end.
 
-
+%%% @doc Used to start a work about a product.
+%%% @see processing/2
+%%% @end
 physical_work(Master, MasterConfig, Request) ->
 	FullAnswer = 
 		(simdr_actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
 	Master ! {self(), end_physical_work, FullAnswer}.
 
-
+%%% @doc Used to start any other work but a product.
+%%% @see processing/2
+%%% @end
 logical_work(Master, MasterConfig, Request) ->
 	FullAnswer = 
 		(simdr_actor_contract:get_module(MasterConfig)):answer(MasterConfig, Request),
@@ -103,12 +125,15 @@ logical_work(Master, MasterConfig, Request) ->
 %% Internal API
 %% ===================================================================
 
-
+%%% @doc
 %%% If there is a problem of destinations, a specific messsage is sent to 
 %%% supervisor which take a decision.
+%%% @end
 end_of_physical_work({_Config, NbWorkers},{NewConf, {actor_product, _ProductConf, prob_out}, Dest}) ->
 	send_message(NewConf, {NewConf,{actor_product, _ProductConf, prob_out}}, Dest),
 	{NewConf, NbWorkers};
+
+%%% @doc
 %%% A worker node has ended.
 %%% Things we have to do:
 %%%  1) Add a debug line
@@ -171,7 +196,8 @@ end_of_physical_work(
 	end,
 	{simdr_actor_contract:set_state(NewConfig, awaiting), Workers}.
 
-
+%%% @doc End of a logical work. Take the new configuration back.
+%%% @end
 end_of_logical_work({_Config, NbWorkers}, 
 					{NewConfig, LittleAnswer, Destination}) ->
 	send_message(NewConfig, LittleAnswer, Destination),
@@ -216,6 +242,7 @@ manage_request({Config, NbWorkers, Sender}, {actor_product, ProdConf}) ->
 	spawn(?MODULE, physical_work, [self(), Config, Request]),
 	NewConfig = simdr_actor_contract:set_state(Config, processing),
 	{NewConfig, NbWorkers};
+
 %%% @doc Taking care of request of a product from actor in `out'.
 %%% Consequence: one of my product in the waiting list
 %%% is sent.
@@ -247,6 +274,7 @@ manage_request({Config, NbWorkers, Sender}, {control, ok}) ->
 			NewNbWorkers = NbWorkers
 	end,
 	{NewConfig, NewNbWorkers};
+
 %%% @doc Taking care of request type notification from one of my actor in `in' 
 %%% actor record field that a product can be sent.
 %%% @end
@@ -280,7 +308,10 @@ manage_request({Config, NbWorkers, _Sender}, {add, out, Out}) ->
 	{NewConfig, LittleAnswer, Destination} = FullAnswer,
 	send_message(Config, LittleAnswer, Destination),
 	{NewConfig, NbWorkers};
+
 %%% @doc Automatic register when receiving a supervisor.
+%%% 	 Part of a request triggering logical information.
+%%% 	 (That's why it's not spawned.)
 %%% @end
 manage_request({Config, NbWorkers, _Sender}, {add, option, {supervisor, V}}) ->
 
@@ -337,6 +368,9 @@ get_destination(_Config, WeirdDestination) ->
 		"Message not sent.~n", [self(), WeirdDestination]),
 	broken.
 
+%%% @doc Send the message if second argument is a Pid.
+%%% Else, just writes the message.
+%%% @end
 sender(Ans, broken) ->
 	io:format("Warning: ~w Message was: ~w.~n", [self(), Ans]);
 sender(Ans, supervisor) ->
