@@ -1,3 +1,23 @@
+%%% @doc Actor Workstation
+%%% 
+%%% This module provides you with a Workstation Actor. 
+%%%
+%%% When the actor simdr_actor_product is in this actor, the workstation
+%%% will write in the product the configuration of the workstation.
+%%% When this product will enter a scanner, the product will have its quality
+%%% computed. Change the option `workstation_luck' for the workstation's
+%%% configuration.
+%%% 
+%%% Suitable options: capacity = limited, only one actor entering in this actor,
+%%% only one actor exiting this actor. (One actor in `in'/`out'.)
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_workstation).
 -include("app_configuration.hrl").
 

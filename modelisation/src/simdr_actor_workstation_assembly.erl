@@ -1,3 +1,20 @@
+%%% @doc Actor Workstation
+%%% 
+%%% This module provides you with an Assembly Workstation Actor. 
+%%%
+%%% When the actor simdr_actor_product is in this actor, the workstation
+%%% will write in the product the configuration of the workstation.
+%%% 
+%%% Suitable options: capacity = limited, only one actor entering in this actor,
+%%% only one actor exiting this actor. (One actor in `in'/`out'.)
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_workstation_assembly).
 -include("app_configuration.hrl").
 

@@ -1,3 +1,23 @@
+%%% @doc Actor Scanner
+%%% 
+%%% This module provides you with a Scanner Actor. It is meant to be used as an
+%%% add-on on some actors. Just configure the actor like so:
+%%% `Actor ! {self(), {add, option, {scanner, ScannerActor}}}.'
+%%%
+%%% When the actor simdr_actor_product is in this actor, it will scan the
+%%% product and see what is the quality and imprint its quality in the product.
+%%% (Only the firs time it will calculate the quality, then it will only read it).
+%%% 
+%%% Suitable options: capacity = infinity, only one actor entering in this actor,
+%%% zero actor exiting this actor. (One actor in `in'.)
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_scanner).
 -include("app_configuration.hrl").
 

@@ -1,3 +1,21 @@
+%%% @doc Actor Workstation
+%%% 
+%%% This module provides you with a 'Finish' Workstation Actor. 
+%%%
+%%% When the actor simdr_actor_product is in this actor, the workstation
+%%% will raise (or not) the quality of the product according to the
+%%% order sent by the supervisor.
+%%% 
+%%% Suitable options: capacity = limited, only one actor entering in this actor,
+%%% only one actor exiting this actor. (One actor in `in'/`out'.)
+%%%
+%%% @author Andre THOMAS <andre.thomas@univ-lorraine.fr>
+%%% @author Hind BRIL EL HAOUZI <hind.el-haouzi@univ-lorraine.fr>
+%%% @author Arnould GUIDAT <arnould.guidat@univ-lorraine.fr>
+%%% @author Marion LY <marion.ly@telecomnancy.net>
+%%% @author Thibaut SMITH <videl@protonmail.ch>
+%%% @see 'overview-summary'
+%%% @end
 -module(simdr_actor_workstation_finish).
 -include("app_configuration.hrl").
 
