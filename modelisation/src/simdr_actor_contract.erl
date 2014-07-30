@@ -270,6 +270,11 @@ get_mode(Actor) ->
 	A = get_option(Actor, mode),
 	get_mode_helper(A).
 
+%%% @doc Set the mode of an Actor.
+%%% Supported values are `discrete' and `rt' (real-time).
+%%% If unknown, it's discrete by default.
+%%% If set twice, there is a warning.
+%%% @end
 set_mode(Actor, Mode) ->
 	A = set_option(Actor, mode, Mode),
 	A.
@@ -280,7 +285,8 @@ set_mode(Actor, Mode) ->
 get_state(Actor) ->
 	Actor#actor.state.	
 
-%%% @doc
+%%% @doc Get ETS identifier for list_data of Actor in parameter.
+%%% @spec (Actor) -> number() | atom()
 %%% @end
 get_list_data(Actor) ->
 	Actor#actor.list_data.
@@ -411,11 +417,13 @@ set_options(Actor, Key, List) ->
 
 -ifdef(TEST).
 
-
+%%% @doc Default work time when testing. (Does not use the tc51eventmgr.)
+%%% @end
 work(_) ->
 	timer:sleep(1000).
 
 -else.
+
 %%% @doc Shortcut for work/2.
 %%% @see work/2
 %%% @end
@@ -427,6 +435,12 @@ work(Actor) when is_record(Actor, actor) ->
 
 -endif.
 
+%%% @doc Function that controls the flow of time.
+%%% If in discrete mode, it will hop to the end of the event.
+%%% If in real-time mode, the seconds will be real.
+%%% If one actor goes into real-time mode, every other events *are* in real-time
+%%% mode too.
+%%% @end
 work(TimeToWork, rt) ->
 	%%% Real time mode. Nothing to do.
 	event_dispatcher(TimeToWork, rt);
