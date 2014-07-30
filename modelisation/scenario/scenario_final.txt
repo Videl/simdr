@@ -2,9 +2,8 @@
 %%% arrives in the end, to us.
 Rec = fun() -> receive V -> io:format("~w~n", [V]) after 0 -> end_of_rec end end.
 tc51eventmgr:start().
-
-Orders=[{'Q2',{1,0,1,0}},{'Q3',{1,0,1,0}},{'Q1',{0,0,1,0}},{'Q1',{1,0,0,0}},{'Q2',{0,0,1,0}},
-{'Q1',{1,0,1,0}},{'Q2',{1,1,1,0}},{'Q3',{1,0,1,0}},{'Q3',{1,0,1,1}},{'Q3',{1,0,1,0}}].
+Orders=[{'Q2',{0,0,1,1}},{'Q3',{1,0,0,1}},{'Q1',{1,0,1,0}},{'Q1',{1,0,1,0}},{'Q2',{0,1,1,0}},
+{'Q1',{1,0,1,0}},{'Q2',{1,0,1,0}},{'Q3',{1,1,1,0}},{'Q3',{1,0,0,0}},{'Q3',{0,0,1,0}}].
 
 CA1 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA1')]).
 RA1 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RA1')]).
@@ -12,7 +11,7 @@ CA2 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA2')])
 RA2 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RA2')]).
 CA3 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA3')]).
 BQA1 = spawn(simdr_actor_container, idling, [simdr_actor_basic_queue:create('BQA1')]).
-WSTA1 = spawn(simdr_actor_container, idling, [simdr_actor_workstation:create('WSTA1',{'Q2',33})]).
+WSA1 = spawn(simdr_actor_container, idling, [simdr_actor_workstation:create('WSA1',{'Q2',33})]).
 CA4 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA4')]).
 CA5 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA5')]).
 RA3 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RA3')]).
@@ -22,28 +21,28 @@ CA7 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA7')])
 RA5 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RA5')]).
 CA8 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA8')]).
 BQA2 = spawn(simdr_actor_container, idling, [simdr_actor_basic_queue:create('BQA2')]).
-WSTA2 = spawn(simdr_actor_container, idling, [simdr_actor_workstation:create('WSTA2',{'Q1',33})]).
+WSA2 = spawn(simdr_actor_container, idling, [simdr_actor_workstation:create('WSA2',{'Q1',33})]).
 CA9 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA9')]).
 CA10 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA10')]).
 RA6 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RA6')]).
 CA11 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CA11')]).
 CB1 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CB1')]).
 RB1 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RB1')]).
-SB1 = spawn(simdr_actor_container, idling, [simdr_actor_scanner:create('SB1')]).
+S = spawn(simdr_actor_container, idling, [simdr_actor_scanner:create('S')]).
 CB2 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CB2')]).
 CC1 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC1')]).
 BQC1 = spawn(simdr_actor_container, idling, [simdr_actor_basic_queue:create('BQC1')]).
-WSTC1 = spawn(simdr_actor_container, idling, [simdr_actor_workstation_assembly:create('WSTC1')]).
+WSC1 = spawn(simdr_actor_container, idling, [simdr_actor_workstation_assembly:create('WSC1')]).
 CC2 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC2')]).
 RC1 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RC1')]).
 CC3 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC3')]).
 BQC2 = spawn(simdr_actor_container, idling, [simdr_actor_basic_queue:create('BQC2')]).
-WSTC2 = spawn(simdr_actor_container, idling, [simdr_actor_workstation_finish:create('WSTC2', Orders)]).
+WSC2 = spawn(simdr_actor_container, idling, [simdr_actor_workstation_finish:create('WSC2', Orders)]).
 CC4 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC4')]).
 %RC2 = spawn(simdr_actor_container, idling, [simdr_actor_railway:create('RC2')]).
 %CC5 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC5')]).
 %BQC3 = spawn(simdr_actor_container, idling, [simdr_actor_basic_queue:create('BQC3')]).
-%WSTC3 = spawn(simdr_actor_container, idling, [simdr_actor_workstation:create('WSTC3')]).
+%WSC3 = spawn(simdr_actor_container, idling, [simdr_actor_workstation:create('WSC3')]).
 %CC6 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC6')]).
 %CC7 = spawn(simdr_actor_container, idling, [simdr_actor_conveyor:create('CC7')]).
 %SC = spawn(simdr_actor_container, idling, [simdr_actor_scanner:create('SC')]).
@@ -57,12 +56,12 @@ So1 = spawn(simdr_supervisor_container, idling, [simdr_supervisor_simpleorder:cr
 %So8 = spawn(simdr_supervisor_container, idling, [simdr_supervisor_simpleorder:create('So7')]).
 So9 = spawn(simdr_supervisor_container, idling, [simdr_supervisor_end:create()]).
 
-CA1 ! RA1 ! CA2 ! RA2 ! CA3 ! BQA1 ! WSTA1 ! CA4 ! CA5 ! RA3 ! CA6 ! RA4 ! CA7 ! RA5 ! 
-CA8 ! BQA2 ! WSTA2 ! CA9 ! CA10 ! RA6 ! CA11 ! CB1 ! RB1 ! SB1 ! CB2 ! CC1 ! BQC1 !
-WSTC1 ! CC2 ! RC1 ! CC3 ! BQC2 ! WSTC2 ! CC4 ! 
-%RC2 ! CC5 ! BQC3! WSTC3 ! CC6 ! CC7 ! SC !
-So1 ! So9 !
-%So2 ! So3 ! So4 ! So5 ! So6 ! So7 ! So8 ! 
+
+CA1 ! RA1 ! CA2 ! RA2 ! CA3 ! BQA1 ! WSA1 ! CA4 ! CA5 ! RA3 ! CA6 ! RA4 ! CA7 ! RA5 ! 
+CA8 ! BQA2 ! WSA2 ! CA9 ! CA10 ! RA6 ! CA11 ! CB1 ! RB1 ! S ! CB2 ! CC1 ! BQC1 !
+ WSC1 ! CC2 ! RC1 ! CC3 ! BQC2 ! WSC2 ! CC4 ! 
+%RC2 ! CC5 ! BQC3! WSC3 ! CC6 ! CC7 ! SC !
+So1 ! %So2 ! So3 ! So4 ! So5 ! So6 ! So7 ! So8 ! So9 !
 {start}.
 
 CA1 ! {self(), {add, out, RA1}}.
@@ -71,8 +70,8 @@ CA2 ! {self(), {add, out, RA2}}.
 RA2 ! {self(), {add, out, CA3}}.
 RA2 ! {self(), {add, out, CA4}}.
 CA4 ! {self(), {add, out, BQA1}}.
-BQA1 ! {self(), {add, out, WSTA1}}.
-WSTA1 ! {self(), {add, out, CA5}}.
+BQA1 ! {self(), {add, out, WSA1}}.
+WSA1 ! {self(), {add, out, CA5}}.
 CA5 ! {self(), {add, out, RA3}}.
 CA3 ! {self(), {add, out, RA3}}.
 RA3 ! {self(), {add, out, CA6}}.
@@ -82,8 +81,8 @@ CA7 ! {self(), {add, out, RA5}}.
 RA5 ! {self(), {add, out, CA8}}.
 RA5 ! {self(), {add, out, CA9}}.
 CA8 ! {self(), {add, out, BQA2}}.
-BQA2 ! {self(), {add, out, WSTA2}}.
-WSTA2 ! {self(), {add, out, CA10}}.
+BQA2 ! {self(), {add, out, WSA2}}.
+WSA2 ! {self(), {add, out, CA10}}.
 CA10 ! {self(), {add, out, RA6}}.
 CA9 ! {self(), {add, out, RA6}}.
 RA6 ! {self(), {add, out, CA11}}.
@@ -92,23 +91,23 @@ CA11 ! {self(), {add, out, RA1}}.
 
 RA4 ! {self(), {add, out, CB1}}.
 CB1 ! {self(), {add, out, RB1}}.
-RB1 ! {self(), {add, option, {scanner, SB1}}}.
+RB1 ! {self(), {add, option, {scanner, S}}}.
 RB1 ! {self(), {add, out, CB2}}.
 RB1 ! {self(), {add, out, CC1}}.
 CB2 ! {self(), {add, out, RA4}}.
 CC1 ! {self(), {add, out, BQC1}}.
-BQC1 ! {self(), {add, out, WSTC1}}.
-WSTC1 ! {self(), {add, out, CC2}}.
+BQC1 ! {self(), {add, out, WSC1}}.
+WSC1 ! {self(), {add, out, CC2}}.
 CC2! {self(), {add, out, RC1}}.
 RC1! {self(), {add, out, CC3}}.
 CC3 ! {self(), {add, out, BQC2}}.
-BQC2 ! {self(), {add, out, WSTC2}}.
-WSTC2 ! {self(), {add, out, CC4}}.
+BQC2 ! {self(), {add, out, WSC2}}.
+WSC2 ! {self(), {add, out, CC4}}.
 %CC4 ! {self(), {add, out, RC2}}.
 %RC2 ! {self(), {add, out, CC5}}.
 %CC5 ! {self(), {add, out, BQC3}}.
-%BQC3 ! {self(), {add, out, WSTC3}}.
-%WSTC3 ! {self(), {add, out, CC6}}.
+%BQC3 ! {self(), {add, out, WSC3}}.
+%WSC3 ! {self(), {add, out, CC6}}.
 
 
 RA1 ! {self(), {add, option, {supervisor, So1}}}.
@@ -116,7 +115,7 @@ CA2 ! {self(), {add, option, {supervisor, So1}}}.
 RA2 ! {self(), {add, option, {supervisor, So1}}}.
 CA4 ! {self(), {add, option, {supervisor, So1}}}.
 BQA1 ! {self(), {add, option, {supervisor, So1}}}.
-WSTA1 ! {self(), {add, option, {supervisor, So1}}}.
+WSA1 ! {self(), {add, option, {supervisor, So1}}}.
 CA5 ! {self(), {add, option, {supervisor, So1}}}.
 CA3 ! {self(), {add, option, {supervisor, So1}}}.
 RA3 ! {self(), {add, option, {supervisor, So1}}}.
@@ -127,7 +126,7 @@ RA5 ! {self(), {add, option, {supervisor, So1}}}.
 CA9 ! {self(), {add, option, {supervisor, So1}}}.
 CA8 ! {self(), {add, option, {supervisor, So1}}}.
 BQA2 ! {self(), {add, option, {supervisor, So1}}}.
-WSTA2 ! {self(), {add, option, {supervisor, So1}}}.
+WSA2 ! {self(), {add, option, {supervisor, So1}}}.
 CA10 ! {self(), {add, option, {supervisor, So1}}}.
 RA6 ! {self(), {add, option, {supervisor, So1}}}.
 CA11 ! {self(), {add, option, {supervisor, So1}}}.
@@ -137,18 +136,19 @@ CB2 ! {self(), {add, option, {supervisor, So1}}}.
 CC1 ! {self(), {add, option, {supervisor, So1}}}.
 CC2 ! {self(), {add, option, {supervisor, So1}}}.
 BQC1 ! {self(), {add, option, {supervisor, So1}}}.
-WSTC1! {self(), {add, option, {supervisor, So1}}}.
+WSC1! {self(), {add, option, {supervisor, So1}}}.
 RC1 ! {self(), {add, option, {supervisor, So1}}}.
 CC3 ! {self(), {add, option, {supervisor, So1}}}.
 BQC2 ! {self(), {add, option, {supervisor, So1}}}.
-WSTC2 ! {self(), {add, option, {supervisor, So1}}}.
+WSC2 ! {self(), {add, option, {supervisor, So1}}}.
 CC4 ! {self(), {add, out, So9}}.
 
-SB1 ! {self(), {change, mode, rt}}.
-WSTC2 ! {self(), {change, mode, rt}}.
 
 P1 = simdr_actor_product:create().
+
+CA1 ! {self(), {actor_product, P1}}.
 P2 = simdr_actor_product:create().
+CA1 ! {self(), {actor_product, P2}}.
 P3 = simdr_actor_product:create().
 P4 = simdr_actor_product:create().
 P5 = simdr_actor_product:create().
@@ -158,8 +158,7 @@ P8 = simdr_actor_product:create().
 P9 = simdr_actor_product:create().
 P10 = simdr_actor_product:create().
 
-CA1 ! {self(), {actor_product, P1}}.
-CA1 ! {self(), {actor_product, P2}}.
+
 CA1 ! {self(), {actor_product, P3}}.
 CA1 ! {self(), {actor_product, P4}}.
 CA1 ! {self(), {actor_product, P5}}.
